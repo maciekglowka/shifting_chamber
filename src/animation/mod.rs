@@ -24,11 +24,11 @@ impl Plugin for AnimationPlugin {
 
 fn update_tiles(
     time: Res<Time>,
-    mut query: Query<(&Tile, &mut Transform, &mut Visibility)>,
+    mut query: Query<(&Tile, &mut Transform)>,
     mut ev_command: EventWriter<CommandEvent>
 ) {
     let mut animating = false;
-    for (tile, mut transform, mut visibility) in query.iter_mut() {
+    for (tile, mut transform) in query.iter_mut() {
         let target = Vec3::new(
             tile.v.x as f32 * TILE_SIZE,
             tile.v.y as f32 * TILE_SIZE,
@@ -41,8 +41,6 @@ fn update_tiles(
                 MOVEMENT_SPEED * time.delta_seconds()
             );
             animating = true;
-
-            visibility.is_visible = if d > TILE_SIZE + MAX_ANIMATION_DIST { false } else { true }
         }
     }
 

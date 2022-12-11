@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
+use crate::units::Unit;
 use crate::vectors::Vector2Int;
 
 mod renderer;
@@ -25,6 +26,8 @@ fn spawn_map(
     mut res: ResMut<TileRes>,
     assets: Res<renderer::TileAssets>
 ) {
+    clear_map(&mut commands, res.as_ref());
+
     let mut tiles = HashMap::new();
     for x in 0..MAP_SIZE {
         for y in 0..MAP_SIZE {
@@ -40,36 +43,81 @@ fn spawn_map(
     res.tiles = tiles;
 }
 
+fn clear_map(
+    commands: &mut Commands,
+    res: &TileRes
+) {
+    for entity in res.tiles.values() {
+        commands.entity(*entity).despawn_recursive();
+    }
+}
+
 pub fn shift_tiles(
+    origin: Vector2Int,
     dir: Vector2Int,
     query: &mut Query<&mut Tile>,
     res: &mut TileRes
 ) {
     let (base, offset) = match dir {
         Vector2Int::LEFT | Vector2Int::RIGHT => {
-            (Vector2Int::new(MAP_SIZE/2, 0), Vector2Int::new(0, 1))
+            (Vector2Int::new(origin.x, 0), Vector2Int::new(0, 1))
         },
         Vector2Int::UP | Vector2Int::DOWN => {
-            (Vector2Int::new(0, MAP_SIZE/2), Vector2Int::new(1, 0))
+            (Vector2Int::new(0, origin.y), Vector2Int::new(1, 0))
         },
         _ => return
     };
 
-    let mut new_tiles = res.tiles.clone();
-    
     for i in 0..MAP_SIZE {
-        for j in 0..=MAP_SIZE/2 {
-            let start_v = base + i * offset + j * dir;
-            let target_v = match j {
-                0 => start_v + MAP_SIZE/2 * dir,
-                _ => start_v - dir
-            };
-            let e = res.tiles[&start_v];
-            new_tiles.insert(target_v, e);
-            if let Ok(mut t) = query.get_mut(e) { t.v = target_v; }
+        let v0 = base + i * offset;
+        let v1 = v0 + dir;
+
+        let e0 = res.tiles[&v0];
+        let e1 = res.tiles[&v1];
+
+        if let Ok(mut t0) = query.get_mut(e0) { t0.v = v1; }
+        if let Ok(mut t1) = query.get_mut(e1) { t1.v = v0; }
+
+        res.tiles.insert(v0, e1);
+        res.tiles.insert(v1, e0);
+    }
+}
+
+pub fn can_shift(
+    origin: Vector2Int,
+    dir: Vector2Int,
+    player_v: Vector2Int,
+    unit_query: &Query<&Parent, With<Unit>>,
+    res: &TileRes
+) -> bool {
+    // TODO needs refactoring
+    let v = match dir {
+        Vector2Int::LEFT | Vector2Int::RIGHT => {
+            match player_v.x {
+                x if x == origin.x => Some(Vector2Int::new((origin+dir).x, player_v.y)),
+                x if x == (origin+dir).x => Some(Vector2Int::new(origin.x, player_v.y)),
+                _ => None
+            }
+        },
+        Vector2Int::UP | Vector2Int::DOWN => {
+            match player_v.y {
+                y if y == origin.y => Some(Vector2Int::new(player_v.x, (origin+dir).y)),
+                y if y == (origin+dir).y => Some(Vector2Int::new(player_v.x, origin.y)),
+                _ => None
+            }
+        },
+        _ => None
+    };
+
+    if v.is_none() { return true; }
+    let tile = res.tiles[&v.unwrap()];
+
+    for parent in unit_query.iter() {
+        if parent.get() == tile {
+            return false
         }
     }
-    res.tiles = new_tiles;
+    true
 }
 
 #[derive(Default, Resource)]

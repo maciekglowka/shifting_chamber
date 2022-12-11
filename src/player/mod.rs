@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::globals::MAP_SIZE;
 use crate::states::GameState;
 use crate::tiles::Tile;
 use crate::units::Unit;
@@ -13,7 +14,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(renderer::load_assets)
             .add_system_set(
-                SystemSet::on_enter(GameState::MapInit)
+                SystemSet::on_exit(GameState::LoadAssets)
                     .with_system(spawn_player)
             )
             .add_system_set(
@@ -33,7 +34,7 @@ pub fn spawn_player(
     assets: Res<renderer::PlayerAssets>
 ) {
     commands.spawn((
-        Player { v: Vector2Int::new(0, 0) },
+        Player { v: Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2) },
         Unit::new(),
         renderer::get_renderer(assets.as_ref())
     ));

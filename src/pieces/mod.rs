@@ -50,7 +50,7 @@ pub fn furnish(
             let v = Vector2Int::new(x, y);
             if RESTRICTED.contains(&v) { continue; }
             let mut rng = rand::thread_rng();
-            if rng.gen_bool(0.8) { continue; }
+            if rng.gen_bool(0.75) { continue; }
 
             let piece = commands.spawn((
                     Unit::new(),
