@@ -1,18 +1,17 @@
 use bevy::prelude::*;
 
-use crate::fixtures;
-use crate::player;
 use crate::states::GameState;
-use crate::tiles;
 use crate::vectors::Vector2Int;
 
 mod action;
 mod map_init;
 mod player_input;
 
+#[derive(Clone, Copy, Debug)]
 pub enum CommandType {
     MapShift(Vector2Int, Vector2Int),
     AnimationEnd,
+    Heal(u32)
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -38,9 +37,10 @@ impl Plugin for ManagerPlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::Action)
-                    .with_system(handle_descend)
+                    .with_system(action::piece_interaction)
             )
-            .add_system(update_state);
+            .add_system(update_state)
+            .add_system(action::heal_command);
     }
 }
 
@@ -66,21 +66,6 @@ pub fn update_state(
                 _ => ()
             }
         }
-    }
-}
-
-fn handle_descend(
-    player_query: Query<&player::Player>,
-    fixture_query: Query<&Parent, With<fixtures::Fixture>>,
-    tile_query: Query<&tiles::Tile>,
-    mut res: ResMut<ManagerRes>
-) {
-    for parent in fixture_query.iter() {
-        let player = player_query.get_single().unwrap();
-
-        let tile = tile_query.get(parent.get()).unwrap();
-        if tile.v != player.v { continue; }
-        res.is_descending = true;
     }
 }
 

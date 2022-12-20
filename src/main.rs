@@ -4,7 +4,6 @@ mod animation;
 mod assets;
 mod camera;
 mod common;
-mod fixtures;
 mod globals;
 mod input;
 mod manager;

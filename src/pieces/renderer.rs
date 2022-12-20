@@ -48,14 +48,28 @@ pub fn load_assets(
     );
     let unit_handle = texture_atlasses.add(unit_atlas);
 
+    let item_image = asset_server.load("items.png");
+    asset_list.0.push(item_image.clone_untyped());
+    let item_atlas = TextureAtlas::from_grid(
+        item_image,
+        Vec2::splat(32.),
+        1,
+        4,
+        None,
+        None
+    );
+    let item_handle = texture_atlasses.add(item_atlas);
+
     commands.insert_resource(PieceAssets{ 
         fixture_texture: fixture_handle,
-        unit_texture: unit_handle 
+        unit_texture: unit_handle,
+        item_texture: item_handle
     });
 }
 
 #[derive(Resource)]
 pub struct PieceAssets {
     pub unit_texture: Handle<TextureAtlas>,
-    pub fixture_texture: Handle<TextureAtlas>
+    pub fixture_texture: Handle<TextureAtlas>,
+    pub item_texture: Handle<TextureAtlas>
 }

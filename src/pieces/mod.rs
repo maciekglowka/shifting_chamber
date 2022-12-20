@@ -1,14 +1,21 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::fixtures::Fixture;
 use crate::globals::MAP_SIZE;
+use crate::manager;
 use crate::states::GameState;
 use crate::tiles::TileRes;
 use crate::units::Unit;
 use crate::vectors::Vector2Int;
 
+mod fixtures;
+mod interactive;
+mod items;
 mod renderer;
+
+pub use fixtures::Fixture;
+pub use interactive::Interactive;
+pub use items::Item;
 
 pub struct PiecesPlugin;
 
@@ -38,6 +45,7 @@ pub fn furnish(
     ];
 
     let fixture = commands.spawn((
+        Piece,
         Fixture::new(),
         renderer::get_piece_renderer(&assets.fixture_texture, 1)
     ))
@@ -45,20 +53,39 @@ pub fn furnish(
     commands.entity(tile_res.tiles[&Vector2Int::new(0, 0)])
         .push_children(&[fixture]);
 
+    let mut rng = rand::thread_rng();
+
     for x in 0..MAP_SIZE {
         for y in 0..MAP_SIZE {
             let v = Vector2Int::new(x, y);
             if RESTRICTED.contains(&v) { continue; }
-            let mut rng = rand::thread_rng();
+            
             if rng.gen_bool(0.75) { continue; }
 
-            let piece = commands.spawn((
-                    Unit::new(2),
-                    renderer::get_piece_renderer(&assets.unit_texture, 1)
+            if rng.gen_bool(0.75) {
+                let piece = commands.spawn((
+                        Piece,
+                        Unit::new(2),
+                        renderer::get_piece_renderer(&assets.unit_texture, 1)
+                    ))
+                    .id();
+                commands.entity(tile_res.tiles[&v])
+                    .push_children(&[piece]);
+            } else {
+                let piece = commands.spawn((
+                    Piece,
+                    Item,
+                    Interactive { command: manager::CommandType::Heal(2) },
+                    renderer::get_piece_renderer(&assets.item_texture, 0)
                 ))
                 .id();
-            commands.entity(tile_res.tiles[&v])
-                .push_children(&[piece]);
+                commands.entity(tile_res.tiles[&v])
+                    .push_children(&[piece]);
+            }
         }
     }
 }
+
+
+#[derive(Component)]
+pub struct Piece;
