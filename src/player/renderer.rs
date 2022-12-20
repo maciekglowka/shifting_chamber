@@ -27,14 +27,14 @@ pub fn load_assets(
     mut texture_atlasses: ResMut<Assets<TextureAtlas>>,
     mut asset_list: ResMut<crate::assets::AssetList>
 ) {
-    let image = asset_server.load("ascii.png");
+    let image = asset_server.load("units.png");
     asset_list.0.push(image.clone_untyped());
     let atlas = TextureAtlas::from_grid(
         image,
-        Vec2::splat(9.0),
-        16,
-        16,
-        Some(Vec2::splat(2.0)),
+        Vec2::splat(32.),
+        1,
+        4,
+        None,
         None
     );
 

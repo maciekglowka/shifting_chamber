@@ -35,7 +35,7 @@ pub fn spawn_player(
 ) {
     commands.spawn((
         Player { v: Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2) },
-        Unit::new(),
+        Unit::new(5),
         renderer::get_renderer(assets.as_ref())
     ));
 }

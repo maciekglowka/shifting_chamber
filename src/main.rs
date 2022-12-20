@@ -12,6 +12,7 @@ mod pieces;
 mod player;
 mod states;
 mod tiles;
+mod ui;
 mod units;
 mod vectors;
 
@@ -42,6 +43,7 @@ fn main() {
         .add_plugin(manager::ManagerPlugin)
         .add_plugin(pieces::PiecesPlugin)
         .add_plugin(player::PlayerPlugin)
+        .add_plugin(ui::UIPlugin)
         .add_plugin(tiles::TilePlugin)
         .run();
 }

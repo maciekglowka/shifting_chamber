@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::globals::{PIECE_Z, TILE_SIZE};
 
 pub fn get_piece_renderer(
-    assets: &PieceAssets,
+    texture: &Handle<TextureAtlas>,
     idx: usize
 ) -> SpriteSheetBundle {
     let mut sprite = TextureAtlasSprite::new(idx);
@@ -12,7 +12,7 @@ pub fn get_piece_renderer(
 
     SpriteSheetBundle {
         sprite: sprite,
-        texture_atlas: assets.texture.clone(),
+        texture_atlas: texture.clone(),
         transform: Transform::from_translation(Vec3::new(0., 0., PIECE_Z)),
         ..Default::default()
     }
@@ -24,22 +24,38 @@ pub fn load_assets(
     mut texture_atlasses: ResMut<Assets<TextureAtlas>>,
     mut asset_list: ResMut<crate::assets::AssetList>
 ) {
-    let image = asset_server.load("ascii.png");
-    asset_list.0.push(image.clone_untyped());
-    let atlas = TextureAtlas::from_grid(
-        image,
-        Vec2::splat(9.0),
-        16,
-        16,
-        Some(Vec2::splat(2.0)),
+    let fixture_image = asset_server.load("tiles.png");
+    asset_list.0.push(fixture_image.clone_untyped());
+    let fixture_atlas = TextureAtlas::from_grid(
+        fixture_image,
+        Vec2::splat(32.),
+        1,
+        4,
+        None,
         None
     );
+    let fixture_handle = texture_atlasses.add(fixture_atlas);
 
-    let atlas_handle = texture_atlasses.add(atlas);
-    commands.insert_resource(PieceAssets{ texture: atlas_handle });
+    let unit_image = asset_server.load("units.png");
+    asset_list.0.push(unit_image.clone_untyped());
+    let unit_atlas = TextureAtlas::from_grid(
+        unit_image,
+        Vec2::splat(32.),
+        1,
+        4,
+        None,
+        None
+    );
+    let unit_handle = texture_atlasses.add(unit_atlas);
+
+    commands.insert_resource(PieceAssets{ 
+        fixture_texture: fixture_handle,
+        unit_texture: unit_handle 
+    });
 }
 
 #[derive(Resource)]
 pub struct PieceAssets {
-    texture: Handle<TextureAtlas>
+    pub unit_texture: Handle<TextureAtlas>,
+    pub fixture_texture: Handle<TextureAtlas>
 }

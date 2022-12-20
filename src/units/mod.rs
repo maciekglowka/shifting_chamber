@@ -9,7 +9,7 @@ pub struct Unit {
 }
 
 impl Unit {
-    pub fn new() -> Unit {
-        Unit { hp: 5, attack: Attack { value: 2 } }
+    pub fn new(hp: u32) -> Unit {
+        Unit { hp: hp, attack: Attack { value: 2 } }
     }
 }

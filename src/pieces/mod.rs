@@ -39,7 +39,7 @@ pub fn furnish(
 
     let fixture = commands.spawn((
         Fixture::new(),
-        renderer::get_piece_renderer(assets.as_ref(), 4)
+        renderer::get_piece_renderer(&assets.fixture_texture, 1)
     ))
     .id();
     commands.entity(tile_res.tiles[&Vector2Int::new(0, 0)])
@@ -53,8 +53,8 @@ pub fn furnish(
             if rng.gen_bool(0.75) { continue; }
 
             let piece = commands.spawn((
-                    Unit::new(),
-                    renderer::get_piece_renderer(assets.as_ref(), 1)
+                    Unit::new(2),
+                    renderer::get_piece_renderer(&assets.unit_texture, 1)
                 ))
                 .id();
             commands.entity(tile_res.tiles[&v])
