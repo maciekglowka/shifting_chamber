@@ -1,3 +1,5 @@
+pub const WINDOW_WIDTH: f32 = 800.;
+pub const WINDOW_HEIGHT: f32 = 600.;
 pub const SIDEBAR_WIDTH: f32 = 200.;
 
 pub const TILE_SIZE: f32 = 96.;

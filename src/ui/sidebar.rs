@@ -25,12 +25,12 @@ pub fn update_sidebar(
                     size: Size::new(Val::Px(SIDEBAR_WIDTH), Val::Percent(100.)),
                     ..Default::default()
                 },
-                background_color: Color::BLACK.into(),
+                background_color: Color::NONE.into(),
                 ..Default::default()
             }  
             ))
             .with_children(|parent| {
-                spawn_text(parent, assets.as_ref(), 20., 10., format!("HP: {}/{}", unit.hp, unit.max_hp));
+                spawn_text(parent, assets.as_ref(), 20., 20., format!("HP: {}/{}", unit.hp, unit.max_hp));
             });
     }
 }
