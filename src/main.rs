@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 
+#[cfg(feature = "debug")]
+use bevy_inspector_egui::WorldInspectorPlugin;
+
+mod actions;
 mod animation;
 mod assets;
 mod camera;
@@ -12,15 +16,14 @@ mod player;
 mod states;
 mod tiles;
 mod ui;
-mod units;
 mod vectors;
 
 fn main() {
     #[cfg(target_arch = "wasm32")]
     console_error_panic_hook::set_once();
 
-    App::new()
-        .add_plugins(
+    let mut app = App::new();
+    app.add_plugins(
             DefaultPlugins.set(
                 WindowPlugin {
                     window: WindowDescriptor {
@@ -35,6 +38,7 @@ fn main() {
             )
         )
         .add_state(states::GameState::LoadAssets)
+        .add_plugin(actions::ActionPlugin)
         .add_plugin(animation::AnimationPlugin)
         .add_plugin(assets::AssetPlugin)
         .add_plugin(camera::CameraPlugin)
@@ -43,6 +47,10 @@ fn main() {
         .add_plugin(pieces::PiecesPlugin)
         .add_plugin(player::PlayerPlugin)
         .add_plugin(ui::UIPlugin)
-        .add_plugin(tiles::TilePlugin)
-        .run();
+        .add_plugin(tiles::TilePlugin);
+
+    #[cfg(feature = "debug")]
+    app.add_plugin(WorldInspectorPlugin::new());
+
+    app.run();
 }

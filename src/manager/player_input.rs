@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::player;
 use crate::states::GameState;
 use crate::tiles;
-use crate::units;
+use crate::pieces::components;
 
 use super::{CommandEvent, CommandType};
 
@@ -11,7 +11,7 @@ use super::{CommandEvent, CommandType};
 pub fn shift_tiles(
     mut ev_command: EventReader<CommandEvent>,
     player_query: Query<&player::Player>,
-    unit_query: Query<&Parent, With<units::Unit>>,
+    unit_query: Query<&Parent, With<components::Unit>>,
     mut tile_query: Query<&mut tiles::Tile>,
     mut tile_res: ResMut<tiles::TileRes>,
     mut game_state: ResMut<State<GameState>>

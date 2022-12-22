@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::manager::CommandType;
+use crate::actions::ActionKind;
 
 #[derive(Component)]
 pub struct Interactive {
-    pub command: CommandType
+    pub kind: ActionKind
 }

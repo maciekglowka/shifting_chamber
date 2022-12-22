@@ -11,9 +11,14 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 
+[features]
+default = []
+debug = ["dep:bevy-inspector-egui"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 bevy = "0.9"
+bevy-inspector-egui = { version = "0.15", optional = true }
 console_error_panic_hook = "0.1"
 rand = "0.8.5"

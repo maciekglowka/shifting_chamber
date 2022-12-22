@@ -1,21 +1,16 @@
 use bevy::prelude::*;
 use rand::Rng;
 
+use crate::actions::ActionKind;
 use crate::globals::MAP_SIZE;
-use crate::manager;
 use crate::states::GameState;
 use crate::tiles::TileRes;
-use crate::units::Unit;
 use crate::vectors::Vector2Int;
 
-mod fixtures;
-mod interactive;
-mod items;
+pub mod components;
 mod renderer;
+mod systems;
 
-pub use fixtures::Fixture;
-pub use interactive::Interactive;
-pub use items::Item;
 
 pub struct PiecesPlugin;
 
@@ -25,14 +20,19 @@ impl Plugin for PiecesPlugin {
             .add_system_set(
                 SystemSet::on_exit(GameState::MapInit)
                     .with_system(furnish)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::Action)
+                    .with_system(systems::interactions::check_interactions)
             );
     }
 }
  
+
+// TO redo and move to systems
 pub fn furnish(
     mut commands: Commands,
     tile_res: Res<TileRes>,
-    // tile_query: Query<(Entity, &Tile, &Parent)>,
     assets: Res<renderer::PieceAssets>
 ) {
     let RESTRICTED: [Vector2Int; 6] = [
@@ -45,8 +45,11 @@ pub fn furnish(
     ];
 
     let fixture = commands.spawn((
-        Piece,
-        Fixture::new(),
+        components::Piece,
+        components::Fixture::new(),
+        components::Interactive { 
+            kind: ActionKind::Descend
+        },
         renderer::get_piece_renderer(&assets.fixture_texture, 1)
     ))
     .id();
@@ -64,8 +67,8 @@ pub fn furnish(
 
             if rng.gen_bool(0.75) {
                 let piece = commands.spawn((
-                        Piece,
-                        Unit::new(2),
+                        components::Piece,
+                        components::Unit::new(2),
                         renderer::get_piece_renderer(&assets.unit_texture, 1)
                     ))
                     .id();
@@ -73,9 +76,11 @@ pub fn furnish(
                     .push_children(&[piece]);
             } else {
                 let piece = commands.spawn((
-                    Piece,
-                    Item,
-                    Interactive { command: manager::CommandType::Heal(2) },
+                    components::Piece,
+                    components::Item,
+                    components::Interactive { 
+                        kind: ActionKind::Heal(2) 
+                    },
                     renderer::get_piece_renderer(&assets.item_texture, 0)
                 ))
                 .id();
@@ -85,7 +90,3 @@ pub fn furnish(
         }
     }
 }
-
-
-#[derive(Component)]
-pub struct Piece;

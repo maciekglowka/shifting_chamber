@@ -4,5 +4,5 @@ pub enum GameState {
     MapInit,
     PlayerInput,
     TileShift,
-    Action
+    Action,
 }

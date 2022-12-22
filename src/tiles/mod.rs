@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
-use crate::units::Unit;
+use crate::pieces::components::Unit;
 use crate::vectors::Vector2Int;
 
 mod renderer;

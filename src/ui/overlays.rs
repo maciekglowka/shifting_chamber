@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::globals::{OVERLAY_FONT_SIZE, OVERLAY_Z, TILE_SIZE};
-use crate::units::Unit;
+use crate::globals::{OVERLAY_Z, TILE_SIZE};
+use crate::pieces::components::Unit;
 
 #[derive(Component)]
 pub struct Overlay;
@@ -37,7 +37,7 @@ fn spawn_unit_overlay(
     assets: &OverlayAssets
 ) -> Entity {
     let symbols = vec!(
-        (unit.attack.value, 1),
+        // (unit.attack.value, 1),
         (unit.hp, 0),
     );
     spawn_overlay(commands, symbols, assets)
