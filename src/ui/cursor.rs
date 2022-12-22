@@ -10,7 +10,7 @@ pub struct Cursor;
 pub fn update_cursor(
     mut commands: Commands,
     res: Res<InputRes>,
-    assets: Res<CursorAssets>,
+    assets: Res<super::UiAssets>,
     query: Query<Entity, With<Cursor>>
 ) {
     if !res.is_changed() { return; }
@@ -22,7 +22,7 @@ pub fn update_cursor(
             Cursor,
             SpriteSheetBundle {
                 sprite: sprite,
-                texture_atlas: assets.texture.clone(),
+                texture_atlas: assets.cursor_texture.clone(),
                 transform: Transform::from_translation(
                     Vec3::new(v.x as f32 * TILE_SIZE, v.y as f32 * TILE_SIZE, OVERLAY_Z)
                 ),
@@ -42,30 +42,4 @@ fn clear_cursor(
         commands.entity(cursor)
             .despawn_recursive();
     }
-}
-
-pub fn load_assets(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut texture_atlasses: ResMut<Assets<TextureAtlas>>,
-    mut asset_list: ResMut<crate::assets::AssetList>
-) {
-    let image = asset_server.load("cursor.png");
-    asset_list.0.push(image.clone_untyped());
-    let atlas = TextureAtlas::from_grid(
-        image,
-        Vec2::splat(16.),
-        1,
-        1,
-        None,
-        None
-    );
-
-    let atlas_handle = texture_atlasses.add(atlas);
-    commands.insert_resource(CursorAssets{ texture: atlas_handle });
-}
-
-#[derive(Resource)]
-pub struct CursorAssets {
-    texture: Handle<TextureAtlas>
 }

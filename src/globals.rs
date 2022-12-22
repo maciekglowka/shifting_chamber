@@ -1,3 +1,5 @@
+pub const SIDEBAR_WIDTH: f32 = 200.;
+
 pub const TILE_SIZE: f32 = 96.;
 pub const MAP_SIZE: i32 = 5;
 

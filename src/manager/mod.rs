@@ -4,7 +4,6 @@ use crate::player::Player;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
-mod action;
 mod map_init;
 mod player_input;
 

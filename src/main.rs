@@ -28,7 +28,7 @@ fn main() {
                 WindowPlugin {
                     window: WindowDescriptor {
                         height: 600.,
-                        width: 600.,
+                        width: 600. + globals::SIDEBAR_WIDTH,
                         ..Default::default()
                     },
                     ..Default::default()

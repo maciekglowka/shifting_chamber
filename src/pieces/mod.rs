@@ -23,7 +23,13 @@ impl Plugin for PiecesPlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::Action)
+                    .with_system(systems::fights::check_fights)
                     .with_system(systems::interactions::check_interactions)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameState::Action)
+                    .with_system(systems::fights::kill_units)
+                    .with_system(systems::items::pick_items)
             );
     }
 }
@@ -46,7 +52,7 @@ pub fn furnish(
 
     let fixture = commands.spawn((
         components::Piece,
-        components::Fixture::new(),
+        components::Fixture,
         components::Interactive { 
             kind: ActionKind::Descend
         },
@@ -67,6 +73,7 @@ pub fn furnish(
 
             if rng.gen_bool(0.75) {
                 let piece = commands.spawn((
+                        components::Damage { value: 2 },
                         components::Piece,
                         components::Unit::new(2),
                         renderer::get_piece_renderer(&assets.unit_texture, 1)

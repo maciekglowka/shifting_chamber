@@ -1,24 +1,25 @@
 use bevy::prelude::*;
 
-use crate::actions::ActionEvent;
+use crate::actions::{ActionEvent, ActionKind};
 use crate::player::Player;
 use crate::tiles::Tile;
 
 use super::super::components::{
-    Interactive,
+    Item,
     Piece
 };
 
-pub fn check_interactions(
+pub fn pick_items(
+    mut commands: Commands,
     player_query: Query<&Player>,
-    piece_query: Query<(&Parent, &Interactive), With<Piece>>,
-    tile_query: Query<&Tile>,
-    mut ev_action: EventWriter<ActionEvent>,
+    item_query: Query<(Entity, &Parent, &Item), With<Piece>>,
+    tile_query: Query<&Tile>
 ) {
-    for (parent, interactive) in piece_query.iter() {
+    for (entity, parent, item) in item_query.iter() {        
         let player = player_query.get_single().unwrap();
         let tile = tile_query.get(parent.get()).unwrap();
         if tile.v != player.v { continue; }
-        ev_action.send(ActionEvent(interactive.kind));
+
+        commands.entity(entity).despawn_recursive();
     }
 }
