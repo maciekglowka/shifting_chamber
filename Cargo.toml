@@ -22,3 +22,5 @@ bevy = "0.9"
 bevy-inspector-egui = { version = "0.15", optional = true }
 console_error_panic_hook = "0.1"
 rand = "0.8.5"
+serde = { version = "1.0", features = ["derive"]}
+serde_yaml = "0.9"

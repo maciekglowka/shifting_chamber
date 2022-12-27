@@ -1,0 +1,8 @@
+Face:
+  sprite: ["units", 1]
+  components:
+    Damage:
+      value: 2
+    Unit:
+      hp: 2
+      max_hp: 2

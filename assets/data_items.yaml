@@ -1,0 +1,6 @@
+Heal:
+  sprite: ["items", 0]
+  components:
+    Interactive:
+      kind: !Heal 2
+    Item:

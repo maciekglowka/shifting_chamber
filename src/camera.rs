@@ -16,14 +16,16 @@ impl Plugin for CameraPlugin {
     }
 }
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands
+) {
     let mut camera = Camera2dBundle::default();
     camera.transform.translation = Vec3::new(
         0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32 + SIDEBAR_WIDTH / 2.,
         0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32,
         camera.transform.translation.z
     );
-    let bg_z = - camera.transform.translation.z;
+    let bg_z = -camera.transform.translation.z;
     commands.spawn((camera, VisibilityBundle::default()))
         .with_children(|parent| spawn_background(parent, bg_z));
 }
@@ -35,7 +37,7 @@ fn spawn_background(
     parent.spawn(
         SpriteBundle {
             sprite: Sprite {
-                color: Color::BLACK,
+                color: Color::DARK_GRAY,
                 ..Default::default()
             },
             transform: Transform::from_scale(Vec3::new(WINDOW_WIDTH, WINDOW_HEIGHT, 1.))

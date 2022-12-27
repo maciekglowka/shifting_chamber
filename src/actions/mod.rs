@@ -1,11 +1,12 @@
 use bevy::prelude::*;
+use serde::Deserialize;
 
 mod player;
 mod units;
 
 pub struct ActionEvent(pub ActionKind);
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Deserialize)]
 pub enum ActionKind {
     Damage(Entity, u32),
     Descend,

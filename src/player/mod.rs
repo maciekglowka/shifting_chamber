@@ -16,10 +16,6 @@ impl Plugin for PlayerPlugin {
                 SystemSet::on_exit(GameState::LoadAssets)
                     .with_system(spawn_player)
             );
-            // .add_system_set(
-            //     SystemSet::on_enter(GameState::Action)
-            //         .with_system(handle_fights)
-            // );
     }
 }
 
@@ -39,7 +35,7 @@ pub fn spawn_player(
             is_descending: false
         },
         Damage { value: 2},
-        Unit::new(5),
+        Unit { hp: 5, max_hp: 5 },
         renderer::get_renderer(assets.as_ref())
     ));
 }

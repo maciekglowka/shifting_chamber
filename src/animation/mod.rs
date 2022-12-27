@@ -41,6 +41,8 @@ fn update_tiles(
                 MOVEMENT_SPEED * time.delta_seconds()
             );
             animating = true;
+        } else {
+            transform.translation = target;
         }
     }
 

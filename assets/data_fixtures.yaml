@@ -1,0 +1,6 @@
+Stair:
+  sprite: ["tiles", 1]
+  components:
+    Fixture:
+    Interactive:
+      kind: !Descend

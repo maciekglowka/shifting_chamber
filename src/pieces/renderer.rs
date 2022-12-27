@@ -1,12 +1,25 @@
 use bevy::prelude::*;
+use serde::Deserialize;
+use serde_yaml;
+use std::collections::HashMap;
 
 use crate::globals::{PIECE_Z, TILE_SIZE};
 
+const SPRITE_FILES: [(&str, usize, usize); 3] = [
+    ("items", 1, 4),
+    ("tiles", 1, 4),
+    ("units", 1, 4)
+];
+
 pub fn get_piece_renderer(
-    texture: &Handle<TextureAtlas>,
-    idx: usize
+    data: &serde_yaml::Value,
+    assets: &PieceAssets,
 ) -> SpriteSheetBundle {
-    let mut sprite = TextureAtlasSprite::new(idx);
+    let sprite_data: SpriteData = serde_yaml::from_value(data.clone())
+        .expect(&format!("Wrong sprite data: {:?}", data));
+
+    let texture = &assets.textures[&sprite_data.0];
+    let mut sprite = TextureAtlasSprite::new(sprite_data.1);
     sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
     sprite.color = Color::WHITE;
 
@@ -24,52 +37,36 @@ pub fn load_assets(
     mut texture_atlasses: ResMut<Assets<TextureAtlas>>,
     mut asset_list: ResMut<crate::assets::AssetList>
 ) {
-    let fixture_image = asset_server.load("tiles.png");
-    asset_list.0.push(fixture_image.clone_untyped());
-    let fixture_atlas = TextureAtlas::from_grid(
-        fixture_image,
-        Vec2::splat(32.),
-        1,
-        4,
-        None,
-        None
-    );
-    let fixture_handle = texture_atlasses.add(fixture_atlas);
+    let mut textures = HashMap::new();
 
-    let unit_image = asset_server.load("units.png");
-    asset_list.0.push(unit_image.clone_untyped());
-    let unit_atlas = TextureAtlas::from_grid(
-        unit_image,
-        Vec2::splat(32.),
-        1,
-        4,
-        None,
-        None
-    );
-    let unit_handle = texture_atlasses.add(unit_atlas);
+    for (fname, columns, rows) in SPRITE_FILES {
+        let image = asset_server.load(fname.to_owned() + ".png");
+        asset_list.0.push(image.clone_untyped());
+        let atlas = TextureAtlas::from_grid(
+            image,
+            Vec2::splat(32.),
+            columns,
+            rows,
+            None,
+            None
+        );
+        let handle = texture_atlasses.add(atlas);
+        textures.insert(fname.to_string(), handle);
+    }
 
-    let item_image = asset_server.load("items.png");
-    asset_list.0.push(item_image.clone_untyped());
-    let item_atlas = TextureAtlas::from_grid(
-        item_image,
-        Vec2::splat(32.),
-        1,
-        4,
-        None,
-        None
-    );
-    let item_handle = texture_atlasses.add(item_atlas);
-
-    commands.insert_resource(PieceAssets{ 
-        fixture_texture: fixture_handle,
-        unit_texture: unit_handle,
-        item_texture: item_handle
-    });
+    commands.insert_resource(PieceAssets{ textures });
 }
 
 #[derive(Resource)]
 pub struct PieceAssets {
-    pub unit_texture: Handle<TextureAtlas>,
-    pub fixture_texture: Handle<TextureAtlas>,
-    pub item_texture: Handle<TextureAtlas>
+    pub textures: HashMap<String, Handle<TextureAtlas>>
 }
+
+// #[derive(Deserialize)]
+// struct SpriteData {
+//     pub atlas: String,
+//     pub index: usize
+// }
+
+#[derive(Deserialize)]
+struct SpriteData(String, usize);

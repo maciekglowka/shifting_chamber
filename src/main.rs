@@ -8,6 +8,7 @@ mod animation;
 mod assets;
 mod camera;
 mod common;
+mod data;
 mod globals;
 mod input;
 mod manager;
@@ -42,6 +43,7 @@ fn main() {
         .add_plugin(animation::AnimationPlugin)
         .add_plugin(assets::AssetPlugin)
         .add_plugin(camera::CameraPlugin)
+        .add_plugin(data::DataPlugin)
         .add_plugin(input::InputPlugin)
         .add_plugin(manager::ManagerPlugin)
         .add_plugin(pieces::PiecesPlugin)

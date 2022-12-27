@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::actions::ActionKind;
+use crate::data::DataAssets;
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
 use crate::tiles::TileRes;
@@ -39,7 +39,8 @@ impl Plugin for PiecesPlugin {
 pub fn furnish(
     mut commands: Commands,
     tile_res: Res<TileRes>,
-    assets: Res<renderer::PieceAssets>
+    assets: Res<renderer::PieceAssets>,
+    data_assets: Res<DataAssets>
 ) {
     let RESTRICTED: [Vector2Int; 6] = [
         Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2),
@@ -50,17 +51,7 @@ pub fn furnish(
         Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2 + 1),
     ];
 
-    let fixture = commands.spawn((
-        components::Piece,
-        components::Fixture,
-        components::Interactive { 
-            kind: ActionKind::Descend
-        },
-        renderer::get_piece_renderer(&assets.fixture_texture, 1)
-    ))
-    .id();
-    commands.entity(tile_res.tiles[&Vector2Int::new(0, 0)])
-        .push_children(&[fixture]);
+    spawn_piece(&mut commands, "Stair".into(), Vector2Int::new(0, 0), &tile_res, &assets, &data_assets);
 
     let mut rng = rand::thread_rng();
 
@@ -72,28 +63,52 @@ pub fn furnish(
             if rng.gen_bool(0.75) { continue; }
 
             if rng.gen_bool(0.75) {
-                let piece = commands.spawn((
-                        components::Damage { value: 2 },
-                        components::Piece,
-                        components::Unit::new(2),
-                        renderer::get_piece_renderer(&assets.unit_texture, 1)
-                    ))
-                    .id();
-                commands.entity(tile_res.tiles[&v])
-                    .push_children(&[piece]);
+                spawn_piece(
+                    &mut commands, 
+                    "Face".into(),
+                    v,
+                    &tile_res,
+                    &assets,
+                    &data_assets
+                );
             } else {
-                let piece = commands.spawn((
-                    components::Piece,
-                    components::Item,
-                    components::Interactive { 
-                        kind: ActionKind::Heal(2) 
-                    },
-                    renderer::get_piece_renderer(&assets.item_texture, 0)
-                ))
-                .id();
-                commands.entity(tile_res.tiles[&v])
-                    .push_children(&[piece]);
+                spawn_piece(
+                    &mut commands, 
+                    "Heal".into(),
+                    v,
+                    &tile_res,
+                    &assets,
+                    &data_assets
+                );
             }
         }
     }
+}
+
+fn spawn_piece(
+    commands: &mut Commands,
+    name: String,
+    v: Vector2Int,
+    tile_res: &TileRes,
+    assets: &renderer::PieceAssets,
+    data_assets: &DataAssets
+) {
+    let err = &format!("Wrong data structure for {}", name);
+    let data = data_assets.entities[&name].as_mapping().expect(err);
+    let components = data["components"].as_mapping().expect(err);
+
+    let mut piece = commands.spawn((
+        components::Piece,
+        renderer::get_piece_renderer(&data["sprite"], &assets)
+    ));
+
+    for (k, v) in components.iter() {
+        components::insert_from_data(
+            &mut piece, k.as_str().unwrap(), v.clone()
+        ).unwrap();
+    }
+
+    let entity = piece.id();
+    commands.entity(tile_res.tiles[&v])
+        .push_children(&[entity]);
 }
