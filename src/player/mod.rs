@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::actions::DamageKind;
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
 use crate::pieces::components::{Damage, Unit};
@@ -34,7 +35,7 @@ pub fn spawn_player(
             v: Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2),
             is_descending: false
         },
-        Damage { value: 2},
+        Damage { value: 2, kind: DamageKind::Hit },
         Unit { hp: 5, max_hp: 5 },
         renderer::get_renderer(assets.as_ref())
     ));

@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use crate::globals::{PIECE_Z, TILE_SIZE};
 
 const SPRITE_FILES: [(&str, usize, usize); 3] = [
+    // atlas, columns, rows
     ("items", 1, 4),
     ("tiles", 1, 4),
     ("units", 1, 4)
@@ -61,12 +62,6 @@ pub fn load_assets(
 pub struct PieceAssets {
     pub textures: HashMap<String, Handle<TextureAtlas>>
 }
-
-// #[derive(Deserialize)]
-// struct SpriteData {
-//     pub atlas: String,
-//     pub index: usize
-// }
 
 #[derive(Deserialize)]
 struct SpriteData(String, usize);

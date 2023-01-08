@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use bevy::prelude::*;
 
 #[cfg(feature = "debug")]
@@ -7,7 +9,6 @@ mod actions;
 mod animation;
 mod assets;
 mod camera;
-mod common;
 mod data;
 mod globals;
 mod input;

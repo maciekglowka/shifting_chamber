@@ -5,7 +5,14 @@ use crate::states::GameState;
 use crate::tiles;
 use crate::pieces::components;
 
-use super::{CommandEvent, CommandType};
+use super::{CommandEvent, CommandType, GameRes};
+
+
+pub fn clear_actions(
+    mut res: ResMut<GameRes>
+) {
+    res.input_actions.clear();
+}
 
 
 pub fn shift_tiles(

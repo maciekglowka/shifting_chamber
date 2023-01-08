@@ -2,21 +2,28 @@ use bevy::prelude::*;
 
 use crate::states::GameState;
 
+mod action_menu;
 mod cursor;
 mod overlays;
 mod sidebar;
+
+pub struct ReloadUIEvent;
 
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(load_assets)
+            .add_event::<ReloadUIEvent>()
             .add_system_set(SystemSet::on_enter(GameState::PlayerInput)
                 .with_system(overlays::update_overlays)
                 .with_system(sidebar::update_sidebar)
+                .with_system(action_menu::update_menu)
+                .after("action")
             )
             .add_system_set(SystemSet::on_update(GameState::PlayerInput)
                 .with_system(cursor::update_cursor)
+                .with_system(action_menu::menu_click)
             );  
     }  
 }

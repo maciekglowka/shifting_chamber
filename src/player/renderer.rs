@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::globals::{MAP_SIZE, PIECE_Z, TILE_SIZE};
+use crate::globals::{MAP_SIZE, PLAYER_Z, TILE_SIZE};
 
 pub fn get_renderer(
     assets: &PlayerAssets
@@ -15,7 +15,7 @@ pub fn get_renderer(
         sprite: sprite,
         texture_atlas: assets.texture.clone(),
         transform: Transform::from_translation(
-            Vec3::new(d, d, PIECE_Z)
+            Vec3::new(d, d, PLAYER_Z)
         ),
         ..Default::default()
     }

@@ -3,6 +3,7 @@ Face:
   components:
     Damage:
       value: 2
+      kind: !Hit
     Unit:
       hp: 2
       max_hp: 2

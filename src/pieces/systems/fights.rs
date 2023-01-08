@@ -1,12 +1,17 @@
 use bevy::prelude::*;
 
 use crate::actions::{ActionEvent, ActionKind};
+use crate::data::DataAssets;
 use crate::player::Player;
 use crate::tiles::Tile;
 
-use super::super::components::{
-    Damage,
-    Unit
+use super::super::{
+    components::{
+        Damage,
+        Unit
+    },
+    renderer,
+    spawn_piece_at_parent
 };
 
 pub fn check_fights(
@@ -21,17 +26,28 @@ pub fn check_fights(
         let tile = tile_query.get(parent.get()).unwrap();
         if tile.v.manhattan(player.v) > 1 { continue; }
 
-        ev_action.send(ActionEvent(ActionKind::Damage(player_entity, npc_damage.value)));
-        ev_action.send(ActionEvent(ActionKind::Damage(npc_entity, player_damage.value)));
+        ev_action.send(ActionEvent(ActionKind::Damage(player_entity, npc_damage.kind, npc_damage.value)));
+        ev_action.send(ActionEvent(ActionKind::Damage(npc_entity, player_damage.kind, player_damage.value)));
     }
 }
 
 pub fn kill_units(
     mut commands: Commands,
-    unit_query: Query<(Entity, &Unit)>
+    unit_query: Query<(Entity, &Unit, Option<&Parent>)>,
+    assets: Res<renderer::PieceAssets>,
+    data_assets: Res<DataAssets>
 ) {
-    for (entity, unit) in unit_query.iter() {
+    for (entity, unit, parent) in unit_query.iter() {
         if unit.hp > 0 { continue; }
         commands.entity(entity).despawn_recursive();
+        if let Some(parent) = parent {
+            spawn_piece_at_parent(
+                &mut commands,
+                "Coin".into(),
+                parent,
+                assets.as_ref(),
+                data_assets.as_ref()
+            )
+        }
     }
 }

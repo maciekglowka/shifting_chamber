@@ -4,3 +4,21 @@ Heal:
     Interactive:
       kind: !Heal 2
     Item:
+
+Coin:
+  sprite: ["items", 1]
+  components:
+    Interactive:
+      kind: !Score 1
+    Item:
+
+Shield:
+  sprite: ["items", 3]
+  components:
+    Collectable:
+    Item:
+    Protect:
+      value: 2
+      kind: !Hit
+    Temporary:
+      value: 3

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::actions::ActionKind;
 use crate::player::Player;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
@@ -21,15 +22,20 @@ pub struct ManagerPlugin;
 impl Plugin for ManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CommandEvent>()
+            .init_resource::<GameRes>()
             .add_system_set(
                 SystemSet::on_update(GameState::MapInit)
-                    .with_system(map_init::start_game)
+                    .with_system(map_init::start_map)
             )
             .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
                     .with_system(player_input::shift_tiles)
             )
-            .add_system(update_state);
+            .add_system_set(
+                SystemSet::on_exit(GameState::PlayerInput)
+                    .with_system(player_input::clear_actions)
+            )
+            .add_system(update_state.after("action"));
     }
 }
 
@@ -58,4 +64,11 @@ pub fn update_state(
             }
         }
     }
+}
+
+#[derive(Default, Resource)]
+pub struct GameRes {
+    pub level: u32,
+    pub score: u32,
+    pub input_actions: Vec<ActionKind>
 }
