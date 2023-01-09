@@ -1,28 +1,24 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionEvent, ActionKind};
+// use crate::actions::{ActionEvent, ActionKind};
 use crate::globals::OVERLAY_FONT_SIZE;
-use crate::manager::GameRes;
+use crate::manager::{CommandType, CommandEvent, GameRes};
 
 #[derive(Component)]
 pub struct ActionMenu;
 
 #[derive(Component)]
-pub struct ActionButton(ActionKind);
+pub struct ActionButton(CommandType);
 
 pub fn menu_click(
-    mut commands: Commands,
-    mut interactions: Query<(Entity, &Interaction, &mut BackgroundColor, &ActionButton), Changed<Interaction>>, 
-    mut ev_action: EventWriter<ActionEvent>
+    mut interactions: Query<(&Interaction, &mut BackgroundColor, &ActionButton), Changed<Interaction>>, 
+    mut ev_command: EventWriter<CommandEvent>
 ) {
-    for (entity, interaction, mut color, button) in interactions.iter_mut() {
+    for (interaction, mut color, button) in interactions.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 *color = Color::DARK_GRAY.into();
-                ev_action.send(ActionEvent(button.0));
-                // TODO remove action from game res as well?
-                commands.entity(entity)
-                    .despawn_recursive()
+                ev_command.send(CommandEvent(button.0));
             },
             _ => {
                 *color = Color::BLACK.into()
@@ -77,7 +73,7 @@ fn add_button(
     parent: &mut ChildBuilder,
     assets: &super::UiAssets,
     msg: &str,
-    action: ActionKind
+    action: CommandType
 ) {
     parent.spawn((
         ActionButton(action),

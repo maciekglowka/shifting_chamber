@@ -27,7 +27,7 @@ pub fn check_asset_loading(
         asset_list.0.iter().map(|a| a.id)
     ) {
         LoadState::Loaded => {
-            game_state.set(crate::states::GameState::MapInit)
+            game_state.set(crate::states::GameState::GameInit)
                 .expect("State switch failed!");
         },
         LoadState::Failed => {

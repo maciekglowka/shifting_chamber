@@ -30,11 +30,18 @@ pub fn update_cursor(
             }
         ));
     } else {
-        clear_cursor(&mut commands, &query);
+        destroy_cursor(&mut commands, &query);
     }
 }
 
-fn clear_cursor(
+pub fn clear_cursor(
+    mut commands: Commands,
+    query: Query<Entity, With<Cursor>>
+) {
+    destroy_cursor(&mut commands, &query);
+}
+
+fn destroy_cursor(
     commands: &mut Commands,
     query: &Query<Entity, With<Cursor>>
 ) {

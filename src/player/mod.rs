@@ -14,7 +14,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(renderer::load_assets)
             .add_system_set(
-                SystemSet::on_exit(GameState::LoadAssets)
+                SystemSet::on_enter(GameState::GameInit)
                     .with_system(spawn_player)
             );
     }

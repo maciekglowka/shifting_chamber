@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::states::GameState;
 
 mod action_menu;
+mod game_over;
 mod cursor;
 mod overlays;
 mod sidebar;
@@ -24,6 +25,15 @@ impl Plugin for UIPlugin {
             .add_system_set(SystemSet::on_update(GameState::PlayerInput)
                 .with_system(cursor::update_cursor)
                 .with_system(action_menu::menu_click)
+            )
+            .add_system_set(SystemSet::on_exit(GameState::PlayerInput)
+                .with_system(cursor::clear_cursor)
+            )
+            .add_system_set(SystemSet::on_enter(GameState::GameOver)
+                .with_system(game_over::show_menu)
+            )
+            .add_system_set(SystemSet::on_exit(GameState::GameOver)
+                .with_system(game_over::clear_menu)
             );  
     }  
 }

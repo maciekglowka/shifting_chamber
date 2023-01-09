@@ -11,7 +11,6 @@ pub enum ActionKind {
     Damage(Entity, DamageKind, u32),
     Descend,
     Heal(u32),
-    Pick(Entity),
     Score(u32)
 }
 
@@ -26,7 +25,6 @@ impl Plugin for ActionPlugin {
                     .with_system(units::receive_damage)
                     .with_system(player::descend)
                     .with_system(player::heal)
-                    .with_system(player::pick_item)
                     .with_system(player::score)
             );
     }

@@ -42,26 +42,3 @@ pub fn score(
         }
     }
 }
-
-pub fn pick_item(
-    mut commands: Commands,
-    player_query: Query<Entity, With<Player>>,
-    item_query: Query<&Parent>,
-    mut ev_action: EventReader<ActionEvent>
-) {
-    for ev in ev_action.iter() {
-        if let ActionKind::Pick(entity) = ev.0 {
-            let player_entity = player_query.get_single().unwrap();
-            let parent = item_query.get(entity).unwrap();
-
-            commands.entity(parent.get())
-                .remove_children(&[entity]);
-            commands.entity(entity)
-                .remove::<SpriteSheetBundle>()
-                .remove::<Piece>();
-            commands.entity(player_entity)
-                .push_children(&[entity]);
-
-        }
-    }
-}

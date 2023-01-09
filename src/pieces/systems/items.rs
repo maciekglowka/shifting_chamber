@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionEvent, ActionKind};
-use crate::manager::GameRes;
+// use crate::actions::{ActionEvent, ActionKind};
+use crate::manager::{CommandType, GameRes};
 use crate::player::Player;
 use crate::tiles::Tile;
 
@@ -19,11 +19,14 @@ pub fn examine_pickable_items(
     mut game_res: ResMut<GameRes>
 ) {
     for (entity, parent) in item_query.iter() {        
-        let player = player_query.get_single().unwrap();
+        let player = match player_query.get_single() {
+            Ok(p) => p,
+            _ => return
+        };
         let tile = tile_query.get(parent.get()).unwrap();
         if tile.v != player.v { continue; }
 
-        game_res.input_actions.push(ActionKind::Pick(entity));
+        game_res.input_actions.push(CommandType::PickItem(entity));
     }
 }
 
@@ -34,7 +37,10 @@ pub fn remove_disposable_items(
     tile_query: Query<&Tile>
 ) {
     for (entity, parent) in item_query.iter() {        
-        let player = player_query.get_single().unwrap();
+        let player = match player_query.get_single() {
+            Ok(p) => p,
+            _ => return
+        };
         let tile = tile_query.get(parent.get()).unwrap();
         if tile.v != player.v { continue; }
 
