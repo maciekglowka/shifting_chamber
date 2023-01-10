@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
+use crate::actions::ActionKind;
 use crate::data::DataAssets;
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
@@ -30,12 +31,12 @@ impl Plugin for PiecesPlugin {
                 SystemSet::on_enter(GameState::Action)
                     .with_system(systems::fights::check_fights)
                     .with_system(systems::interactions::check_interactions)
+                    .with_system(systems::interactions::update_temporary)
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::Action)
                     .with_system(systems::fights::kill_units)
                     .with_system(systems::items::remove_disposable_items)
-                    .with_system(systems::items::update_temp_items)
             );
     }
 }
@@ -136,19 +137,24 @@ fn get_new_piece(
     assets: &renderer::PieceAssets,
     data_assets: &DataAssets
 ) -> Entity {
-    let err = &format!("Wrong data structure for {}", name);
-    let data = data_assets.entities[&name].as_mapping().expect(err);
-    let components = data["components"].as_mapping().expect(err);
-
+    let (data, component_list) = components::get_piece_data(&name, data_assets);
+    
     let mut piece = commands.spawn((
         components::Piece,
         renderer::get_piece_renderer(&data["sprite"], &assets)
     ));
-
-    for (k, v) in components.iter() {
-        components::insert_from_data(
-            &mut piece, k.as_str().unwrap(), v.clone()
-        ).expect(err);
-    }
+    info!("{:?}", component_list.keys().map(|k| k.as_str()).collect::<Vec<_>>());
+    if component_list.contains_key("Effect") {
+        // when spawning an effect, wrap it inside interactive item
+        piece.insert((
+            components::Item,
+            components::Interactive {
+                kind: ActionKind::ApplyEffect(name)
+            }
+        ));
+    } else {
+        // otherwise just build component list normally
+        components::insert_from_list(&mut piece, component_list);
+    }   
     piece.id()
 }

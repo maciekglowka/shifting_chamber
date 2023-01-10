@@ -6,8 +6,9 @@ mod units;
 
 pub struct ActionEvent(pub ActionKind);
 
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub enum ActionKind {
+    ApplyEffect(String),
     Damage(Entity, DamageKind, u32),
     Descend,
     Heal(u32),
@@ -23,6 +24,7 @@ impl Plugin for ActionPlugin {
                 SystemSet::new()
                     .label("action")
                     .with_system(units::receive_damage)
+                    .with_system(player::apply_effect)
                     .with_system(player::descend)
                     .with_system(player::heal)
                     .with_system(player::score)

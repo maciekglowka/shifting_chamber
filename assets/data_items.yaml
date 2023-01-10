@@ -11,14 +11,3 @@ Coin:
     Interactive:
       kind: !Score 1
     Item:
-
-Shield:
-  sprite: ["items", 3]
-  components:
-    Collectable:
-    Item:
-    Protect:
-      value: 2
-      kind: !Hit
-    Temporary:
-      value: 3

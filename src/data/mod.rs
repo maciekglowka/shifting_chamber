@@ -10,7 +10,8 @@ use std::collections::HashMap;
 
 use crate::states::GameState;
 
-const YML_FILES: [&str; 3] = [
+const YML_FILES: [&str; 4] = [
+    "data_effects.yaml",
     "data_fixtures.yaml", "data_items.yaml", "data_units.yaml"
 ];
 

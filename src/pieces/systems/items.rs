@@ -36,6 +36,7 @@ pub fn remove_disposable_items(
     item_query: Query<(Entity, &Parent), (With<Piece>, With<Item>, Without<Collectable>)>,
     tile_query: Query<&Tile>
 ) {
+    // remove non collectable items, when player is standing on them
     for (entity, parent) in item_query.iter() {        
         let player = match player_query.get_single() {
             Ok(p) => p,
@@ -45,17 +46,5 @@ pub fn remove_disposable_items(
         if tile.v != player.v { continue; }
 
         commands.entity(entity).despawn_recursive();
-    }
-}
-
-pub fn update_temp_items(
-    mut commands: Commands,
-    mut item_query: Query<(Entity, &mut Temporary), Without<Piece>>,
-) {
-    for (entity, mut temporary) in item_query.iter_mut() {        
-        temporary.value = temporary.value.saturating_sub(1);
-        if temporary.value == 0 {
-            commands.entity(entity).despawn_recursive();
-        }
     }
 }

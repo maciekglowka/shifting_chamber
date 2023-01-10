@@ -1,0 +1,9 @@
+Shield:
+  sprite: ["items", 3]
+  components:
+    Effect:
+    Protect:
+      value: 2
+      kind: !Hit
+    Temporary:
+      value: 3

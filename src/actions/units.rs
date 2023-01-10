@@ -1,14 +1,13 @@
 use bevy::prelude::*;
 
-use crate::pieces::components::{Item, Protect, Unit};
-use crate::player::Player;
+use crate::pieces::components::{Protect, Unit};
 
 use super::{ActionEvent, ActionKind};
 
 pub fn receive_damage(
     mut unit_query: Query<(&mut Unit, Option<&Children>)>,
     mut ev_action: EventReader<ActionEvent>,
-    protect_query: Query<&Protect, With<Item>>
+    protect_query: Query<&Protect>
 ) {
     for ev in ev_action.iter() {
         if let ActionKind::Damage(entity, kind, value) = ev.0 {

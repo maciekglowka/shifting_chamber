@@ -4,10 +4,10 @@ use bevy::{
 };
 use serde::Deserialize;
 use serde_yaml;
-use std::collections::HashMap;
+use serde_yaml::Mapping;
 
-use crate::actions::ActionKind;
-use crate::actions::DamageKind;
+use crate::actions::{ ActionKind, DamageKind};
+use crate::data::DataAssets;
 
 // dynamic components, added in runtime - context depending
 #[derive(Component)]
@@ -28,6 +28,9 @@ pub struct Damage {
 }
 
 #[derive(Component, Deserialize)]
+pub struct Effect;
+
+#[derive(Component, Deserialize)]
 pub struct Fixture {}
 
 #[derive(Component, Deserialize)]
@@ -36,7 +39,7 @@ pub struct Interactive {
 }
 
 #[derive(Component, Deserialize)]
-pub struct Item {}
+pub struct Item;
 
 #[derive(Component, Deserialize)]
 pub struct Protect {
@@ -58,10 +61,19 @@ pub struct Unit {
     pub max_hp: u32
 }
 
-pub fn insert_from_data(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) -> Result<(), serde_yaml::Error> {
+pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {
+    for (k, v) in component_list.iter() {
+        insert_single(
+            ec, k.as_str().unwrap(), v.clone()
+        ).expect("Wrong component list!");
+    }
+}
+
+fn insert_single(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) -> Result<(), serde_yaml::Error> {
     match name {
         "Collectable" => ec.insert(serde_yaml::from_value::<Collectable>(data)?),
         "Damage" => ec.insert(serde_yaml::from_value::<Damage>(data)?),
+        "Effect" => ec.insert(serde_yaml::from_value::<Effect>(data)?),
         "Fixture" => ec.insert(serde_yaml::from_value::<Fixture>(data)?),
         "Interactive" =>  ec.insert(serde_yaml::from_value::<Interactive>(data)?),
         "Item" => ec.insert(serde_yaml::from_value::<Item>(data)?),
@@ -71,4 +83,14 @@ pub fn insert_from_data(ec: &mut EntityCommands, name: &str, data: serde_yaml::V
         _ => ec
     };        
     Ok(())
+}
+
+pub fn get_piece_data<'a>(
+    name: &'a str,
+    data_assets: &'a DataAssets
+) -> (&'a Mapping, &'a Mapping) {
+    let err = &format!("Wrong data structure for {}", name);
+    let data = data_assets.entities[name].as_mapping().expect(err);
+    let components = data["components"].as_mapping().expect(err);
+    return (data, components)
 }
