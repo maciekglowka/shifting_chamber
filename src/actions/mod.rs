@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use serde::Deserialize;
 
+mod pieces;
 mod player;
 mod units;
 
@@ -12,7 +13,8 @@ pub enum ActionKind {
     Damage(Entity, DamageKind, u32),
     Descend,
     Heal(u32),
-    Score(u32)
+    Score(u32),
+    SpawnPiece(Entity, String)
 }
 
 pub struct ActionPlugin;
@@ -24,6 +26,7 @@ impl Plugin for ActionPlugin {
                 SystemSet::new()
                     .label("action")
                     .with_system(units::receive_damage)
+                    .with_system(pieces::spawn_piece)
                     .with_system(player::apply_effect)
                     .with_system(player::descend)
                     .with_system(player::heal)

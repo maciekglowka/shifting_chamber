@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::pieces::components::Piece;
+use crate::pieces::components::{Piece, Spawner};
 use crate::player::Player;
 use crate::states::GameState;
 use crate::tiles;
@@ -25,7 +25,8 @@ pub fn shift_tiles(
     unit_query: Query<&Parent, With<components::Unit>>,
     mut tile_query: Query<&mut tiles::Tile>,
     mut tile_res: ResMut<tiles::TileRes>,
-    mut game_state: ResMut<State<GameState>>
+    mut game_state: ResMut<State<GameState>>,
+    mut ev_tile: EventWriter<tiles::TileSwapEvent>
 ) {
     for ev in ev_command.iter() {
         if let CommandType::MapShift(v0, v1) = ev.0 {
@@ -34,7 +35,7 @@ pub fn shift_tiles(
             let player_v = player_query.get_single().unwrap().v;
 
             if tiles::can_shift(v0, v1-v0, player_v, &unit_query, &tile_res) {
-                tiles::shift_tiles(v0, v1-v0, &mut tile_query, tile_res.as_mut());
+                tiles::shift_tiles(v0, v1-v0, &mut tile_query, tile_res.as_mut(), &mut ev_tile);
                 game_state.set(GameState::TileShift).expect("Switching states failed");
             }
         }

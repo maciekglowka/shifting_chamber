@@ -11,12 +11,12 @@ use super::super::{
         Unit
     },
     renderer,
-    spawn_piece_at_parent
+    spawn_piece_at_entity
 };
 
 pub fn check_fights(
     player_query: Query<(Entity, &Damage, &Player)>,
-    npc_query: Query<(Entity, &Damage, &Parent), Without<Player>>,
+    npc_query: Query<(Entity, &Damage, &Parent), (With<Unit>, Without<Player>)>,
     tile_query: Query<&Tile>,
     mut ev_action: EventWriter<ActionEvent>,
 ) {
@@ -41,10 +41,10 @@ pub fn kill_units(
         if unit.hp > 0 { continue; }
         commands.entity(entity).despawn_recursive();
         if let Some(parent) = parent {
-            spawn_piece_at_parent(
+            spawn_piece_at_entity(
                 &mut commands,
                 "Coin".into(),
-                parent,
+                parent.get(),
                 assets.as_ref(),
                 data_assets.as_ref()
             )

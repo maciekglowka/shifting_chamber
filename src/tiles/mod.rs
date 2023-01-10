@@ -1,22 +1,30 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
+use crate::actions::{ActionKind, ActionEvent};
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
-use crate::pieces::components::Unit;
+use crate::pieces::components::{Piece, Spawner, Unit};
 use crate::vectors::Vector2Int;
 
 mod renderer;
+
+pub struct TileSwapEvent(Entity, Entity);
 
 pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<TileRes>()
+            .add_event::<TileSwapEvent>()
             .add_startup_system(renderer::load_assets)
             .add_system_set(
                 SystemSet::on_enter(GameState::MapInit)
                     .with_system(spawn_map)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameState::PlayerInput)
+                    .with_system(swap_action)
             );
     }
 }
@@ -55,8 +63,9 @@ fn clear_map(
 pub fn shift_tiles(
     origin: Vector2Int,
     dir: Vector2Int,
-    query: &mut Query<&mut Tile>,
-    res: &mut TileRes
+    tile_query: &mut Query<&mut Tile>,
+    res: &mut TileRes,
+    ev_tile: &mut EventWriter<TileSwapEvent>
 ) {
     let (base, offset) = match dir {
         Vector2Int::LEFT | Vector2Int::RIGHT => {
@@ -75,11 +84,40 @@ pub fn shift_tiles(
         let e0 = res.tiles[&v0];
         let e1 = res.tiles[&v1];
 
-        if let Ok(mut t0) = query.get_mut(e0) { t0.v = v1; }
-        if let Ok(mut t1) = query.get_mut(e1) { t1.v = v0; }
+        if let Ok(mut t0) = tile_query.get_mut(e0) { t0.v = v1; }
+        if let Ok(mut t1) = tile_query.get_mut(e1) { t1.v = v0; }
 
         res.tiles.insert(v0, e1);
         res.tiles.insert(v1, e0);
+        ev_tile.send(TileSwapEvent(e0, e1));
+    }
+}
+
+fn swap_action(
+    mut ev_command: EventReader<TileSwapEvent>,
+    tile_query: Query<(Entity, Option<&Children>), With<Tile>>,
+    piece_query: Query<(&Piece, Option<&Spawner>)>,
+    mut ev_action: EventWriter<ActionEvent>
+) {
+    for ev in ev_command.iter() {
+        for i in 0..2 {
+            let (e0, e1) = match i {
+                0 => (ev.0, ev.1),
+                _ => (ev.1, ev.0)
+            };
+            let t0 = tile_query.get(e0).unwrap();
+            let t1 = tile_query.get(e1).unwrap();
+            
+            if t1.1.iter().flat_map(|a| *a).any(|a| piece_query.get(*a).is_ok()) {
+                // if other tile has any piece on it, we do not spawn
+                continue;
+            }
+            for child in t0.1.iter().flat_map(|a| *a) {
+                if let Ok((_piece, Some(spawner))) = piece_query.get(*child) {
+                    ev_action.send(ActionEvent(ActionKind::SpawnPiece(t1.0, spawner.piece.clone())))
+                }
+            }
+        }
     }
 }
 

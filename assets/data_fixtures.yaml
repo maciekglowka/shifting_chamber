@@ -1,6 +1,24 @@
 Stair:
-  sprite: ["tiles", 1]
+  sprite: ["fixtures", 0]
   components:
     Fixture:
     Interactive:
       kind: !Descend
+
+Fire:
+  sprite: ["fixtures", 1]
+  components:
+    Fixture:
+    Spawner:
+      piece: "SmallFire"
+    Damage:
+      value: 2
+      kind: !Fire
+
+SmallFire:
+  sprite: ["fixtures", 2]
+  components:
+    Fixture:
+    Damage:
+      value: 1
+      kind: !Fire

@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 
-use crate::actions::ActionEvent;
+use crate::actions::{ActionEvent, ActionKind};
 use crate::player::Player;
 use crate::tiles::Tile;
 
 use super::super::components::{
+    Damage,
     Interactive,
     Piece,
     Temporary
@@ -33,5 +34,21 @@ pub fn update_temporary(
         if temporary.value == 0 {
             commands.entity(entity).despawn_recursive();
         }
+    }
+}
+
+pub fn check_damage(
+    player_query: Query<(Entity, &Player)>,
+    piece_query: Query<(&Parent, &Damage), With<Piece>>,
+    tile_query: Query<&Tile>,
+    mut ev_action: EventWriter<ActionEvent>,
+) {
+    for (parent, damage) in piece_query.iter() {
+        let (player_entity, player) = player_query.get_single().unwrap();
+        let tile = tile_query.get(parent.get()).unwrap();
+        if tile.v != player.v { continue; }
+        ev_action.send(ActionEvent(
+            ActionKind::Damage(player_entity, damage.kind, damage.value)
+        ));
     }
 }

@@ -5,8 +5,9 @@ use std::collections::HashMap;
 
 use crate::globals::{PIECE_Z, TILE_SIZE};
 
-const SPRITE_FILES: [(&str, usize, usize); 3] = [
+const SPRITE_FILES: [(&str, usize, usize); 4] = [
     // atlas, columns, rows
+    ("fixtures", 1, 4),
     ("items", 1, 4),
     ("tiles", 1, 4),
     ("units", 1, 4)

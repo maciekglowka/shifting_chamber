@@ -47,8 +47,10 @@ pub struct Protect {
     pub kind: DamageKind
 }
 
-// #[derive(Component)]
-// pub struct Spreading;
+#[derive(Component, Debug, Deserialize)]
+pub struct Spawner {
+    pub piece: String
+}
 
 #[derive(Component, Deserialize)]
 pub struct Temporary {
@@ -63,26 +65,32 @@ pub struct Unit {
 
 pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {
     for (k, v) in component_list.iter() {
-        insert_single(
+        insert_by_name(
             ec, k.as_str().unwrap(), v.clone()
-        ).expect("Wrong component list!");
+        );
     }
 }
 
-fn insert_single(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) -> Result<(), serde_yaml::Error> {
+fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) {
     match name {
-        "Collectable" => ec.insert(serde_yaml::from_value::<Collectable>(data)?),
-        "Damage" => ec.insert(serde_yaml::from_value::<Damage>(data)?),
-        "Effect" => ec.insert(serde_yaml::from_value::<Effect>(data)?),
-        "Fixture" => ec.insert(serde_yaml::from_value::<Fixture>(data)?),
-        "Interactive" =>  ec.insert(serde_yaml::from_value::<Interactive>(data)?),
-        "Item" => ec.insert(serde_yaml::from_value::<Item>(data)?),
-        "Protect" => ec.insert(serde_yaml::from_value::<Protect>(data)?),
-        "Temporary" => ec.insert(serde_yaml::from_value::<Temporary>(data)?),
-        "Unit" => ec.insert(serde_yaml::from_value::<Unit>(data)?),
-        _ => ec
+        "Collectable" => insert::<Collectable>(ec, data),
+        "Damage" => insert::<Damage>(ec, data),
+        "Effect" => insert::<Effect>(ec, data),
+        "Fixture" => insert::<Fixture>(ec, data),
+        "Interactive" =>  insert::<Interactive>(ec, data),
+        "Item" => insert::<Item>(ec, data),
+        "Protect" => insert::<Protect>(ec, data),
+        "Spawner" => insert::<Spawner>(ec, data),
+        "Temporary" => insert::<Temporary>(ec, data),
+        "Unit" => insert::<Unit>(ec, data),
+        _ => ()
     };        
-    Ok(())
+}
+
+fn insert<T>(ec: &mut EntityCommands, data: serde_yaml::Value)
+where for<'de> T: Bundle + Deserialize<'de>
+{
+    ec.insert(serde_yaml::from_value::<T>(data).expect("Wrong component list!"));
 }
 
 pub fn get_piece_data<'a>(

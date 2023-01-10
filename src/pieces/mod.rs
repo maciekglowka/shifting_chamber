@@ -9,7 +9,7 @@ use crate::tiles::TileRes;
 use crate::vectors::Vector2Int;
 
 pub mod components;
-mod renderer;
+pub mod renderer;
 mod systems;
 
 
@@ -31,11 +31,12 @@ impl Plugin for PiecesPlugin {
                 SystemSet::on_enter(GameState::Action)
                     .with_system(systems::fights::check_fights)
                     .with_system(systems::interactions::check_interactions)
-                    .with_system(systems::interactions::update_temporary)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameState::Action)
+                    .with_system(systems::interactions::check_damage)
+                )
+                .add_system_set(
+                    SystemSet::on_exit(GameState::Action)
                     .with_system(systems::fights::kill_units)
+                    .with_system(systems::interactions::update_temporary)
                     .with_system(systems::items::remove_disposable_items)
             );
     }
@@ -65,6 +66,7 @@ pub fn furnish(
     ];
 
     spawn_piece_at_v(&mut commands, "Stair".into(), Vector2Int::new(0, 0), &tile_res, &assets, &data_assets);
+    spawn_piece_at_v(&mut commands, "Fire".into(), Vector2Int::new(MAP_SIZE/2 + 1, MAP_SIZE/2), &tile_res, &assets, &data_assets);
 
     let mut rng = rand::thread_rng();
 
@@ -106,17 +108,29 @@ pub fn furnish(
     }
 }
 
-fn spawn_piece_at_parent(
+pub fn spawn_piece_at_entity(
     commands: &mut Commands,
     name: String,
-    parent: &Parent,
+    parent_entity: Entity,
     assets: &renderer::PieceAssets,
     data_assets: &DataAssets
 ) {
     let entity = get_new_piece(commands, name, assets, data_assets);
-    commands.entity(parent.get())
+    commands.entity(parent_entity)
         .push_children(&[entity]);
 }
+
+// fn spawn_piece_at_parent(
+//     commands: &mut Commands,
+//     name: String,
+//     parent: &Parent,
+//     assets: &renderer::PieceAssets,
+//     data_assets: &DataAssets
+// ) {
+//     let entity = get_new_piece(commands, name, assets, data_assets);
+//     commands.entity(parent.get())
+//         .push_children(&[entity]);
+// }
 
 fn spawn_piece_at_v(
     commands: &mut Commands,
@@ -143,7 +157,7 @@ fn get_new_piece(
         components::Piece,
         renderer::get_piece_renderer(&data["sprite"], &assets)
     ));
-    info!("{:?}", component_list.keys().map(|k| k.as_str()).collect::<Vec<_>>());
+
     if component_list.contains_key("Effect") {
         // when spawning an effect, wrap it inside interactive item
         piece.insert((
