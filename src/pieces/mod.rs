@@ -28,15 +28,16 @@ impl Plugin for PiecesPlugin {
                     .label("action")
             )
             .add_system_set(
-                SystemSet::on_enter(GameState::Action)
+                SystemSet::on_enter(GameState::ShiftResult)
                     .with_system(systems::fights::check_fights)
+                    .with_system(systems::interactions::check_instant)
                     .with_system(systems::interactions::check_interactions)
                     .with_system(systems::interactions::check_damage)
                 )
                 .add_system_set(
-                    SystemSet::on_exit(GameState::Action)
+                    SystemSet::on_exit(GameState::ShiftResult)
                     .with_system(systems::fights::kill_units)
-                    .with_system(systems::interactions::update_temporary)
+                    .with_system(systems::items::update_temporary)
                     .with_system(systems::items::remove_disposable_items)
             );
     }
@@ -120,18 +121,6 @@ pub fn spawn_piece_at_entity(
         .push_children(&[entity]);
 }
 
-// fn spawn_piece_at_parent(
-//     commands: &mut Commands,
-//     name: String,
-//     parent: &Parent,
-//     assets: &renderer::PieceAssets,
-//     data_assets: &DataAssets
-// ) {
-//     let entity = get_new_piece(commands, name, assets, data_assets);
-//     commands.entity(parent.get())
-//         .push_children(&[entity]);
-// }
-
 fn spawn_piece_at_v(
     commands: &mut Commands,
     name: String,
@@ -159,10 +148,10 @@ fn get_new_piece(
     ));
 
     if component_list.contains_key("Effect") {
-        // when spawning an effect, wrap it inside interactive item
+        // when spawning an effect, wrap it inside an instant item
         piece.insert((
             components::Item,
-            components::Interactive {
+            components::Instant {
                 kind: ActionKind::ApplyEffect(name)
             }
         ));

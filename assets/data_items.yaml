@@ -1,13 +1,13 @@
 Heal:
   sprite: ["items", 0]
   components:
-    Interactive:
+    Instant:
       kind: !Heal 2
     Item:
 
 Coin:
   sprite: ["items", 1]
   components:
-    Interactive:
+    Instant:
       kind: !Score 1
     Item:

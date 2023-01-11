@@ -34,7 +34,14 @@ pub struct Effect;
 pub struct Fixture {}
 
 #[derive(Component, Deserialize)]
+pub struct Instant {
+    // triggered automatically
+    pub kind: ActionKind
+}
+
+#[derive(Component, Deserialize)]
 pub struct Interactive {
+    // triggered manually, through ui
     pub kind: ActionKind
 }
 
@@ -77,6 +84,7 @@ fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) 
         "Damage" => insert::<Damage>(ec, data),
         "Effect" => insert::<Effect>(ec, data),
         "Fixture" => insert::<Fixture>(ec, data),
+        "Instant" =>  insert::<Instant>(ec, data),
         "Interactive" =>  insert::<Interactive>(ec, data),
         "Item" => insert::<Item>(ec, data),
         "Protect" => insert::<Protect>(ec, data),

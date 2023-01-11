@@ -7,11 +7,11 @@ use crate::vectors::Vector2Int;
 
 mod player_input;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum CommandType {
-    PickItem(Entity),
     MapShift(Vector2Int, Vector2Int),
-    AnimationEnd
+    AnimationEnd,
+    NextLevel
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -34,11 +34,7 @@ impl Plugin for ManagerPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
                     .with_system(player_input::shift_tiles)
-                    .with_system(player_input::pick_item)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameState::PlayerInput)
-                    .with_system(player_input::clear_actions)
+                    .with_system(player_input::next_level)
             )
             .add_system(update_state.after("action"));
     }
@@ -70,21 +66,14 @@ pub fn update_state(
         if let CommandType::AnimationEnd = ev.0 {
             match game_state.current() {
                 GameState::TileShift => {
-                    game_state.set(GameState::Action);
+                    game_state.set(GameState::ShiftResult);
                 },
-                GameState::Action => {
+                GameState::ShiftResult => {
                     if let Ok((mut player, unit)) = player_query.get_single_mut() {
                         if unit.hp == 0 {
                             game_state.set(GameState::GameOver);
                             return;
-                        }
-
-                        if player.is_descending {
-                            player.is_descending = false;
-                            game_state.set(GameState::MapInit);
-                            return
-                        }
-                    
+                        }                    
                         game_state.set(GameState::PlayerInput);
                     }
                 },
@@ -97,6 +86,4 @@ pub fn update_state(
 #[derive(Default, Resource)]
 pub struct GameRes {
     pub level: u32,
-    pub score: u32,
-    pub input_actions: Vec<CommandType>
-}
+    pub score: u32}

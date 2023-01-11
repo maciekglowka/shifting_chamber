@@ -22,8 +22,7 @@ impl Plugin for PlayerPlugin {
 
 #[derive(Component)]
 pub struct Player {
-    pub v: Vector2Int,
-    pub is_descending: bool
+    pub v: Vector2Int
 }
 
 pub fn spawn_player(
@@ -32,11 +31,10 @@ pub fn spawn_player(
 ) {
     commands.spawn((
         Player { 
-            v: Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2),
-            is_descending: false
+            v: Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2)
         },
         Damage { value: 2, kind: DamageKind::Hit },
-        Unit { hp: 5, max_hp: 5 },
+        Unit { hp: 3, max_hp: 3 },
         renderer::get_renderer(assets.as_ref())
     ));
 }

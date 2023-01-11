@@ -16,7 +16,7 @@ impl Plugin for AnimationPlugin {
                     .with_system(update_tiles)
             )
             .add_system_set(
-                SystemSet::on_update(GameState::Action)
+                SystemSet::on_update(GameState::ShiftResult)
                     .with_system(update_actions)
             );
     }

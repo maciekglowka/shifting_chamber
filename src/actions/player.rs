@@ -2,9 +2,10 @@ use bevy::prelude::*;
 use std::cmp::min;
 
 use crate::data::DataAssets;
+use crate::manager::{CommandEvent, CommandType};
 use crate::pieces::{
     components,
-    components::Unit
+    components::{Piece, Unit}
 };
 use crate::player::Player;
 
@@ -24,14 +25,13 @@ pub fn heal(
 }
 
 pub fn descend(
-    mut player_query: Query<&mut Player>,
-    mut ev_action: EventReader<ActionEvent>
+    mut ev_action: EventReader<ActionEvent>,
+    mut ev_command: EventWriter<CommandEvent>
+
 ) {
     for ev in ev_action.iter() {
         if let ActionKind::Descend = ev.0 {
-            if let Ok(mut player) = player_query.get_single_mut() {
-                player.is_descending = true;
-            }
+            ev_command.send(CommandEvent(CommandType::NextLevel));
         }
     }
 }
@@ -64,6 +64,29 @@ pub fn apply_effect(
                         components::insert_from_list(&mut effect, component_list);
                     });
             }
+        }
+    }
+}
+
+pub fn pick_item(
+    mut commands: Commands,
+    mut ev_action: EventReader<ActionEvent>,
+    player_query: Query<Entity, With<Player>>,
+    item_query: Query<&Parent>,
+) {
+    for ev in ev_action.iter() {
+        if let ActionKind::PickItem(entity) = &ev.0 {
+            let player_entity = player_query.get_single().unwrap();
+            let parent = item_query.get(*entity).unwrap();
+
+            commands.entity(parent.get())
+                .remove_children(&[*entity]);
+            commands.entity(*entity)
+                .remove::<SpriteSheetBundle>()
+                .remove::<Piece>();
+            commands.entity(player_entity)
+                .push_children(&[*entity]);
+
         }
     }
 }

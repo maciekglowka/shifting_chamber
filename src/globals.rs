@@ -6,7 +6,8 @@ pub const TILE_SIZE: f32 = 64.;
 pub const MAP_SIZE: i32 = 5;
 
 pub const TILE_Z: f32 = 20.;
-pub const PIECE_Z: f32 = 25.;
+// relative to TILE_Z
+pub const PIECE_Z: f32 = 5.;
 pub const PLAYER_Z: f32 = 30.;
 pub const OVERLAY_Z: f32 = 50.;
 
