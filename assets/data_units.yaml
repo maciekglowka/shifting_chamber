@@ -6,4 +6,4 @@ Face:
       kind: !Hit
     Unit:
       hp: 2
-      max_hp: 2
+      stats: {HP: 2}

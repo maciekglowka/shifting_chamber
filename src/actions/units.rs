@@ -21,8 +21,8 @@ pub fn receive_damage(
                         }
                     }
                 }
-
-                unit.hp = unit.hp.saturating_sub(dmg);
+                let hp = unit.hp().saturating_sub(dmg);
+                unit.set_hp(hp);
             }
         }
     }

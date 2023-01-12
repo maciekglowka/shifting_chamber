@@ -53,7 +53,7 @@ fn start_game(
 ) {
     res.score = 0;
     res.level = 0;
-    res.next_upgrade = 1;
+    res.next_upgrade = 2;
     game_state.set(GameState::MapInit).expect("Switching states failed");
 }
 
@@ -79,11 +79,11 @@ pub fn update_state(
                 },
                 GameState::ShiftResult => {
                     if let Ok(unit) = player_query.get_single_mut() {
-                        if unit.hp == 0 {
+                        if unit.hp() == 0 {
                             game_state.set(GameState::GameOver);
                             return;
                         }  
-                        if res.score > res.next_upgrade {
+                        if res.score >= res.next_upgrade {
                             game_state.set(GameState::Upgrade);
                             return;
                         }            

@@ -39,7 +39,7 @@ fn spawn_unit_overlay(
 ) -> Entity {
     let symbols = vec!(
         (damage.value, 1),
-        (unit.hp, 0),
+        (unit.hp(), 0),
     );
     spawn_overlay(commands, symbols, assets)
 }

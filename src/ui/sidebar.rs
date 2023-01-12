@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::actions::StatKind;
 use crate::globals::{OVERLAY_FONT_SIZE, SIDEBAR_WIDTH};
 use crate::player::Player;
 use crate::pieces::components::{
@@ -39,7 +40,10 @@ pub fn update_sidebar(
             }  
             ))
             .with_children(|parent| {
-                spawn_text(parent, assets.as_ref(), format!("HP: {}/{}", unit.hp, unit.max_hp));
+                spawn_text(parent, assets.as_ref(), format!("HP: {}/{}", unit.hp(), unit.stats[&StatKind::HP]));
+                if unit.stats.contains_key(&StatKind::ST) {
+                    spawn_text(parent, assets.as_ref(), format!("ST: {}", unit.stats[&StatKind::ST]));
+                }
                 spawn_text(parent, assets.as_ref(), format!("Level: {}", game_res.level));
                 spawn_text(parent, assets.as_ref(), format!("Score: {}", game_res.score));
                 spawn_text(parent, assets.as_ref(), "-------".into());

@@ -17,7 +17,8 @@ pub enum ActionKind {
     Heal(u32),
     PickItem(Entity),
     Score(u32),
-    SpawnPiece(Entity, String)
+    SpawnPiece(Entity, String),
+    StatUpgrade(StatKind, u32)
 }
 
 pub struct ActionPlugin;
@@ -36,6 +37,7 @@ impl Plugin for ActionPlugin {
                     .with_system(player::heal)
                     .with_system(player::pick_item)
                     .with_system(player::score)
+                    .with_system(player::stat_upgrade)
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::PlayerInput)
@@ -48,6 +50,12 @@ pub fn clear_input_actions(
     mut res: ResMut<ActionRes>
 ) {
     res.input_actions.clear();
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq)]
+pub enum StatKind {
+    HP,
+    ST
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]

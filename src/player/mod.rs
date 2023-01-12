@@ -1,6 +1,7 @@
 use bevy::prelude::*;
+use std::collections::HashMap;
 
-use crate::actions::DamageKind;
+use crate::actions::{DamageKind, StatKind};
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
 use crate::pieces::components::{Damage, Unit};
@@ -33,8 +34,8 @@ pub fn spawn_player(
         Player { 
             v: Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2)
         },
-        Damage { value: 2, kind: DamageKind::Hit },
-        Unit { hp: 3, max_hp: 3 },
+        Damage { value: 1, kind: DamageKind::Hit },
+        Unit::new(HashMap::from([(StatKind::HP, 3)])),
         renderer::get_renderer(assets.as_ref())
     ));
 }

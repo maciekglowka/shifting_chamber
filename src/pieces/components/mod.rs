@@ -5,8 +5,12 @@ use bevy::{
 use serde::Deserialize;
 use serde_yaml;
 use serde_yaml::Mapping;
+use std::{
+    cmp::min,
+    collections::HashMap
+};
 
-use crate::actions::{ ActionKind, DamageKind};
+use crate::actions::{ ActionKind, DamageKind, StatKind};
 use crate::data::DataAssets;
 
 // dynamic components, added in runtime - context depending
@@ -66,8 +70,20 @@ pub struct Temporary {
 
 #[derive(Component, Deserialize)]
 pub struct Unit {
-    pub hp: u32,
-    pub max_hp: u32
+    hp: u32,
+    pub stats: HashMap<StatKind, u32>
+}
+
+impl Unit {
+    pub fn new(stats: HashMap<StatKind, u32>) -> Unit {
+        Unit { hp: stats[&StatKind::HP], stats}
+    }
+    pub fn hp(&self) -> u32 {
+        self.hp
+    }
+    pub fn set_hp(&mut self, val: u32) {
+        self.hp = min(val, self.stats[&StatKind::HP]);
+    }
 }
 
 pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {

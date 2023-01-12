@@ -18,7 +18,22 @@ pub fn heal(
     for ev in ev_action.iter() {
         if let ActionKind::Heal(val) = ev.0 {
             if let Ok(mut unit) = player_query.get_single_mut() {
-                unit.hp = min(unit.max_hp, unit.hp + val);
+                let hp = unit.hp() + val;
+                unit.set_hp(hp);
+            }
+        }
+    }
+}
+
+pub fn stat_upgrade(
+    mut player_query: Query<&mut Unit, With<Player>>,
+    mut ev_action: EventReader<ActionEvent>
+) {
+    for ev in ev_action.iter() {
+        if let ActionKind::StatUpgrade(kind, val) = ev.0 {
+            if let Ok(mut unit) = player_query.get_single_mut() {
+                let stat = val + unit.stats.get(&kind).unwrap_or(&0);
+                unit.stats.insert(kind, stat);
             }
         }
     }

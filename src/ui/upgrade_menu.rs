@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::actions::ActionKind;
+use crate::actions::{ActionKind, StatKind};
 use crate::globals::OVERLAY_FONT_SIZE;
 use crate::manager::{CommandEvent, CommandType};
 
@@ -52,6 +52,7 @@ pub fn show_menu(
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
                             padding: UiRect::all(Val::Px(20.)),
+                            flex_direction: FlexDirection::Column,
                             ..Default::default()
                         },
                         background_color: Color::DARK_GRAY.into(),
@@ -59,7 +60,21 @@ pub fn show_menu(
                     }
                 )
                 .with_children(|parent| {
+                    parent.spawn(TextBundle {
+                        text: Text::from_section(
+                            "Choose your upgrade:",
+                            TextStyle {
+                                color: Color::WHITE,
+                                font: assets.font.clone(),
+                                font_size: OVERLAY_FONT_SIZE,
+                                ..Default::default()
+                            }
+                        ),
+                        ..Default::default()
+                    });
                     add_button(parent, assets.as_ref(), "HP +3", ActionKind::Heal(3));
+                    add_button(parent, assets.as_ref(), "MAX HP + 1", ActionKind::StatUpgrade(StatKind::HP, 1));
+                    add_button(parent, assets.as_ref(), "ST + 1", ActionKind::StatUpgrade(StatKind::ST, 1));
                 });
         });
 }
@@ -87,7 +102,7 @@ fn add_button(
                 size: Size::new(Val::Px(200.), Val::Px(32.)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                margin: UiRect { bottom: Val::Px(10.), ..Default::default()},
+                margin: UiRect::all(Val::Px(10.)),
                 ..Default::default()
             },
             background_color: Color::BLACK.into(),
