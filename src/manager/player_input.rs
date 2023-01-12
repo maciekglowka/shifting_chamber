@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::actions::ActionEvent;
 use crate::player::Player;
 use crate::states::GameState;
 use crate::tiles;
@@ -41,6 +42,21 @@ pub fn next_level(
     for ev in ev_command.iter() {
         if let CommandType::NextLevel = ev.0 {
             game_state.set(GameState::MapInit).expect("Switching states failed");
+        }
+    }
+}
+
+pub fn upgrade(
+    mut ev_command: EventReader<CommandEvent>,
+    mut game_state: ResMut<State<GameState>>,
+    mut ev_action: EventWriter<ActionEvent>,
+    mut res: ResMut<GameRes>
+) {
+    for ev in ev_command.iter() {
+        if let CommandType::Upgrade(kind) = &ev.0 {
+            res.next_upgrade = res.next_upgrade * 2;
+            ev_action.send(ActionEvent(kind.clone()));
+            game_state.set(GameState::PlayerInput).expect("Switching states failed");
         }
     }
 }

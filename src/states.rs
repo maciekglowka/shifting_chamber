@@ -6,5 +6,6 @@ pub enum GameState {
     PlayerInput,
     TileShift,
     ShiftResult,
+    Upgrade,
     GameOver,
 }

@@ -7,6 +7,7 @@ mod game_over;
 mod cursor;
 mod overlays;
 mod sidebar;
+mod upgrade_menu;
 
 pub struct ReloadUIEvent;
 
@@ -28,6 +29,15 @@ impl Plugin for UIPlugin {
             )
             .add_system_set(SystemSet::on_exit(GameState::PlayerInput)
                 .with_system(cursor::clear_cursor)
+            )
+            .add_system_set(SystemSet::on_enter(GameState::Upgrade)
+                .with_system(upgrade_menu::show_menu)
+            )
+            .add_system_set(SystemSet::on_update(GameState::Upgrade)
+                .with_system(upgrade_menu::menu_click)
+            )
+            .add_system_set(SystemSet::on_exit(GameState::Upgrade)
+                .with_system(upgrade_menu::clear_menu)
             )
             .add_system_set(SystemSet::on_enter(GameState::GameOver)
                 .with_system(game_over::show_menu)

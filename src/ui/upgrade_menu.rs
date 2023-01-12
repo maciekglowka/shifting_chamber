@@ -1,23 +1,26 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionKind, ActionEvent, ActionRes};
+use crate::actions::ActionKind;
 use crate::globals::OVERLAY_FONT_SIZE;
+use crate::manager::{CommandEvent, CommandType};
 
 #[derive(Component)]
-pub struct ActionMenu;
+pub struct UpgradeMenu;
 
 #[derive(Component)]
-pub struct ActionButton(ActionKind);
+pub struct UpgradeButton(ActionKind);
 
 pub fn menu_click(
-    mut interactions: Query<(&Interaction, &mut BackgroundColor, &ActionButton), Changed<Interaction>>, 
-    mut ev_action: EventWriter<ActionEvent>
+    mut interactions: Query<(&Interaction, &mut BackgroundColor, &UpgradeButton), Changed<Interaction>>, 
+    mut ev_command: EventWriter<CommandEvent>
 ) {
     for (interaction, mut color, button) in interactions.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
                 *color = Color::DARK_GRAY.into();
-                ev_action.send(ActionEvent(button.0.clone()));
+                ev_command.send(
+                    CommandEvent(CommandType::Upgrade(button.0.clone()))
+                );
             },
             _ => {
                 *color = Color::BLACK.into()
@@ -26,41 +29,44 @@ pub fn menu_click(
     }
 }
 
-pub fn update_menu(
+pub fn show_menu(
     mut commands: Commands,
-    menu_query: Query<Entity, With<ActionMenu>>,
     assets: Res<super::UiAssets>,
-    action_res: Res<ActionRes>
 ) {
-    clear_menu(&mut commands, &menu_query);
-
     commands.spawn((
-            ActionMenu,
+            UpgradeMenu,
             NodeBundle {
                 style: Style {
-                    position_type: PositionType::Absolute,
-                    padding: UiRect { left: Val::Px(20.), top: Val::Px(20.), ..Default::default()},
-                    // size: Size::new(Val::Px(SIDEBAR_WIDTH), Val::Percent(100.)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
                     ..Default::default()
                 },
                 ..Default::default()
             }
         ))
-        .with_children(|mut parent| {
-            for action in action_res.input_actions.iter() {
-                add_button(
-                    &mut parent,
-                    &assets,
-                    &format!("{:?}", action),
-                    action.clone()
-                );
-            }
+        .with_children(|parent| {
+            parent.spawn(
+                    NodeBundle {
+                        style: Style {
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            padding: UiRect::all(Val::Px(20.)),
+                            ..Default::default()
+                        },
+                        background_color: Color::DARK_GRAY.into(),
+                        ..Default::default()
+                    }
+                )
+                .with_children(|parent| {
+                    add_button(parent, assets.as_ref(), "HP +3", ActionKind::Heal(3));
+                });
         });
 }
 
-fn clear_menu(
-    commands: &mut Commands,
-    query: &Query<Entity, With<ActionMenu>>
+pub fn clear_menu(
+    mut commands: Commands,
+    query: Query<Entity, With<UpgradeMenu>>
 ) {
     for entity in query.iter() {
         commands.entity(entity)
@@ -75,12 +81,13 @@ fn add_button(
     action: ActionKind
 ) {
     parent.spawn((
-        ActionButton(action),
+        UpgradeButton(action),
         ButtonBundle {
             style: Style {
                 size: Size::new(Val::Px(200.), Val::Px(32.)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                margin: UiRect { bottom: Val::Px(10.), ..Default::default()},
                 ..Default::default()
             },
             background_color: Color::BLACK.into(),
