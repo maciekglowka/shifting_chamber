@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use rand::Rng;
+use rand::prelude::*;
 
 use crate::actions::ActionKind;
 use crate::data::DataAssets;
@@ -9,9 +9,9 @@ use crate::tiles::TileRes;
 use crate::vectors::Vector2Int;
 
 pub mod components;
+mod placement;
 pub mod renderer;
 mod systems;
-
 
 pub struct PiecesPlugin;
 
@@ -20,7 +20,7 @@ impl Plugin for PiecesPlugin {
         app.add_startup_system(renderer::load_assets)
             .add_system_set(
                 SystemSet::on_exit(GameState::MapInit)
-                    .with_system(furnish)
+                    .with_system(placement::generate_pieces)
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::PlayerInput)
@@ -42,72 +42,71 @@ impl Plugin for PiecesPlugin {
             );
     }
 }
- 
 
 // TO redo and move to systems
-pub fn furnish(
-    mut commands: Commands,
-    tile_res: Res<TileRes>,
-    assets: Res<renderer::PieceAssets>,
-    data_assets: Res<DataAssets>
-) {
-    let RESTRICTED: [Vector2Int; 6] = [
-        Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2),
-        Vector2Int::new(MAP_SIZE/2 - 1, MAP_SIZE/2),
-        Vector2Int::new(MAP_SIZE/2 + 1, MAP_SIZE/2),
-        Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2 - 1),
-        Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2 + 1),
-        Vector2Int::new(0, 0),
-    ];
+// pub fn furnish(
+//     mut commands: Commands,
+//     tile_res: Res<TileRes>,
+//     assets: Res<renderer::PieceAssets>,
+//     data_assets: Res<DataAssets>
+// ) {
+//     let RESTRICTED: [Vector2Int; 6] = [
+//         Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2),
+//         Vector2Int::new(MAP_SIZE/2 - 1, MAP_SIZE/2),
+//         Vector2Int::new(MAP_SIZE/2 + 1, MAP_SIZE/2),
+//         Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2 - 1),
+//         Vector2Int::new(MAP_SIZE/2, MAP_SIZE/2 + 1),
+//         Vector2Int::new(0, 0),
+//     ];
 
-    let ITEM: [Vector2Int; 3] = [
-        Vector2Int::new(MAP_SIZE-1, 0),
-        Vector2Int::new(0, MAP_SIZE-1),
-        Vector2Int::new(MAP_SIZE-1, MAP_SIZE-1),
-    ];
+//     let ITEM: [Vector2Int; 3] = [
+//         Vector2Int::new(MAP_SIZE-1, 0),
+//         Vector2Int::new(0, MAP_SIZE-1),
+//         Vector2Int::new(MAP_SIZE-1, MAP_SIZE-1),
+//     ];
 
-    spawn_piece_at_v(&mut commands, "Stair".into(), Vector2Int::new(0, 0), &tile_res, &assets, &data_assets);
-    spawn_piece_at_v(&mut commands, "Fire".into(), Vector2Int::new(MAP_SIZE/2 + 1, MAP_SIZE/2), &tile_res, &assets, &data_assets);
+//     spawn_piece_at_v(&mut commands, "Stair".into(), Vector2Int::new(0, 0), &tile_res, &assets, &data_assets);
+//     spawn_piece_at_v(&mut commands, "Fire".into(), Vector2Int::new(MAP_SIZE/2 + 1, MAP_SIZE/2), &tile_res, &assets, &data_assets);
 
-    let mut rng = rand::thread_rng();
+//     let mut rng = rand::thread_rng();
 
-    for v in ITEM {
-        if rng.gen_bool(0.5) { continue; }
+//     for v in ITEM {
+//         if rng.gen_bool(0.5) { continue; }
 
-        let name = match rng.gen_bool(0.5) {
-            true => "Shield",
-            false => "Heal"
-        };
+//         let name = match rng.gen_bool(0.5) {
+//             true => "Shield",
+//             false => "Heal"
+//         };
 
-        spawn_piece_at_v(
-            &mut commands, 
-            name.into(),
-            v,
-            &tile_res,
-            &assets,
-            &data_assets
-        );
-    }
+//         spawn_piece_at_v(
+//             &mut commands, 
+//             name.into(),
+//             v,
+//             &tile_res,
+//             &assets,
+//             &data_assets
+//         );
+//     }
 
-    for x in 0..MAP_SIZE {
-        for y in 0..MAP_SIZE {
-            let v = Vector2Int::new(x, y);
-            if RESTRICTED.contains(&v) { continue; }
-            if ITEM.contains(&v) { continue; }
+//     for x in 0..MAP_SIZE {
+//         for y in 0..MAP_SIZE {
+//             let v = Vector2Int::new(x, y);
+//             if RESTRICTED.contains(&v) { continue; }
+//             if ITEM.contains(&v) { continue; }
             
-            if rng.gen_bool(0.75) { continue; }
+//             if rng.gen_bool(0.75) { continue; }
 
-            spawn_piece_at_v(
-                &mut commands, 
-                "Face".into(),
-                v,
-                &tile_res,
-                &assets,
-                &data_assets
-            );
-        }
-    }
-}
+//             spawn_piece_at_v(
+//                 &mut commands, 
+//                 "Face".into(),
+//                 v,
+//                 &tile_res,
+//                 &assets,
+//                 &data_assets
+//             );
+//         }
+//     }
+// }
 
 pub fn spawn_piece_at_entity(
     commands: &mut Commands,
