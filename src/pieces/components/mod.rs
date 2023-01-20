@@ -126,3 +126,11 @@ pub fn get_piece_data<'a>(
     let components = data["components"].as_mapping().expect(err);
     return (data, components)
 }
+
+pub fn get_effective_dmg(
+    unit: &Unit,
+    damage: &Damage
+ ) -> (DamageKind, u32) {
+    let val = damage.value + unit.stats.get(&StatKind::ST).unwrap_or(&0);
+    (damage.kind, val)
+}

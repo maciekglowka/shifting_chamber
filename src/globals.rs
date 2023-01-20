@@ -10,7 +10,10 @@ pub const TILE_Z: f32 = 20.;
 pub const PIECE_Z: f32 = 5.;
 pub const PLAYER_Z: f32 = 30.;
 pub const OVERLAY_Z: f32 = 50.;
+pub const  BUBBLE_Z: f32 = 55.;
 
 pub const OVERLAY_FONT_SIZE: f32 = 24.;
 
 pub const MAX_ANIMATION_DIST: f32 = 0.1;
+
+pub const BUBBLE_LIFE: f32 = 2.;

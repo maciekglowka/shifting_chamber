@@ -6,7 +6,6 @@ use crate::pieces::components::{Damage, Piece, Unit};
 #[derive(Component)]
 pub struct Overlay;
 
-
 pub fn update_overlays(
     mut commands: Commands,
     overlay_query: Query<Entity, With<Overlay>>,

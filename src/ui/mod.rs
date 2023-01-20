@@ -3,20 +3,26 @@ use bevy::prelude::*;
 use crate::states::GameState;
 
 mod action_menu;
+mod bubble;
 mod game_over;
 mod cursor;
 mod overlays;
 mod sidebar;
 mod upgrade_menu;
 
-pub struct ReloadUIEvent;
+pub use bubble::BubbleEvent;
+
+// pub struct ReloadUIEvent;
 
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(load_assets)
-            .add_event::<ReloadUIEvent>()
+            // .add_event::<ReloadUIEvent>()
+            .add_event::<bubble::BubbleEvent>()
+            .add_system(bubble::spawn_bubbles)
+            .add_system(bubble::update_bubbles)
             .add_system_set(SystemSet::on_enter(GameState::PlayerInput)
                 .with_system(overlays::update_overlays)
                 .with_system(sidebar::update_sidebar)

@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionEvent, ActionKind, StatKind};
+use crate::actions::{ActionEvent, ActionKind};
 use crate::data::DataAssets;
 use crate::player::Player;
 use crate::tiles::Tile;
 
 use super::super::{
     components::{
+        get_effective_dmg,
         Damage,
         Unit
     },
@@ -26,11 +27,11 @@ pub fn check_fights(
         let tile = tile_query.get(parent.get()).unwrap();
         if tile.v.manhattan(player.v) > 1 { continue; }
 
-        let npc_dmg = npc_damage.value + npc_unit.stats.get(&StatKind::ST).unwrap_or(&0);
-        let player_dmg = player_damage.value + player_unit.stats.get(&StatKind::ST).unwrap_or(&0);
+        let npc_dmg = get_effective_dmg(npc_unit, npc_damage);
+        let player_dmg = get_effective_dmg(player_unit, player_damage);
 
-        ev_action.send(ActionEvent(ActionKind::Damage(player_entity, npc_damage.kind, npc_dmg)));
-        ev_action.send(ActionEvent(ActionKind::Damage(npc_entity, player_damage.kind, player_dmg)));
+        ev_action.send(ActionEvent(ActionKind::Damage(player_entity, npc_dmg.0, npc_dmg.1)));
+        ev_action.send(ActionEvent(ActionKind::Damage(npc_entity, player_dmg.0, player_dmg.1)));
     }
 }
 
