@@ -14,12 +14,9 @@ const SPRITE_FILES: [(&str, usize, usize); 4] = [
 ];
 
 pub fn get_piece_renderer(
-    data: &serde_yaml::Value,
+    sprite_data: &(String, usize),
     assets: &PieceAssets,
 ) -> SpriteSheetBundle {
-    let sprite_data: SpriteData = serde_yaml::from_value(data.clone())
-        .expect(&format!("Wrong sprite data: {:?}", data));
-
     let texture = &assets.textures[&sprite_data.0];
     let mut sprite = TextureAtlasSprite::new(sprite_data.1);
     sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
@@ -63,6 +60,3 @@ pub fn load_assets(
 pub struct PieceAssets {
     pub textures: HashMap<String, Handle<TextureAtlas>>
 }
-
-#[derive(Deserialize)]
-struct SpriteData(String, usize);

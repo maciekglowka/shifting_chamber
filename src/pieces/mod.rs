@@ -74,14 +74,14 @@ fn get_new_piece(
     assets: &renderer::PieceAssets,
     data_assets: &DataAssets
 ) -> Entity {
-    let (data, component_list) = components::get_piece_data(&name, data_assets);
+    let data_item = &data_assets.entities[&name];
     
     let mut piece = commands.spawn((
         components::Piece,
-        renderer::get_piece_renderer(&data["sprite"], &assets)
+        renderer::get_piece_renderer(&data_item.sprite, &assets)
     ));
 
-    if component_list.contains_key("Effect") {
+    if data_item.components.contains_key("Effect") {
         // when spawning an effect, wrap it inside an instant item
         piece.insert((
             components::Item,
@@ -91,7 +91,7 @@ fn get_new_piece(
         ));
     } else {
         // otherwise just build component list normally
-        components::insert_from_list(&mut piece, component_list);
+        components::insert_from_list(&mut piece, &data_item.components);
     }   
     piece.id()
 }

@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use std::cmp::min;
 
 use crate::data::DataAssets;
 use crate::manager::{CommandEvent, CommandType};
@@ -71,12 +70,12 @@ pub fn apply_effect(
     for ev in ev_action.iter() {
         if let ActionKind::ApplyEffect(name) = &ev.0 {
             if let Ok(player_entity) = player_query.get_single() {
-                let (_data, component_list) = components::get_piece_data(&name, data_assets.as_ref());
+                let data_item = &data_assets.entities[name];
     
                 commands.entity(player_entity)
                     .with_children(|parent| {
                         let mut effect = parent.spawn_empty();
-                        components::insert_from_list(&mut effect, component_list);
+                        components::insert_from_list(&mut effect, &data_item.components);
                     });
             }
         }

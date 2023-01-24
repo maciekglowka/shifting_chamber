@@ -6,6 +6,7 @@ Stair:
       kind: !Descend
 
 Fire:
+  points: 2
   sprite: ["fixtures", 1]
   components:
     Fixture:

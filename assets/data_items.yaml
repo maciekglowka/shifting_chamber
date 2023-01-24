@@ -1,4 +1,5 @@
 Heal:
+  points: -1
   sprite: ["items", 0]
   components:
     Instant:

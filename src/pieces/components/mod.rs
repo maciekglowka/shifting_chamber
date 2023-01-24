@@ -11,7 +11,7 @@ use std::{
 };
 
 use crate::actions::{ ActionKind, DamageKind, StatKind};
-use crate::data::DataAssets;
+use crate::data::{DataAssets, DataItem};
 
 // dynamic components, added in runtime - context depending
 #[derive(Component)]
@@ -115,16 +115,6 @@ fn insert<T>(ec: &mut EntityCommands, data: serde_yaml::Value)
 where for<'de> T: Bundle + Deserialize<'de>
 {
     ec.insert(serde_yaml::from_value::<T>(data).expect("Wrong component list!"));
-}
-
-pub fn get_piece_data<'a>(
-    name: &'a str,
-    data_assets: &'a DataAssets
-) -> (&'a Mapping, &'a Mapping) {
-    let err = &format!("Wrong data structure for {}", name);
-    let data = data_assets.entities[name].as_mapping().expect(err);
-    let components = data["components"].as_mapping().expect(err);
-    return (data, components)
 }
 
 pub fn get_effective_dmg(

@@ -40,7 +40,10 @@ fn parse_data(
             .expect("Incorrect yaml!");
         for (k, v) in data.as_mapping().expect("Incorrect data format!") {
             let key = k.as_str().expect("Keys must be strings!").into();
-            assets.entities.insert(key, v.to_owned());
+            assets.entities.insert(
+                key,
+                serde_yaml::from_value(v.clone()).expect("Wrong data item!")
+            );
         }
     }
 }
@@ -59,8 +62,16 @@ fn load_assets(
 
 #[derive(Default, Resource)]
 pub struct DataAssets {
-    pub entities: HashMap<String, serde_yaml::Value>,
-    pub raw_entities: Vec<Handle<YamlAsset>>
+    pub entities: HashMap<String, DataItem>,
+    pub raw_entities: Vec<Handle<YamlAsset>>,
+}
+
+#[derive(Deserialize)]
+pub struct DataItem {
+    pub min_level: Option<u32>,
+    pub points: Option<i32>,
+    pub sprite: (String, usize),
+    pub components: serde_yaml::Mapping
 }
 
 #[derive(Debug, Deserialize, TypeUuid)]

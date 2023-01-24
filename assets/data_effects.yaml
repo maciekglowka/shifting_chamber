@@ -1,4 +1,5 @@
 Shield:
+  points: -1
   sprite: ["items", 3]
   components:
     Effect:
@@ -6,4 +7,4 @@ Shield:
       value: 2
       kind: !Hit
     Temporary:
-      value: 3
+      value: 4
