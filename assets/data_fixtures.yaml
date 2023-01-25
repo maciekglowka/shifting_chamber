@@ -23,3 +23,15 @@ SmallFire:
     Damage:
       value: 1
       kind: !Fire
+
+GreatFire:
+  points: 4
+  min_level: 6
+  sprite: ["fixtures", 3]
+  components:
+    Fixture:
+    Spawner:
+      piece: "Fire"
+    Damage:
+      value: 3
+      kind: !Fire

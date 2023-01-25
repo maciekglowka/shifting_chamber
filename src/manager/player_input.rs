@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::cmp;
 
 use crate::actions::ActionEvent;
 use crate::player::Player;
@@ -54,7 +55,7 @@ pub fn upgrade(
 ) {
     for ev in ev_command.iter() {
         if let CommandType::Upgrade(kind) = &ev.0 {
-            res.next_upgrade = res.next_upgrade * 3 / 2;
+            res.next_upgrade += cmp::max(2, res.next_upgrade / 2);
             ev_action.send(ActionEvent(kind.clone()));
             game_state.set(GameState::PlayerInput).expect("Switching states failed");
         }

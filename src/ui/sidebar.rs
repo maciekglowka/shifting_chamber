@@ -47,7 +47,7 @@ pub fn update_sidebar(
                     spawn_text(parent, assets.as_ref(), format!("ST: {}", unit.stats[&StatKind::ST]));
                 }
                 spawn_text(parent, assets.as_ref(), format!("Level: {}", game_res.level));
-                spawn_text(parent, assets.as_ref(), format!("Score: {}", game_res.score));
+                spawn_text(parent, assets.as_ref(), format!("Score: {} ({})", game_res.score, game_res.next_upgrade));
                 spawn_text(parent, assets.as_ref(), "-------".into());
                 spawn_text(parent, assets.as_ref(), format!("Eff. dmg: {}", get_effective_dmg(unit, damage).1));
 

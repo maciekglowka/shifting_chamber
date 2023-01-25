@@ -37,15 +37,15 @@ fn spawn_unit_overlay(
     assets: &super::UiAssets
 ) -> Entity {
     let symbols = vec!(
-        (damage.value, 1),
-        (unit.hp(), 0),
+        (damage.value, Color::WHITE),
+        (unit.hp(), Color::GOLD),
     );
     spawn_overlay(commands, symbols, assets)
 }
 
 fn spawn_overlay(
     commands: &mut Commands,
-    symbols: Vec<(u32, usize)>,
+    symbols: Vec<(u32, Color)>,
     assets: &super::UiAssets
 ) -> Entity {
     commands.spawn((
@@ -63,20 +63,20 @@ fn spawn_overlay(
         Overlay
     ))
     .with_children(|parent| {
-        let size = TILE_SIZE / 8.;
-        for (x, (count, sprite)) in symbols.iter().enumerate() {
-            for y in 0..*count {
-                let offset = Vec2::new(
-                    x as f32 * size - size / 2.,
-                    -(TILE_SIZE - size)/2. + y as f32 * size
-                );
-                parent.spawn(get_icon_bundle(
-                    *sprite,
-                    &assets.overlay_texture,
-                    Vec2::splat(size),
-                    offset
-                ));
-            }
+        let size = TILE_SIZE / 3.;
+        for (y, (count, color)) in symbols.iter().enumerate() {
+            let offset = Vec2::new(
+                size * 0.4,
+                - TILE_SIZE * 0.4 + y as f32 * 0.75 * size
+            );
+            let sprite_idx = 48 + count;
+            parent.spawn(get_icon_bundle(
+                sprite_idx as usize,
+                *color,
+                &assets.pico_font,
+                Vec2::splat(size),
+                offset
+            ));
         }
     })
     .id()
@@ -84,12 +84,14 @@ fn spawn_overlay(
 
 fn get_icon_bundle(
     sprite_idx: usize,
+    color: Color,
     atlas: &Handle<TextureAtlas>,
     size: Vec2,
     offset: Vec2,
 ) -> SpriteSheetBundle {
     let mut sprite = TextureAtlasSprite::new(sprite_idx);
     sprite.custom_size = Some(size);
+    sprite.color = color;
 
     SpriteSheetBundle {
         sprite: sprite,
@@ -100,26 +102,3 @@ fn get_icon_bundle(
         ..Default::default()
     }
 }
-
-// fn get_text_bundle(
-//     text: impl Into<String>,
-//     color: Color,
-//     offset: Vec2,
-//     font: &Handle<Font>
-// ) -> Text2dBundle {
-//     Text2dBundle {
-//         text: Text::from_section(
-//             text,
-//             TextStyle {
-//                 color,
-//                 font: font.clone(),
-//                 font_size: OVERLAY_FONT_SIZE,
-//                 ..Default::default()
-//             }
-//         ).with_alignment(TextAlignment::CENTER_LEFT),
-//         transform: Transform::from_translation(
-//             Vec3::new(offset.x - TILE_SIZE / 2. + 1., offset.y, OVERLAY_Z + 1.)
-//         ),
-//         ..Default::default()
-//     }
-// }

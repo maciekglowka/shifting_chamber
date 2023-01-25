@@ -89,9 +89,22 @@ pub fn load_assets(
 
     let cursor_handle = texture_atlasses.add(cursor_atlas);
 
+    let pico_img = asset_server.load("pico.png");
+    asset_list.0.push(pico_img.clone_untyped());
+    let pico_atlas = TextureAtlas::from_grid(
+        pico_img,
+        Vec2::splat(32.),
+        16,
+        16,
+        None,
+        None
+    );
+    let pico_handle = texture_atlasses.add(pico_atlas);
+
     commands.insert_resource(
         UiAssets { 
             font: font_handle,
+            pico_font: pico_handle,
             overlay_texture: overlay_handle,
             cursor_texture: cursor_handle
         }
@@ -101,6 +114,7 @@ pub fn load_assets(
 #[derive(Default, Resource)]
 pub struct UiAssets {
     font: Handle<Font>,
+    pico_font: Handle<TextureAtlas>,
     overlay_texture: Handle<TextureAtlas>,
     cursor_texture: Handle<TextureAtlas>,
 }

@@ -33,6 +33,8 @@ pub fn stat_upgrade(
             if let Ok(mut unit) = player_query.get_single_mut() {
                 let stat = val + unit.stats.get(&kind).unwrap_or(&0);
                 unit.stats.insert(kind, stat);
+
+                if kind == super::StatKind::HP { let hp = unit.hp() + val; unit.set_hp(hp); }
             }
         }
     }
