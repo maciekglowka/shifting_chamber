@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use rand::prelude::*;
 use std::collections::HashMap;
 
-use crate::data::{DataAssets, DataItem};
+use crate::data::{DataAssets, PieceData};
 use crate::globals::MAP_SIZE;
 use crate::manager::GameRes;
 use crate::tiles::TileRes;
@@ -25,48 +25,50 @@ pub fn generate_pieces(
         .collect();
 
     let item_pool = get_name_pool(
-        &data_assets.entities,
+        &data_assets.pieces,
         &data_assets.item_names,
         game_res.level,
         false
     );
     let fixture_pool = get_name_pool(
-        &data_assets.entities,
+        &data_assets.pieces,
         &data_assets.fixture_names,
         game_res.level,
         false
     );
     let unit_pool = get_name_pool(
-        &data_assets.entities,
+        &data_assets.pieces,
         &data_assets.unit_names,
         game_res.level,
         true
     );
 
-    let mut points = 0;
+    let level_data = &data_assets.levels["Basic"];
+
+    let mut points = level_data.initial_points;
     let mut pieces = vec!("Stair".to_string());
     let mut rng = thread_rng();
 
-    for _ in 0..rng.gen_range(1..3) {
+    for _ in 0..rng.gen_range(level_data.extra_items.0..=level_data.extra_items.1) {
         let name = &item_pool.choose_weighted(&mut rng, |v| v.1).unwrap().0;
-        points += data_assets.entities[name].points.unwrap_or(0);
+        points += data_assets.pieces[name].points.unwrap_or(0);
         pieces.push(name.to_string());
     }
 
-    for _ in 0..rng.gen_range(0..2) {
+    for _ in 0..rng.gen_range(level_data.extra_features.0..=level_data.extra_features.1) {
         let name = &fixture_pool.choose_weighted(&mut rng, |v| v.1).unwrap().0;
-        points += data_assets.entities[name].points.unwrap_or(0);
+        points += data_assets.pieces[name].points.unwrap_or(0);
         pieces.push(name.to_string());
     }
 
     while points < target_points {
         let name = &unit_pool.choose_weighted(&mut rng, |v| v.1).unwrap().0;
-        points += data_assets.entities[name].points.unwrap_or(0);
+        points += data_assets.pieces[name].points.unwrap_or(0);
         pieces.push(name.to_string());
     }
     
     for name in pieces {
-        let v = match data_assets.entities[&name].points {
+        let v = match data_assets.pieces[&name].points {
             Some(a) if a > 0 => get_near_tile(&mut tile_pool, player_v),
             _ => get_far_tile(&mut tile_pool, player_v)
         };
@@ -83,7 +85,7 @@ pub fn generate_pieces(
     }
 }
 
-fn get_name_pool(data: &HashMap<String, DataItem>, names: &Vec<String>, level: u32, weighted: bool) -> Vec<(String, i32)> {
+fn get_name_pool(data: &HashMap<String, PieceData>, names: &Vec<String>, level: u32, weighted: bool) -> Vec<(String, i32)> {
     names.iter()
         .filter(|n| data[*n].points.is_some() && data[*n].min_level.unwrap_or(0) <= level)
         .map(|n| {

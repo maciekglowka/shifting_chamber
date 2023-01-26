@@ -72,7 +72,7 @@ pub fn apply_effect(
     for ev in ev_action.iter() {
         if let ActionKind::ApplyEffect(name) = &ev.0 {
             if let Ok(player_entity) = player_query.get_single() {
-                let data_item = &data_assets.entities[name];
+                let data_item = &data_assets.pieces[name];
     
                 commands.entity(player_entity)
                     .with_children(|parent| {

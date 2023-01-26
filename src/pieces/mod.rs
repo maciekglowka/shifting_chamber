@@ -72,7 +72,7 @@ fn get_new_piece(
     assets: &renderer::PieceAssets,
     data_assets: &DataAssets
 ) -> Entity {
-    let data_item = &data_assets.entities[&name];
+    let data_item = &data_assets.pieces[&name];
     
     let mut piece = commands.spawn((
         components::Piece,
