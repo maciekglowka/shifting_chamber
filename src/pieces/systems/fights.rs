@@ -4,6 +4,7 @@ use crate::actions::{ActionEvent, ActionKind};
 use crate::data::DataAssets;
 use crate::player::Player;
 use crate::tiles::Tile;
+use crate::vectors::Vector2Int;
 
 use super::super::{
     components::{
@@ -14,26 +15,6 @@ use super::super::{
     renderer,
     spawn_piece_at_entity
 };
-
-pub fn check_fights(
-    player_query: Query<(Entity, &Damage, &Player, &Unit)>,
-    npc_query: Query<(Entity, &Damage, &Parent, &Unit), Without<Player>>,
-    tile_query: Query<&Tile>,
-    mut ev_action: EventWriter<ActionEvent>,
-) {
-    for (npc_entity, npc_damage, parent, npc_unit) in npc_query.iter() {
-        let (player_entity, player_damage, player, player_unit) = player_query.get_single().unwrap();
-
-        let tile = tile_query.get(parent.get()).unwrap();
-        if tile.v.manhattan(player.v) > 1 { continue; }
-
-        let npc_dmg = get_effective_dmg(npc_unit, npc_damage);
-        let player_dmg = get_effective_dmg(player_unit, player_damage);
-
-        ev_action.send(ActionEvent(ActionKind::Damage(player_entity, npc_dmg.0, npc_dmg.1)));
-        ev_action.send(ActionEvent(ActionKind::Damage(npc_entity, player_dmg.0, player_dmg.1)));
-    }
-}
 
 pub fn kill_units(
     mut commands: Commands,
@@ -54,4 +35,33 @@ pub fn kill_units(
             )
         }
     }
+}
+
+pub fn check_unit_damage(
+    damage_query: Query<&Damage>,
+    player_query: Query<(Entity, &Player, &Unit, Option<&Children>)>,
+    unit_query: Query<(Entity, &Unit, &Parent, Option<&Children>), Without<Player>>,
+    tile_query: Query<&Tile>,
+    mut ev_action: EventWriter<ActionEvent>,
+) {
+    let (player_entity, player, player_unit, player_children) = player_query.get_single().unwrap();
+    for (npc_entity, npc_unit, _, npc_children) in get_close_units(player.v, &unit_query, &tile_query) {
+        let npc_dmg = get_effective_dmg(npc_entity, npc_unit, &damage_query, npc_children);
+        let player_dmg = get_effective_dmg(player_entity, player_unit, &damage_query, player_children);
+
+        ev_action.send(ActionEvent(ActionKind::Damage(player_entity, npc_dmg.0, npc_dmg.1)));
+        ev_action.send(ActionEvent(ActionKind::Damage(npc_entity, player_dmg.0, player_dmg.1)));
+    }
+}
+
+fn get_close_units<'a>(
+    player_v: Vector2Int,
+    unit_query: &'a Query<(Entity, &Unit, &Parent, Option<&Children>), Without<Player>>,
+    tile_query: &'a Query<&Tile>
+) -> Vec<(Entity, &'a Unit, &'a Parent, Option<&'a Children>)> {
+    unit_query.iter()
+        .filter(|(_, _, parent, _)| {
+            tile_query.get(parent.get()).unwrap().v.manhattan(player_v) <= 1
+        })
+        .collect()
 }

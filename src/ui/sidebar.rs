@@ -16,7 +16,8 @@ pub struct Sidebar;
 
 pub fn update_sidebar(
     mut commands: Commands,
-    player_query: Query<(&Player, &Unit, &Damage, Option<&Children>)>,
+    player_query: Query<(Entity, &Unit, Option<&Children>), With<Player>>,
+    damage_query: Query<&Damage>,
     inventory_query: Query<(&Protect, Option<&Temporary>)>,
     sidebar_query: Query<Entity, With<Sidebar>>,
     assets: Res<super::UiAssets>,
@@ -24,7 +25,7 @@ pub fn update_sidebar(
 ) {
     clear_sidebar(&mut commands, &sidebar_query);
 
-    if let Ok((_player, unit, damage, children)) = player_query.get_single() {
+    if let Ok((entity, unit, children)) = player_query.get_single() {
         commands.spawn((
             Sidebar,
             NodeBundle {
@@ -49,7 +50,11 @@ pub fn update_sidebar(
                 spawn_text(parent, assets.as_ref(), format!("Level: {}", game_res.level));
                 spawn_text(parent, assets.as_ref(), format!("Score: {} ({})", game_res.score, game_res.next_upgrade));
                 spawn_text(parent, assets.as_ref(), "-------".into());
-                spawn_text(parent, assets.as_ref(), format!("Eff. dmg: {}", get_effective_dmg(unit, damage).1));
+                spawn_text(
+                    parent,
+                    assets.as_ref(),
+                    format!("Eff. dmg: {}", get_effective_dmg(entity, unit, &damage_query, children).1)
+                );
 
                 for child in children.iter().flat_map(|v| *v) {
                     if let Ok((protect, temp)) = inventory_query.get(*child) {

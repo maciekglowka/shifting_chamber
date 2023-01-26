@@ -60,6 +60,7 @@ pub enum StatKind {
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
 pub enum DamageKind {
+    None,
     Hit,
     Fire
 }

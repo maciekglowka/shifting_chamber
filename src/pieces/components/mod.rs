@@ -118,9 +118,15 @@ where for<'de> T: Bundle + Deserialize<'de>
 }
 
 pub fn get_effective_dmg(
+    entity: Entity,
     unit: &Unit,
-    damage: &Damage
+    damage_query: &Query<&Damage>,
+    children: Option<&Children>
  ) -> (DamageKind, u32) {
-    let val = damage.value + unit.stats.get(&StatKind::ST).unwrap_or(&0);
-    (damage.kind, val)
+    let dmg = match damage_query.get(entity) {
+        Ok(d) => d,
+        _ => return (DamageKind::None, 0)
+    };
+    let val = dmg.value + unit.stats.get(&StatKind::ST).unwrap_or(&0);
+    (dmg.kind, val)
 }
