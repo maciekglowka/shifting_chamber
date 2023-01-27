@@ -6,6 +6,7 @@ use crate::player::Player;
 use crate::pieces::components::{
     get_effective_dmg,
     Damage,
+    Poisoned,
     Protect,
     Temporary,
     Unit
@@ -16,7 +17,7 @@ pub struct Sidebar;
 
 pub fn update_sidebar(
     mut commands: Commands,
-    player_query: Query<(Entity, &Unit, Option<&Children>), With<Player>>,
+    player_query: Query<(Entity, &Unit, Option<&Children>, Option<&Poisoned>), With<Player>>,
     damage_query: Query<&Damage>,
     inventory_query: Query<(&Protect, Option<&Temporary>)>,
     sidebar_query: Query<Entity, With<Sidebar>>,
@@ -25,7 +26,7 @@ pub fn update_sidebar(
 ) {
     clear_sidebar(&mut commands, &sidebar_query);
 
-    if let Ok((entity, unit, children)) = player_query.get_single() {
+    if let Ok((entity, unit, children, poisoned)) = player_query.get_single() {
         commands.spawn((
             Sidebar,
             NodeBundle {
@@ -55,6 +56,10 @@ pub fn update_sidebar(
                     assets.as_ref(),
                     format!("Eff. dmg: {}", get_effective_dmg(entity, unit, &damage_query, children).1)
                 );
+                if let Some(poisoned) = poisoned {
+                    spawn_text(parent, assets.as_ref(), format!("Poisoned: {}", poisoned.value));
+                }
+                spawn_text(parent, assets.as_ref(), "-------".into());
 
                 for child in children.iter().flat_map(|v| *v) {
                     if let Ok((protect, temp)) = inventory_query.get(*child) {

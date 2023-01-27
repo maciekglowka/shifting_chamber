@@ -16,8 +16,10 @@ use crate::actions::{ ActionKind, DamageKind, StatKind};
 #[derive(Component)]
 pub struct Piece;
 
-// #[derive(Component)]
-// pub struct Inventory;
+#[derive(Component)]
+pub struct Poisoned {
+    pub value: u32
+}
 
 // serialized components - object data
 
@@ -34,7 +36,7 @@ pub struct Damage {
 pub struct Effect;
 
 #[derive(Component, Deserialize)]
-pub struct Fixture {}
+pub struct Fixture;
 
 #[derive(Component, Deserialize)]
 pub struct Instant {
@@ -50,6 +52,11 @@ pub struct Interactive {
 
 #[derive(Component, Deserialize)]
 pub struct Item;
+
+#[derive(Component, Deserialize)]
+pub struct Poisonous {
+    pub value: u32
+}
 
 #[derive(Component, Deserialize)]
 pub struct Protect {
@@ -80,8 +87,14 @@ impl Unit {
     pub fn hp(&self) -> u32 {
         self.hp
     }
-    pub fn set_hp(&mut self, val: u32) {
-        self.hp = min(val, self.stats[&StatKind::HP]);
+    pub fn add_hp(&mut self, val: u32) {
+        self.hp = min(
+            self.stats[&StatKind::HP],
+            self.hp + val
+        );
+    }
+    pub fn sub_hp(&mut self, val: u32) {
+        self.hp = self.hp.saturating_sub(val);
     }
 }
 
@@ -102,6 +115,7 @@ fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) 
         "Instant" =>  insert::<Instant>(ec, data),
         "Interactive" =>  insert::<Interactive>(ec, data),
         "Item" => insert::<Item>(ec, data),
+        "Poisonous" => insert::<Poisonous>(ec, data),
         "Protect" => insert::<Protect>(ec, data),
         "Spawner" => insert::<Spawner>(ec, data),
         "Temporary" => insert::<Temporary>(ec, data),
@@ -122,10 +136,23 @@ pub fn get_effective_dmg(
     damage_query: &Query<&Damage>,
     children: Option<&Children>
  ) -> (DamageKind, u32) {
+    // TODO incl children (items)
     let dmg = match damage_query.get(entity) {
         Ok(d) => d,
         _ => return (DamageKind::None, 0)
     };
     let val = dmg.value + unit.stats.get(&StatKind::ST).unwrap_or(&0);
     (dmg.kind, val)
+}
+
+pub fn get_poisonous(
+    entity: Entity,
+    poisonous_query: &Query<&Poisonous>,
+    children: Option<&Children>
+ ) -> Option<u32> {
+    // TODO incl children (items)
+    match poisonous_query.get(entity) {
+        Ok(p) => Some(p.value),
+        _ => None
+    }
 }

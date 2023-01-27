@@ -43,10 +43,11 @@ pub fn generate_pieces(
         true
     );
 
-    let level_data = &data_assets.levels["Basic"];
+    let level_data = &data_assets.levels["SnakePit"];
 
     let mut points = level_data.initial_points;
-    let mut pieces = vec!("Stair".to_string());
+    let mut pieces = level_data.required_pieces.clone();
+    pieces.push("Stair".to_string());
     let mut rng = thread_rng();
 
     for _ in 0..rng.gen_range(level_data.extra_items.0..=level_data.extra_items.1) {

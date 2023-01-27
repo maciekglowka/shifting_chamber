@@ -9,6 +9,7 @@ Mask:
     Unit:
       hp: 2
       stats: {HP: 2}
+
 Minotaur:
   min_level: 2
   points: 2
@@ -20,6 +21,7 @@ Minotaur:
     Unit:
       hp: 2
       stats: {HP: 2}
+
 Spider:
   min_level: 5
   points: 4
@@ -31,3 +33,13 @@ Spider:
     Unit:
       hp: 4
       stats: {HP: 4}
+
+Snake:
+  min_level: 1
+  sprite: ["units", 0]
+  components:
+    Poisonous:
+      value: 1
+    Unit:
+      hp: 2
+      stats: {HP: 2}

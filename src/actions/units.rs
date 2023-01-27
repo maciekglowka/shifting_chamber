@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::pieces::components::{Protect, Unit};
+use crate::pieces::components::{Protect, Poisoned, Unit};
 use crate::ui::BubbleEvent;
 
 use super::{ActionEvent, ActionKind};
@@ -23,9 +23,30 @@ pub fn receive_damage(
                         }
                     }
                 }
-                let hp = unit.hp().saturating_sub(dmg);
-                unit.set_hp(hp);
+                unit.sub_hp(dmg);
                 ev_bubble.send(BubbleEvent(transform.translation(), format!("-{}", dmg)));
+            }
+        }
+    }
+}
+
+pub fn get_poisoned(
+    mut commands: Commands,
+    mut unit_query: Query<Option<&mut Poisoned>, With<Unit>>,
+    mut ev_action: EventReader<ActionEvent>,
+) {
+    for ev in ev_action.iter() {
+        if let ActionKind::Poison(entity, value) = ev.0 {
+            let poisoned = match unit_query.get_mut(entity) {
+                Ok(p) => p,
+                _ => continue
+            };
+
+            if let Some(mut poisoned) = poisoned {
+                poisoned.value += value;
+            } else {
+                commands.entity(entity)
+                    .insert(Poisoned { value });
             }
         }
     }

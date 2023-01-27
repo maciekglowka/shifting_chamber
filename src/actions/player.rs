@@ -17,8 +17,7 @@ pub fn heal(
     for ev in ev_action.iter() {
         if let ActionKind::Heal(val) = ev.0 {
             if let Ok(mut unit) = player_query.get_single_mut() {
-                let hp = unit.hp() + val;
-                unit.set_hp(hp);
+                unit.add_hp(val);
             }
         }
     }
@@ -34,7 +33,7 @@ pub fn stat_upgrade(
                 let stat = val + unit.stats.get(&kind).unwrap_or(&0);
                 unit.stats.insert(kind, stat);
 
-                if kind == super::StatKind::HP { let hp = unit.hp() + val; unit.set_hp(hp); }
+                if kind == super::StatKind::HP { unit.add_hp(val); }
             }
         }
     }

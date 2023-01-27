@@ -16,6 +16,7 @@ pub enum ActionKind {
     Descend,
     Heal(u32),
     PickItem(Entity),
+    Poison(Entity, u32),
     Score(u32),
     SpawnPiece(Entity, String),
     StatUpgrade(StatKind, u32)
@@ -31,6 +32,7 @@ impl Plugin for ActionPlugin {
                 SystemSet::new()
                     .label("action")
                     .with_system(units::receive_damage)
+                    .with_system(units::get_poisoned)
                     .with_system(pieces::spawn_piece)
                     .with_system(player::apply_effect)
                     .with_system(player::descend)

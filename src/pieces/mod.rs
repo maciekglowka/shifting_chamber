@@ -27,17 +27,19 @@ impl Plugin for PiecesPlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::ShiftResult)
-                    .with_system(systems::fights::check_unit_damage)
+                    .with_system(systems::units::check_unit_damage)
+                    .with_system(systems::units::check_poisoning)
+                    .with_system(systems::units::apply_poison)
                     .with_system(systems::interactions::check_instant)
                     .with_system(systems::interactions::check_interactions)
                     .with_system(systems::interactions::check_damage)
                 )
-                .add_system_set(
-                    SystemSet::on_exit(GameState::ShiftResult)
-                    .with_system(systems::fights::kill_units)
+            .add_system_set(
+                SystemSet::on_exit(GameState::ShiftResult)
+                    .with_system(systems::units::kill_units)
                     .with_system(systems::items::update_temporary)
                     .with_system(systems::items::remove_disposable_items)
-            );
+                );
     }
 }
 
