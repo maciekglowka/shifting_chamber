@@ -129,6 +129,7 @@ pub fn can_shift(
     res: &TileRes
 ) -> bool {
     // TODO needs refactoring
+    if res.tiles.get(&(dir + origin)).is_none() { return false; }
     let v = match dir {
         Vector2Int::LEFT | Vector2Int::RIGHT => {
             match player_v.x {

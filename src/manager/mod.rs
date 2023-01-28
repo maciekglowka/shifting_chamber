@@ -99,6 +99,7 @@ pub fn update_state(
 #[derive(Default, Resource)]
 pub struct GameRes {
     pub level: u32,
+    pub level_history: Vec<String>,
     pub score: u32,
-    pub next_upgrade: u32
+    pub next_upgrade: u32,
 }
