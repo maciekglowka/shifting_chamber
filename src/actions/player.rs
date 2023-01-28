@@ -4,7 +4,7 @@ use crate::data::DataAssets;
 use crate::manager::{CommandEvent, CommandType};
 use crate::pieces::{
     components,
-    components::{Piece, Unit}
+    components::{Piece, Poisoned, Unit}
 };
 use crate::player::Player;
 
@@ -18,6 +18,21 @@ pub fn heal(
         if let ActionKind::Heal(val) = ev.0 {
             if let Ok(mut unit) = player_query.get_single_mut() {
                 unit.add_hp(val);
+            }
+        }
+    }
+}
+
+pub fn heal_poison(
+    mut commands: Commands,
+    player_query: Query<Entity, (With<Player>, With<Poisoned>)>,
+    mut ev_action: EventReader<ActionEvent>
+) {
+    for ev in ev_action.iter() {
+        if let ActionKind::HealPoison = ev.0 {
+            if let Ok(entity) = player_query.get_single() {
+                commands.entity(entity)
+                    .remove::<Poisoned>();
             }
         }
     }

@@ -6,6 +6,13 @@ Heal:
       kind: !Heal 2
     Item:
 
+HealPoison:
+  sprite: ["items", 2]
+  components:
+    Instant:
+      kind: !HealPoison
+    Item:
+
 Coin:
   sprite: ["items", 1]
   components:

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::globals::{OVERLAY_Z, TILE_SIZE};
-use crate::pieces::components::{Damage, Piece, Unit};
+use crate::pieces::components::{Damage, Piece, Poisonous, Unit};
 
 #[derive(Component)]
 pub struct Overlay;
@@ -9,12 +9,12 @@ pub struct Overlay;
 pub fn update_overlays(
     mut commands: Commands,
     overlay_query: Query<Entity, With<Overlay>>,
-    unit_query: Query<(Entity, &Damage, &Unit), With<Piece>>,
+    unit_query: Query<(Entity, &Unit, Option<&Damage>, Option<&Poisonous>), With<Piece>>,
     assets: Res<super::UiAssets>
 ) {
     clear_overlays(&mut commands, &overlay_query);
-    for (entity, damage, unit) in unit_query.iter() {
-        let overlay = spawn_unit_overlay(&mut commands, damage, unit, assets.as_ref());
+    for (entity, unit, damage, poisonous) in unit_query.iter() {
+        let overlay = spawn_unit_overlay(&mut commands, damage, poisonous, unit, assets.as_ref());
         commands.entity(entity)
             .add_child(overlay);
     }
@@ -32,14 +32,20 @@ fn clear_overlays(
 
 fn spawn_unit_overlay(
     commands: &mut Commands,
-    damage: &Damage,
+    damage: Option<&Damage>,
+    poisonous: Option<&Poisonous>,
     unit: &Unit,
     assets: &super::UiAssets
 ) -> Entity {
-    let symbols = vec!(
-        (damage.value, Color::WHITE),
+    let mut symbols = vec!(
         (unit.hp(), Color::GOLD),
     );
+    if let Some(d) = damage {
+        symbols.push((d.value, Color::WHITE))
+    }
+    if let Some(p) = poisonous {
+        symbols.push((p.value, Color::LIME_GREEN))
+    }
     spawn_overlay(commands, symbols, assets)
 }
 

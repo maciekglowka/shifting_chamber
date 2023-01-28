@@ -15,6 +15,7 @@ pub enum ActionKind {
     Damage(Entity, DamageKind, u32),
     Descend,
     Heal(u32),
+    HealPoison,
     PickItem(Entity),
     Poison(Entity, u32),
     Score(u32),
@@ -30,16 +31,17 @@ impl Plugin for ActionPlugin {
             .init_resource::<ActionRes>()
             .add_system_set(
                 SystemSet::new()
-                    .label("action")
                     .with_system(units::receive_damage)
                     .with_system(units::get_poisoned)
                     .with_system(pieces::spawn_piece)
                     .with_system(player::apply_effect)
                     .with_system(player::descend)
                     .with_system(player::heal)
+                    .with_system(player::heal_poison)
                     .with_system(player::pick_item)
                     .with_system(player::score)
                     .with_system(player::stat_upgrade)
+                    .label("action")
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::PlayerInput)

@@ -12,6 +12,6 @@ Blaze:
 
 SnakePit:
   initial_points: 8
-  required_pieces: ["Snake"]
+  required_pieces: ["Snake", "HealPoison"]
   extra_items: [0, 0]
   extra_features: [0, 0]

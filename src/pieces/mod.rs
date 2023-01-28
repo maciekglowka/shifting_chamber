@@ -26,11 +26,16 @@ impl Plugin for PiecesPlugin {
                     .label("action")
             )
             .add_system_set(
+                // these systems would fire before eg. damage is applied
+                // so it is possible to grab healing potion and not die the same turn :)
+                SystemSet::on_enter(GameState::TileShift)
+                    .with_system(systems::interactions::check_instant)
+            )
+            .add_system_set(
                 SystemSet::on_enter(GameState::ShiftResult)
                     .with_system(systems::units::check_unit_damage)
                     .with_system(systems::units::check_poisoning)
                     .with_system(systems::units::apply_poison)
-                    .with_system(systems::interactions::check_instant)
                     .with_system(systems::interactions::check_interactions)
                     .with_system(systems::interactions::check_damage)
                 )
