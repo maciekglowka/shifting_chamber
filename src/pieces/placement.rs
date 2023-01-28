@@ -43,7 +43,7 @@ pub fn generate_pieces(
         true
     );
 
-    let level_data = &data_assets.levels["SnakePit"];
+    let level_data = &data_assets.levels["Chamber"];
 
     let mut points = level_data.initial_points;
     let mut pieces = level_data.required_pieces.clone();

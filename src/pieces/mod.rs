@@ -86,17 +86,19 @@ fn get_new_piece(
         renderer::get_piece_renderer(&data_item.sprite, &assets)
     ));
 
-    if data_item.components.contains_key("Effect") {
-        // when spawning an effect, wrap it inside an instant item
-        piece.insert((
-            components::Item,
-            components::Instant {
-                kind: ActionKind::ApplyEffect(name)
-            }
-        ));
-    } else {
-        // otherwise just build component list normally
-        components::insert_from_list(&mut piece, &data_item.components);
-    }   
+    // if data_item.components.contains_key("Effect") {
+    //     // when spawning an effect, wrap it inside an instant item
+    //     piece.insert((
+    //         components::Item,
+    //         components::Instant {
+    //             kind: ActionKind::ApplyEffect(name)
+    //         }
+    //     ));
+    // } else {
+    //     // otherwise just build component list normally
+    //     components::insert_from_list(&mut piece, &data_item.components);
+    // }   
+
+    components::insert_from_list(&mut piece, &data_item.components);
     piece.id()
 }

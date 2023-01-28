@@ -1,5 +1,4 @@
-Shield:
-  points: -1
+MagicalShield:
   sprite: ["items", 3]
   components:
     Effect:

@@ -37,7 +37,7 @@ pub fn parse_data(
             );
             match name.as_str() {
                 "data_units" => assets.unit_names.push(key),
-                "data_items" | "data_effects" => assets.item_names.push(key),
+                "data_items" => assets.item_names.push(key),
                 "data_fixtures" => assets.fixture_names.push(key),
                 _ => ()
             }

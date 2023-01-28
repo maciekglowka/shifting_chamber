@@ -1,3 +1,6 @@
+# elements with `points` not set won't be spawned randomly
+# (only explicitly by level type or specific action)
+
 Heal:
   points: -1
   sprite: ["items", 0]
@@ -18,4 +21,12 @@ Coin:
   components:
     Instant:
       kind: !Score 1
+    Item:
+
+MagicalShieldField:
+  points: -1
+  sprite: ["items", 3]
+  components:
+    Instant:
+      kind: !ApplyEffect "MagicalShield"
     Item:

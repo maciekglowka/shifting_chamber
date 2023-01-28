@@ -1,3 +1,6 @@
+# elements with `points` not set won't be spawned randomly
+# (only explicitly by level type or specific action)
+
 Stair:
   sprite: ["fixtures", 0]
   components:
