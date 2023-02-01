@@ -38,11 +38,12 @@ Spider:
       stats: {HP: 4}
 
 Snake:
-  min_level: 1
+  min_level: 3
+  points: 4
   sprite: ["units", 0]
   components:
     Poisonous:
-      value: 1
+      value: 3
     Unit:
       hp: 2
       stats: {HP: 2}

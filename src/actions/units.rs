@@ -1,6 +1,11 @@
 use bevy::prelude::*;
 
-use crate::pieces::components::{Protect, Poisoned, Unit};
+use crate::pieces::components::{
+    Protect,
+    Poisoned,
+    Unit, 
+    get_components_with_children
+};
 use crate::ui::BubbleEvent;
 
 use super::{ActionEvent, ActionKind};

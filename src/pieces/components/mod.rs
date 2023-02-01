@@ -149,10 +149,28 @@ pub fn get_poisonous(
     entity: Entity,
     poisonous_query: &Query<&Poisonous>,
     children: Option<&Children>
- ) -> Option<u32> {
-    // TODO incl children (items)
-    match poisonous_query.get(entity) {
-        Ok(p) => Some(p.value),
-        _ => None
+ ) -> u32 {
+    get_components_with_children(entity, poisonous_query, children)
+        .iter()
+        .map(|a| a.value)
+        .sum()
+}
+
+pub fn get_components_with_children<'a, T: Component>(
+    entity: Entity,
+    query: &'a Query<&T>,
+    children: Option<&Children>
+) -> Vec<&'a T> {
+    let mut v = match query.get(entity) {
+        Ok(c) => vec!(c),
+        _ => Vec::new()
+    };
+    if let Some(children) = children {
+        for child in children.iter() {
+            if let Ok(c) = query.get(*child) {
+                v.push(c);
+            }
+        }
     }
+    v
 }

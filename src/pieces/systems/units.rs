@@ -42,12 +42,19 @@ pub fn kill_units(
 }
 
 pub fn apply_poison(
-    mut unit_query: Query<(&mut Unit, &Poisoned, &GlobalTransform)>,
+    mut commands: Commands,
+    mut unit_query: Query<(Entity, &mut Unit, &mut Poisoned, &GlobalTransform)>,
     mut ev_bubble: EventWriter<BubbleEvent>
 ) {
-    for (mut unit, poison, transform) in unit_query.iter_mut() {
-        unit.sub_hp(poison.value);
-        ev_bubble.send(BubbleEvent(transform.translation(), format!("-{}", poison.value)));
+    for (entity, mut unit, mut poisoned, transform) in unit_query.iter_mut() {
+        unit.sub_hp(1);
+        ev_bubble.send(BubbleEvent(transform.translation(), format!("-{}", 1)));
+
+        poisoned.value -= 1;
+        if poisoned.value == 0 {
+            commands.entity(entity)
+                .remove::<Poisoned>();
+        }
     }
 }
 
@@ -80,11 +87,11 @@ pub fn check_poisoning(
         let npc_poison = get_poisonous(npc_entity, &poisonous_query, npc_children);
         let player_poison = get_poisonous(player_entity, &poisonous_query, player_children);
 
-        if let Some(p) = npc_poison {
-            ev_action.send(ActionEvent(ActionKind::Poison(player_entity, p)));
+        if npc_poison > 0 {
+            ev_action.send(ActionEvent(ActionKind::Poison(player_entity, npc_poison)));
         }
-        if let Some(p) = player_poison {
-            ev_action.send(ActionEvent(ActionKind::Poison(npc_entity, p)));
+        if player_poison > 0 {
+            ev_action.send(ActionEvent(ActionKind::Poison(npc_entity, player_poison)));
         }
     }
 }
