@@ -18,6 +18,10 @@ impl Plugin for AnimationPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::ShiftResult)
                     .with_system(update_actions)
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::TurnEnd)
+                    .with_system(update_actions)
             );
     }
 }

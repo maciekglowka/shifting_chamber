@@ -40,7 +40,7 @@ impl Plugin for PiecesPlugin {
                     .with_system(systems::interactions::check_damage)
                 )
             .add_system_set(
-                SystemSet::on_exit(GameState::ShiftResult)
+                SystemSet::on_enter(GameState::TurnEnd)
                     .with_system(systems::units::kill_units)
                     .with_system(systems::items::update_temporary)
                     .with_system(systems::items::remove_disposable_items)
@@ -82,9 +82,10 @@ fn get_new_piece(
     let data_item = &data_assets.pieces[&name];
     
     let mut piece = commands.spawn((
-        components::Piece,
-        renderer::get_piece_renderer(&data_item.sprite, &assets)
-    ));
+            Name::new(name),
+            components::Piece,
+            renderer::get_piece_renderer(&data_item.sprite, &assets)
+        ));
 
     // if data_item.components.contains_key("Effect") {
     //     // when spawning an effect, wrap it inside an instant item

@@ -68,7 +68,7 @@ fn start_map(
 pub fn update_state(
     mut ev_command: EventReader<CommandEvent>,
     mut game_state: ResMut<State<GameState>>,
-    mut player_query: Query<&Unit, With<Player>>,
+    player_query: Query<&Player>,
     res: Res<GameRes>
 ) {
     for ev in ev_command.iter() {
@@ -78,16 +78,19 @@ pub fn update_state(
                     game_state.set(GameState::ShiftResult);
                 },
                 GameState::ShiftResult => {
-                    if let Ok(unit) = player_query.get_single_mut() {
-                        if unit.hp() == 0 {
-                            game_state.set(GameState::GameOver);
-                            return;
-                        }  
-                        if res.score >= res.next_upgrade {
-                            game_state.set(GameState::Upgrade);
-                            return;
-                        }            
-                        game_state.set(GameState::PlayerInput);
+                    game_state.set(GameState::TurnEnd);
+                },
+                GameState::TurnEnd => {
+                    match player_query.get_single() {
+                        Ok(_) => {
+                            if res.score >= res.next_upgrade {
+                                game_state.set(GameState::Upgrade);
+                                return;
+                            } else {
+                                game_state.set(GameState::PlayerInput);
+                            }          
+                        },
+                        _ => { game_state.set(GameState::GameOver); },
                     }
                 },
                 _ => ()

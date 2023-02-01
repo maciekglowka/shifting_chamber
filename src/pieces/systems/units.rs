@@ -16,28 +16,38 @@ use super::super::{
         Poisonous,
         Unit
     },
-    renderer,
-    spawn_piece_at_entity
+    // renderer,
+    // spawn_piece_at_entity
 };
 
 pub fn kill_units(
     mut commands: Commands,
-    unit_query: Query<(Entity, &Unit, Option<&Parent>)>,
-    assets: Res<renderer::PieceAssets>,
-    data_assets: Res<DataAssets>
+    unit_query: Query<(Entity, Option<&Name>, &Unit)>,
+    // assets: Res<renderer::PieceAssets>,
+    data_assets: Res<DataAssets>,
+    mut ev_action: EventWriter<ActionEvent>
 ) {
-    for (entity, unit, parent) in unit_query.iter() {
+    for (entity, name, unit) in unit_query.iter() {
         if unit.hp() > 0 { continue; }
         commands.entity(entity).despawn_recursive();
-        if let Some(parent) = parent {
-            spawn_piece_at_entity(
-                &mut commands,
-                "Coin".into(),
-                parent.get(),
-                assets.as_ref(),
-                data_assets.as_ref()
-            )
+
+        if let Some(name) = name {
+            if let Some(data) = data_assets.pieces.get(name.as_str()) {
+                match data.points {
+                    Some(p) if p>0 => ev_action.send(ActionEvent(ActionKind::Score((p as f32 / 2.).ceil() as u32))),
+                    _ => ()
+                }
+            }
         }
+        // if let Some(parent) = parent {
+        //     spawn_piece_at_entity(
+        //         &mut commands,
+        //         "Coin".into(),
+        //         parent.get(),
+        //         assets.as_ref(),
+        //         data_assets.as_ref()
+        //     )
+        // }
     }
 }
 
