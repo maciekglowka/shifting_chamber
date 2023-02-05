@@ -1,6 +1,6 @@
-pub const WINDOW_WIDTH: f32 = 800.;
+pub const WINDOW_WIDTH: f32 = 1060.;
 pub const WINDOW_HEIGHT: f32 = 600.;
-pub const SIDEBAR_WIDTH: f32 = 200.;
+pub const SIDEBAR_WIDTH: f32 = 250.;
 
 pub const TILE_SIZE: f32 = 64.;
 pub const MAP_SIZE: i32 = 7;

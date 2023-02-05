@@ -4,9 +4,10 @@ use crate::data::DataAssets;
 use crate::manager::{CommandEvent, CommandType};
 use crate::pieces::{
     components,
-    components::{Piece, Poisoned, Unit}
+    components::{Manual, Piece, Poisoned, Unit}
 };
 use crate::player::Player;
+use crate::ui::ReloadUIEvent;
 
 use super::{ActionEvent, ActionKind};
 
@@ -94,29 +95,6 @@ pub fn apply_effect(
                         components::insert_from_list(&mut effect, &data_item.components);
                     });
             }
-        }
-    }
-}
-
-pub fn pick_item(
-    mut commands: Commands,
-    mut ev_action: EventReader<ActionEvent>,
-    player_query: Query<Entity, With<Player>>,
-    item_query: Query<&Parent>,
-) {
-    for ev in ev_action.iter() {
-        if let ActionKind::PickItem(entity) = &ev.0 {
-            let player_entity = player_query.get_single().unwrap();
-            let parent = item_query.get(*entity).unwrap();
-
-            commands.entity(parent.get())
-                .remove_children(&[*entity]);
-            commands.entity(*entity)
-                .remove::<SpriteSheetBundle>()
-                .remove::<Piece>();
-            commands.entity(player_entity)
-                .push_children(&[*entity]);
-
         }
     }
 }

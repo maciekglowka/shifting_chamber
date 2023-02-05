@@ -9,18 +9,17 @@ mod units;
 
 pub struct ActionEvent(pub ActionKind);
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq)]
 pub enum ActionKind {
     ApplyEffect(String),
     Damage(Entity, DamageKind, u32),
     Descend,
     Heal(u32),
     HealPoison,
-    PickItem(Entity),
     Poison(Entity, u32),
     Score(u32),
     SpawnPiece(Entity, String),
-    StatUpgrade(StatKind, u32)
+    StatUpgrade(StatKind, u32),
 }
 
 pub struct ActionPlugin;
@@ -28,7 +27,6 @@ pub struct ActionPlugin;
 impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ActionEvent>()
-            .init_resource::<ActionRes>()
             .add_system_set(
                 SystemSet::new()
                     .with_system(units::receive_damage)
@@ -38,23 +36,13 @@ impl Plugin for ActionPlugin {
                     .with_system(player::descend)
                     .with_system(player::heal)
                     .with_system(player::heal_poison)
-                    .with_system(player::pick_item)
                     .with_system(player::score)
                     .with_system(player::stat_upgrade)
                     .label("action")
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameState::PlayerInput)
-                    .with_system(clear_input_actions)
             );
     }
 }
 
-pub fn clear_input_actions(
-    mut res: ResMut<ActionRes>
-) {
-    res.input_actions.clear();
-}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq)]
 pub enum StatKind {
@@ -67,9 +55,4 @@ pub enum DamageKind {
     None,
     Hit,
     Fire
-}
-
-#[derive(Default, Resource)]
-pub struct ActionRes {
-    pub input_actions: Vec<ActionKind>
 }

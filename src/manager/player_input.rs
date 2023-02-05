@@ -2,10 +2,11 @@ use bevy::prelude::*;
 use std::cmp;
 
 use crate::actions::ActionEvent;
+use crate::pieces::components;
 use crate::player::Player;
 use crate::states::GameState;
 use crate::tiles;
-use crate::pieces::components;
+use crate::ui;
 
 use super::{CommandEvent, CommandType, GameRes};
 
@@ -58,6 +59,68 @@ pub fn upgrade(
             res.next_upgrade += cmp::max(2, res.next_upgrade / 2);
             ev_action.send(ActionEvent(kind.clone()));
             game_state.set(GameState::PlayerInput).expect("Switching states failed");
+        }
+    }
+}
+
+pub fn interact(
+    mut ev_command: EventReader<CommandEvent>,
+    mut ev_action: EventWriter<ActionEvent>,
+) {
+    for ev in ev_command.iter() {
+        if let CommandType::Interact(action) = &ev.0 {
+            ev_action.send(ActionEvent(action.clone()));
+        }
+    }
+}
+
+pub fn pick_item(
+    mut commands: Commands,
+    mut ev_command: EventReader<CommandEvent>,
+    player_query: Query<Entity, With<Player>>,
+    item_query: Query<&Parent>,
+    mut ev_ui: EventWriter<ui::ReloadUIEvent>,
+    mut res: ResMut<super::GameRes>
+) {
+    for ev in ev_command.iter() {
+        if let CommandType::PickItem(entity) = &ev.0 {
+            let player_entity = player_query.get_single().unwrap();
+            let parent = item_query.get(*entity).unwrap();
+
+            commands.entity(parent.get())
+                .remove_children(&[*entity]);
+            commands.entity(*entity)
+                .remove::<SpriteSheetBundle>()
+                .remove::<components::Piece>();
+            commands.entity(player_entity)
+                .push_children(&[*entity]);
+
+            // remove action from the list and reload the UI
+            res.input_commands.retain(|a| *a != ev.0);
+            ev_ui.send(ui::ReloadUIEvent);
+        }
+    }
+}
+
+pub fn use_item(
+    mut commands: Commands,
+    mut ev_command: EventReader<CommandEvent>,
+    mut ev_action: EventWriter<ActionEvent>,
+    item_query: Query<&components::Manual>,
+    mut ev_ui: EventWriter<ui::ReloadUIEvent>,
+) {
+    for ev in ev_command.iter() {
+        if let CommandType::UseItem(entity) = &ev.0 {
+            let manual = match item_query.get(*entity) {
+                Ok(m) => m,
+                _ => continue
+            };
+
+            ev_action.send(ActionEvent(manual.kind.clone()));
+            ev_ui.send(ui::ReloadUIEvent);
+
+            commands.entity(*entity)
+                .despawn_recursive();
         }
     }
 }

@@ -21,7 +21,7 @@ fn setup(
 ) {
     let mut camera = Camera2dBundle::default();
     camera.transform.translation = Vec3::new(
-        0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32 + SIDEBAR_WIDTH / 2.,
+        0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32,
         0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32,
         camera.transform.translation.z
     );

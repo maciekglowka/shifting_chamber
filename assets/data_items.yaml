@@ -5,14 +5,16 @@ Heal:
   points: -1
   sprite: ["items", 0]
   components:
-    Instant:
+    Collectable:
+    Manual:
       kind: !Heal 2
     Item:
 
 HealPoison:
   sprite: ["items", 2]
   components:
-    Instant:
+    Collectable:
+    Manual:
       kind: !HealPoison
     Item:
 
@@ -27,6 +29,7 @@ MagicalShieldField:
   points: -1
   sprite: ["items", 3]
   components:
-    Instant:
+    Collectable:
+    Manual:
       kind: !ApplyEffect "MagicalShield"
     Item:

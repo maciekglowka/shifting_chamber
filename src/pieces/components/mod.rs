@@ -46,12 +46,18 @@ pub struct Instant {
 
 #[derive(Component, Deserialize)]
 pub struct Interactive {
-    // triggered manually, through ui
+    // triggered manually, through ui - when stepped upon
     pub kind: ActionKind
 }
 
 #[derive(Component, Deserialize)]
 pub struct Item;
+
+#[derive(Component, Deserialize)]
+pub struct Manual {
+    // triggered manually, through ui - when in the inventory
+    pub kind: ActionKind
+}
 
 #[derive(Component, Deserialize)]
 pub struct Poisonous {
@@ -115,6 +121,7 @@ fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) 
         "Instant" =>  insert::<Instant>(ec, data),
         "Interactive" =>  insert::<Interactive>(ec, data),
         "Item" => insert::<Item>(ec, data),
+        "Manual" => insert::<Manual>(ec, data),
         "Poisonous" => insert::<Poisonous>(ec, data),
         "Protect" => insert::<Protect>(ec, data),
         "Spawner" => insert::<Spawner>(ec, data),

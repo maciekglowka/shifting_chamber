@@ -10,13 +10,16 @@ pub fn update_overlays(
     mut commands: Commands,
     overlay_query: Query<Entity, With<Overlay>>,
     unit_query: Query<(Entity, &Unit, Option<&Damage>, Option<&Poisonous>), With<Piece>>,
-    assets: Res<super::UiAssets>
+    assets: Res<super::UiAssets>,
+    mut ev_ui: EventReader<super::ReloadUIEvent>
 ) {
-    clear_overlays(&mut commands, &overlay_query);
-    for (entity, unit, damage, poisonous) in unit_query.iter() {
-        let overlay = spawn_unit_overlay(&mut commands, damage, poisonous, unit, assets.as_ref());
-        commands.entity(entity)
-            .add_child(overlay);
+    for _ in ev_ui.iter() {
+        clear_overlays(&mut commands, &overlay_query);
+        for (entity, unit, damage, poisonous) in unit_query.iter() {
+            let overlay = spawn_unit_overlay(&mut commands, damage, poisonous, unit, assets.as_ref());
+            commands.entity(entity)
+                .add_child(overlay);
+        }
     }
 }
 

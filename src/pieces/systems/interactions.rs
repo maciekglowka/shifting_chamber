@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionEvent, ActionKind, ActionRes};
+use crate::actions::{ActionEvent, ActionKind};
+use crate::manager::{CommandType, GameRes};
 use crate::player::Player;
 use crate::tiles::Tile;
 
@@ -29,13 +30,15 @@ pub fn check_interactions(
     player_query: Query<&Player>,
     piece_query: Query<(&Parent, &Interactive), With<Piece>>,
     tile_query: Query<&Tile>,
-    mut action_res: ResMut<ActionRes>
+    mut game_res: ResMut<GameRes>
 ) {
     for (parent, interactive) in piece_query.iter() {
         if !is_player_tile(&player_query.get_single().unwrap(), parent, &tile_query) {
             continue;
         }
-        action_res.input_actions.push(interactive.kind.clone());
+        game_res.input_commands.push(
+            CommandType::Interact(interactive.kind.clone())
+        );
     }
 }
 

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionKind, ActionRes};
+use crate::manager::{CommandType, GameRes};
 use crate::player::Player;
 use crate::tiles::Tile;
 
@@ -15,7 +15,7 @@ pub fn examine_pickable_items(
     player_query: Query<&Player>,
     item_query: Query<(Entity, &Parent), (With<Piece>, With<Collectable>)>,
     tile_query: Query<&Tile>,
-    mut action_res: ResMut<ActionRes>
+    mut game_res: ResMut<GameRes>
 ) {
     for (entity, parent) in item_query.iter() {        
         let player = match player_query.get_single() {
@@ -25,8 +25,8 @@ pub fn examine_pickable_items(
         let tile = tile_query.get(parent.get()).unwrap();
         if tile.v != player.v { continue; }
 
-        action_res.input_actions.push(
-            ActionKind::PickItem(entity)
+        game_res.input_commands.push(
+            CommandType::PickItem(entity)
         );
     }
 }

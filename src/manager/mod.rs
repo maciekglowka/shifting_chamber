@@ -1,19 +1,21 @@
 use bevy::prelude::*;
 
 use crate::actions::ActionKind;
-use crate::pieces::components::Unit;
 use crate::player::Player;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
 mod player_input;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum CommandType {
     MapShift(Vector2Int, Vector2Int),
     AnimationEnd,
     NextLevel,
-    Upgrade(ActionKind)
+    Upgrade(ActionKind),
+    Interact(ActionKind),
+    PickItem(Entity),
+    UseItem(Entity)
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -39,11 +41,24 @@ impl Plugin for ManagerPlugin {
                     .with_system(player_input::next_level)
             )
             .add_system_set(
+                SystemSet::on_exit(GameState::PlayerInput)
+                    .with_system(clear_input_commands)
+            )
+            .add_system_set(
                 SystemSet::on_update(GameState::Upgrade)
                     .with_system(player_input::upgrade)
                     .before("action")
             )
-            .add_system(update_state.after("action"));
+            .add_system(update_state.after("action"))
+            .add_system_set(
+                SystemSet::new()
+                    .with_system(player_input::use_item)
+                    .with_system(player_input::interact)
+                    .with_system(player_input::pick_item)
+                    .label("input_command")
+                    .before("action")
+            );
+
     }
 }
 
@@ -99,10 +114,17 @@ pub fn update_state(
     }
 }
 
+fn clear_input_commands(
+    mut res: ResMut<GameRes>
+) {
+    res.input_commands.clear();
+}
+
 #[derive(Default, Resource)]
 pub struct GameRes {
     pub level: u32,
     pub level_history: Vec<String>,
     pub score: u32,
     pub next_upgrade: u32,
+    pub input_commands: Vec<CommandType>
 }
