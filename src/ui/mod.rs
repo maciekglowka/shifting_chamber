@@ -27,7 +27,7 @@ impl Plugin for UIPlugin {
                 .with_system(command_menu::update_menu)
                 .with_system(overlays::update_overlays)
                 .with_system(sidebar::update_sidebar)
-                .before("action")
+                .before("input_command")
             )
             .add_system_set(SystemSet::on_enter(GameState::PlayerInput)
                 .with_system(player_input)

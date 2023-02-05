@@ -4,6 +4,7 @@ pub const SIDEBAR_WIDTH: f32 = 250.;
 
 pub const TILE_SIZE: f32 = 64.;
 pub const MAP_SIZE: i32 = 7;
+pub const MAX_ITEMS: usize = 3;
 
 pub const TILE_Z: f32 = 20.;
 // relative to TILE_Z
