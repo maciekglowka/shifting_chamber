@@ -3,7 +3,7 @@ use rand::prelude::*;
 use std::collections::HashMap;
 
 use crate::data::{DataAssets, PieceData};
-use crate::globals::MAP_SIZE;
+use crate::globals::{MAP_SIZE, MAP_POINTS_MUL};
 use crate::manager::GameRes;
 use crate::tiles::TileRes;
 use crate::vectors::Vector2Int;
@@ -17,7 +17,7 @@ pub fn generate_pieces(
     data_assets: Res<DataAssets>,
     mut game_res: ResMut<GameRes>
 ) {
-    let target_points = (game_res.level * 3) as i32;
+    let target_points = (game_res.level * MAP_POINTS_MUL) as i32;
     let level_type = get_level_type(&mut game_res, &data_assets, target_points);
     let player_v = Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2);
 

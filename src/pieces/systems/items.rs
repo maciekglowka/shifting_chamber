@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::globals::MAX_ITEMS;
+use crate::globals::MAX_INVENTORY;
 use crate::manager::{CommandType, GameRes};
 use crate::player::Player;
 use crate::tiles::Tile;
@@ -29,7 +29,7 @@ pub fn examine_pickable_items(
             .count(),
         None => 0
     };
-    if inventory_count >= MAX_ITEMS { return; }
+    if inventory_count >= MAX_INVENTORY { return; }
 
     for (entity, parent) in collectable_query.iter() {    
         // query has already been checked above => safe to unwrap    
