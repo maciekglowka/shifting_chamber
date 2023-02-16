@@ -6,11 +6,11 @@ use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod actions;
-mod animation;
 mod assets;
 mod camera;
 mod data;
 mod globals;
+mod graphics;
 mod input;
 mod manager;
 mod pieces;
@@ -41,10 +41,10 @@ fn main() {
         )
         .add_state(states::GameState::LoadAssets)
         .add_plugin(actions::ActionPlugin)
-        .add_plugin(animation::AnimationPlugin)
         .add_plugin(assets::AssetPlugin)
         .add_plugin(camera::CameraPlugin)
         .add_plugin(data::DataPlugin)
+        .add_plugin(graphics::GraphicsPlugin)
         .add_plugin(input::InputPlugin)
         .add_plugin(manager::ManagerPlugin)
         .add_plugin(pieces::PiecesPlugin)

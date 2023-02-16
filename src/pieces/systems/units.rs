@@ -3,117 +3,72 @@ use bevy::prelude::*;
 use crate::actions::{ActionEvent, ActionKind};
 use crate::data::DataAssets;
 use crate::player::Player;
-use crate::tiles::Tile;
+use crate::tiles::{Tile, TileRes};
 use crate::ui::BubbleEvent;
-use crate::vectors::Vector2Int;
+use crate::vectors::{Vector2Int, ORTHO_DIRECTIONS};
 
 use super::super::{
     components::{
-        get_effective_dmg,
-        get_poisonous,
         Damage,
-        Poisoned,
-        Poisonous,
-        Unit
+        Health,
+        Walking
     },
-    // renderer,
-    // spawn_piece_at_entity
 };
 
 pub fn kill_units(
     mut commands: Commands,
-    unit_query: Query<(Entity, Option<&Name>, &Unit)>,
-    // assets: Res<renderer::PieceAssets>,
+    health_query: Query<(Entity, Option<&Name>, &Health)>,
     data_assets: Res<DataAssets>,
     mut ev_action: EventWriter<ActionEvent>
 ) {
-    for (entity, name, unit) in unit_query.iter() {
-        if unit.hp() > 0 { continue; }
+    for (entity, name, health) in health_query.iter() {
+        if health.value > 0 { continue; }
         commands.entity(entity).despawn_recursive();
-
-        if let Some(name) = name {
-            if let Some(data) = data_assets.pieces.get(name.as_str()) {
-                match data.points {
-                    Some(p) if p>0 => ev_action.send(ActionEvent(ActionKind::Score((p as f32 / 2.).ceil() as u32))),
-                    _ => ()
-                }
-            }
-        }
-        // if let Some(parent) = parent {
-        //     spawn_piece_at_entity(
-        //         &mut commands,
-        //         "Coin".into(),
-        //         parent.get(),
-        //         assets.as_ref(),
-        //         data_assets.as_ref()
-        //     )
-        // }
     }
 }
 
-pub fn apply_poison(
+pub fn plan_moves(
+    mut walking_query: Query<(&mut Walking, &Parent)>,
+    player_query: Query<&Parent, With<Player>>,
+    tile_query: Query<&Tile>,
+    tile_res: Res<TileRes>
+) {
+    let Ok(player_parent) = player_query.get_single() else { return };
+    let player_v = match tile_query.get(player_parent.get()) {
+        Ok(t) => t.v,
+        _ => return
+    };
+    for (mut walking, parent) in walking_query.iter_mut() {
+        let mut possible = Vec::new();
+        let Ok(tile) = tile_query.get(parent.get()) else { continue };
+        for dir in ORTHO_DIRECTIONS {
+            let v = tile.v + dir;
+            if !tile_res.tiles.contains_key(&v) { continue }
+            let rank = player_v.manhattan(v);
+            possible.push((rank, dir));
+        }
+        possible.sort_by(|a, b| a.0.cmp(&b.0));
+        walking.planned_move = match possible.iter().next() {
+            Some(a) => Some(a.1),
+            None => None
+        }
+    }
+}
+
+pub fn move_units(
     mut commands: Commands,
-    mut unit_query: Query<(Entity, &mut Unit, &mut Poisoned, &GlobalTransform)>,
-    mut ev_bubble: EventWriter<BubbleEvent>
-) {
-    for (entity, mut unit, mut poisoned, transform) in unit_query.iter_mut() {
-        unit.sub_hp(1);
-        ev_bubble.send(BubbleEvent(transform.translation(), format!("-{}", 1)));
-
-        poisoned.value -= 1;
-        if poisoned.value == 0 {
-            commands.entity(entity)
-                .remove::<Poisoned>();
-        }
-    }
-}
-
-pub fn check_unit_damage(
-    damage_query: Query<&Damage>,
-    player_query: Query<(Entity, &Player, &Unit, Option<&Children>)>,
-    unit_query: Query<(Entity, &Unit, &Parent, Option<&Children>), Without<Player>>,
+    walking_query: Query<(Entity, &Walking, &Parent)>,
+    player_query: Query<(Entity, &Player)>,
     tile_query: Query<&Tile>,
-    mut ev_action: EventWriter<ActionEvent>,
+    tile_res: Res<TileRes>
 ) {
-    let (player_entity, player, player_unit, player_children) = player_query.get_single().unwrap();
-    for (npc_entity, npc_unit, _, npc_children) in get_close_units(player.v, &unit_query, &tile_query) {
-        let npc_dmg = get_effective_dmg(npc_entity, npc_unit, &damage_query, npc_children);
-        let player_dmg = get_effective_dmg(player_entity, player_unit, &damage_query, player_children);
+    for (entity, walking, parent) in walking_query.iter() {
+        let Some(dir) = walking.planned_move else { continue };
+        let Ok(tile) = tile_query.get(parent.get()) else { continue };
+        let v = tile.v + dir;
 
-        ev_action.send(ActionEvent(ActionKind::Damage(player_entity, npc_dmg.0, npc_dmg.1)));
-        ev_action.send(ActionEvent(ActionKind::Damage(npc_entity, player_dmg.0, player_dmg.1)));
+        let Some(new_tile_entity) = tile_res.tiles.get(&v) else { continue };
+        commands.entity(parent.get()).remove_children(&[entity]);
+        commands.entity(*new_tile_entity).add_child(entity);
     }
-}
-
-pub fn check_poisoning(
-    poisonous_query: Query<&Poisonous>,
-    player_query: Query<(Entity, &Player, Option<&Children>)>,
-    unit_query: Query<(Entity, &Unit, &Parent, Option<&Children>), Without<Player>>,
-    tile_query: Query<&Tile>,
-    mut ev_action: EventWriter<ActionEvent>,
-) {
-    let (player_entity, player, player_children) = player_query.get_single().unwrap();
-    for (npc_entity, _, _, npc_children) in get_close_units(player.v, &unit_query, &tile_query) {
-        let npc_poison = get_poisonous(npc_entity, &poisonous_query, npc_children);
-        let player_poison = get_poisonous(player_entity, &poisonous_query, player_children);
-
-        if npc_poison > 0 {
-            ev_action.send(ActionEvent(ActionKind::Poison(player_entity, npc_poison)));
-        }
-        if player_poison > 0 {
-            ev_action.send(ActionEvent(ActionKind::Poison(npc_entity, player_poison)));
-        }
-    }
-}
-
-fn get_close_units<'a>(
-    player_v: Vector2Int,
-    unit_query: &'a Query<(Entity, &Unit, &Parent, Option<&Children>), Without<Player>>,
-    tile_query: &'a Query<&Tile>
-) -> Vec<(Entity, &'a Unit, &'a Parent, Option<&'a Children>)> {
-    unit_query.iter()
-        .filter(|(_, _, parent, _)| {
-            tile_query.get(parent.get()).unwrap().v.manhattan(player_v) <= 1
-        })
-        .collect()
 }

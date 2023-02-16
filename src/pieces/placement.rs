@@ -8,12 +8,12 @@ use crate::manager::GameRes;
 use crate::tiles::TileRes;
 use crate::vectors::Vector2Int;
 
-use super::renderer::PieceAssets;
+// use super::renderer::PieceAssets;
 
 pub fn generate_pieces(
     mut commands: Commands,
     tile_res: Res<TileRes>,
-    assets: Res<PieceAssets>,
+    // assets: Res<PieceAssets>,
     data_assets: Res<DataAssets>,
     mut game_res: ResMut<GameRes>
 ) {
@@ -71,7 +71,7 @@ pub fn generate_pieces(
         data_assets.as_ref(),
         player_v,
         tile_res.as_ref(),
-        assets.as_ref()
+        // assets.as_ref()
     )
 }
 
@@ -81,7 +81,7 @@ fn spawn_level_pieces(
     data_assets: &DataAssets,
     player_v: Vector2Int,
     tile_res: &TileRes,
-    assets: &PieceAssets
+    // assets: &PieceAssets
 ) {
     let mut tile_pool: Vec<_> = tile_res.tiles.keys()
     .filter(|a| a.manhattan(player_v) > 1)
@@ -99,7 +99,6 @@ fn spawn_level_pieces(
                 name.into(),
                 v,
                 &tile_res,
-                &assets,
                 &data_assets
             );
         }

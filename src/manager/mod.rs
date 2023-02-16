@@ -10,12 +10,7 @@ mod player_input;
 #[derive(Clone, Debug, PartialEq)]
 pub enum CommandType {
     MapShift(Vector2Int, Vector2Int),
-    AnimationEnd,
-    NextLevel,
-    Upgrade(ActionKind),
-    Interact(ActionKind),
-    PickItem(Entity),
-    UseItem(Entity)
+    AnimationEnd
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -38,26 +33,12 @@ impl Plugin for ManagerPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
                     .with_system(player_input::shift_tiles)
-                    .with_system(player_input::next_level)
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::PlayerInput)
                     .with_system(clear_input_commands)
             )
-            .add_system_set(
-                SystemSet::on_update(GameState::Upgrade)
-                    .with_system(player_input::upgrade)
-                    .before("action")
-            )
-            .add_system(update_state.after("action"))
-            .add_system_set(
-                SystemSet::new()
-                    .with_system(player_input::use_item)
-                    .with_system(player_input::interact)
-                    .with_system(player_input::pick_item)
-                    .label("input_command")
-                    .before("action")
-            );
+            .add_system(update_state);
 
     }
 }

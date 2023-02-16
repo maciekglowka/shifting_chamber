@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use crate::actions::{ActionKind, ActionEvent};
 use crate::globals::MAP_SIZE;
 use crate::states::GameState;
-use crate::pieces::components::{Piece, Spawner, Unit};
 use crate::vectors::Vector2Int;
 
 mod renderer;
@@ -21,10 +20,6 @@ impl Plugin for TilePlugin {
             .add_system_set(
                 SystemSet::on_enter(GameState::MapInit)
                     .with_system(spawn_map)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameState::PlayerInput)
-                    .with_system(swap_action)
             );
     }
 }
@@ -93,71 +88,43 @@ pub fn shift_tiles(
     }
 }
 
-fn swap_action(
-    mut ev_command: EventReader<TileSwapEvent>,
-    tile_query: Query<(Entity, Option<&Children>), With<Tile>>,
-    piece_query: Query<(&Piece, Option<&Spawner>)>,
-    mut ev_action: EventWriter<ActionEvent>
-) {
-    for ev in ev_command.iter() {
-        for i in 0..2 {
-            let (e0, e1) = match i {
-                0 => (ev.0, ev.1),
-                _ => (ev.1, ev.0)
-            };
-            let t0 = tile_query.get(e0).unwrap();
-            let t1 = tile_query.get(e1).unwrap();
-            
-            if t1.1.iter().flat_map(|a| *a).any(|a| piece_query.get(*a).is_ok()) {
-                // if other tile has any piece on it, we do not spawn
-                continue;
-            }
-            for child in t0.1.iter().flat_map(|a| *a) {
-                if let Ok((_piece, Some(spawner))) = piece_query.get(*child) {
-                    ev_action.send(ActionEvent(ActionKind::SpawnPiece(t1.0, spawner.piece.clone())))
-                }
-            }
-        }
-    }
-}
+// pub fn can_shift(
+//     origin: Vector2Int,
+//     dir: Vector2Int,
+//     player_v: Vector2Int,
+//     unit_query: &Query<&Parent, With<Unit>>,
+//     res: &TileRes
+// ) -> bool {
+//     // TODO needs refactoring
+//     if res.tiles.get(&(dir + origin)).is_none() { return false; }
+//     let v = match dir {
+//         Vector2Int::LEFT | Vector2Int::RIGHT => {
+//             match player_v.x {
+//                 x if x == origin.x => Some(Vector2Int::new((origin+dir).x, player_v.y)),
+//                 x if x == (origin+dir).x => Some(Vector2Int::new(origin.x, player_v.y)),
+//                 _ => None
+//             }
+//         },
+//         Vector2Int::UP | Vector2Int::DOWN => {
+//             match player_v.y {
+//                 y if y == origin.y => Some(Vector2Int::new(player_v.x, (origin+dir).y)),
+//                 y if y == (origin+dir).y => Some(Vector2Int::new(player_v.x, origin.y)),
+//                 _ => None
+//             }
+//         },
+//         _ => None
+//     };
 
-pub fn can_shift(
-    origin: Vector2Int,
-    dir: Vector2Int,
-    player_v: Vector2Int,
-    unit_query: &Query<&Parent, With<Unit>>,
-    res: &TileRes
-) -> bool {
-    // TODO needs refactoring
-    if res.tiles.get(&(dir + origin)).is_none() { return false; }
-    let v = match dir {
-        Vector2Int::LEFT | Vector2Int::RIGHT => {
-            match player_v.x {
-                x if x == origin.x => Some(Vector2Int::new((origin+dir).x, player_v.y)),
-                x if x == (origin+dir).x => Some(Vector2Int::new(origin.x, player_v.y)),
-                _ => None
-            }
-        },
-        Vector2Int::UP | Vector2Int::DOWN => {
-            match player_v.y {
-                y if y == origin.y => Some(Vector2Int::new(player_v.x, (origin+dir).y)),
-                y if y == (origin+dir).y => Some(Vector2Int::new(player_v.x, origin.y)),
-                _ => None
-            }
-        },
-        _ => None
-    };
+//     if v.is_none() { return true; }
+//     let tile = res.tiles[&v.unwrap()];
 
-    if v.is_none() { return true; }
-    let tile = res.tiles[&v.unwrap()];
-
-    for parent in unit_query.iter() {
-        if parent.get() == tile {
-            return false
-        }
-    }
-    true
-}
+//     for parent in unit_query.iter() {
+//         if parent.get() == tile {
+//             return false
+//         }
+//     }
+//     true
+// }
 
 #[derive(Default, Resource)]
 pub struct TileRes {

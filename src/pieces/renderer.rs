@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use serde::Deserialize;
-use serde_yaml;
 use std::collections::HashMap;
 
 use crate::globals::{PIECE_Z, TILE_SIZE};

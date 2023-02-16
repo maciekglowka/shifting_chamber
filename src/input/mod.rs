@@ -14,11 +14,7 @@ impl Plugin for InputPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
                     .with_system(mouse_input)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::GameOver)
-                    .with_system(mouse_game_over)
-            );;
+            );
     }
 }
 
@@ -37,14 +33,6 @@ impl Plugin for InputPlugin {
 //     (KeyCode::W, Vector2Int::UP), (KeyCode::S, Vector2Int::DOWN),
 //     (KeyCode::A, Vector2Int::LEFT), (KeyCode::D, Vector2Int::RIGHT),
 // ];
-fn mouse_game_over (
-    buttons: Res<Input<MouseButton>>,
-    mut game_state: ResMut<State<GameState>>,
-) {
-    if buttons.just_pressed(MouseButton::Left) {
-        game_state.set(GameState::GameInit);
-    }
-}
 
 fn mouse_input (
     windows: Res<Windows>,
