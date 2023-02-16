@@ -8,8 +8,7 @@ pub const MAP_POINTS_MUL: u32 = 2;
 pub const MAX_INVENTORY: usize = 3;
 
 pub const TILE_Z: f32 = 20.;
-// relative to TILE_Z
-pub const PIECE_Z: f32 = 5.;
+pub const PIECE_Z: f32 = 25.;
 pub const PLAYER_Z: f32 = 30.;
 pub const OVERLAY_Z: f32 = 50.;
 pub const BUBBLE_Z: f32 = 55.;

@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-use crate::actions::ActionKind;
 use crate::player::Player;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
@@ -10,7 +9,8 @@ mod player_input;
 #[derive(Clone, Debug, PartialEq)]
 pub enum CommandType {
     MapShift(Vector2Int, Vector2Int),
-    AnimationEnd
+    AnimationEnd,
+    TurnEnd
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -38,6 +38,10 @@ impl Plugin for ManagerPlugin {
                 SystemSet::on_exit(GameState::PlayerInput)
                     .with_system(clear_input_commands)
             )
+            .add_system_set(
+                SystemSet::on_update(GameState::NPCMove)
+                    .with_system(turn_end)
+            )
             .add_system(update_state);
 
     }
@@ -61,6 +65,17 @@ fn start_map(
     game_state.set(GameState::PlayerInput).expect("Switching states failed");
 }
 
+pub fn turn_end(
+    mut ev_command: EventReader<CommandEvent>,
+    mut game_state: ResMut<State<GameState>>,
+) {
+    for ev in ev_command.iter() {
+        if let CommandType::TurnEnd = ev.0 {
+            game_state.set(GameState::TurnEnd);
+        }
+    }
+}
+
 pub fn update_state(
     mut ev_command: EventReader<CommandEvent>,
     mut game_state: ResMut<State<GameState>>,
@@ -71,10 +86,13 @@ pub fn update_state(
         if let CommandType::AnimationEnd = ev.0 {
             match game_state.current() {
                 GameState::TileShift => {
-                    game_state.set(GameState::ShiftResult);
+                    game_state.set(GameState::NPCMove).unwrap();
                 },
-                GameState::ShiftResult => {
-                    game_state.set(GameState::TurnEnd);
+                GameState::NPCMove => {
+                    game_state.set(GameState::MoveResult);
+                },
+                GameState::MoveResult => {
+                    game_state.set(GameState::NPCMove);
                 },
                 GameState::TurnEnd => {
                     match player_query.get_single() {

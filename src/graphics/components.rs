@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Renderer {
-    target: Entity
+pub struct PieceRenderer {
+    pub target: Entity
 }

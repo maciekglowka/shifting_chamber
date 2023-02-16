@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::collections::VecDeque;
 
 use crate::data::DataAssets;
 use crate::states::GameState;
@@ -14,8 +15,8 @@ pub struct PiecesPlugin;
 
 impl Plugin for PiecesPlugin {
     fn build(&self, app: &mut App) {
-        // app.add_startup_system(renderer::load_assets)
-        app.add_system_set(
+        app.init_resource::<PieceRes>()
+            .add_system_set(
                 SystemSet::on_exit(GameState::MapInit)
                     .with_system(placement::generate_pieces)
             )
@@ -24,9 +25,8 @@ impl Plugin for PiecesPlugin {
                     .with_system(systems::units::plan_moves)
             )
             .add_system_set(
-                SystemSet::on_enter(GameState::ShiftResult)
-                    .with_system(systems::units::move_units)
-                    .label("logic")
+                SystemSet::on_enter(GameState::NPCMove)
+                    .with_system(systems::units::move_walking)
                 )
             .add_system_set(
                 SystemSet::on_enter(GameState::TurnEnd)
@@ -35,24 +35,28 @@ impl Plugin for PiecesPlugin {
     }
 }
 
-pub fn spawn_piece_at_entity(
-    commands: &mut Commands,
-    name: String,
-    parent_entity: Entity,
-    // assets: &renderer::PieceAssets,
-    data_assets: &DataAssets
-) {
-    let entity = get_new_piece(commands, name, data_assets);
-    commands.entity(parent_entity)
-        .push_children(&[entity]);
+#[derive(Default, Resource)]
+pub struct PieceRes {
+    pub walking_queue: VecDeque<Entity>
 }
+
+// pub fn spawn_piece_at_entity(
+//     commands: &mut Commands,
+//     name: String,
+//     parent_entity: Entity,
+//     // assets: &renderer::PieceAssets,
+//     data_assets: &DataAssets
+// ) {
+//     let entity = get_new_piece(commands, name, data_assets);
+//     commands.entity(parent_entity)
+//         .push_children(&[entity]);
+// }
 
 fn spawn_piece_at_v(
     commands: &mut Commands,
     name: String,
     v: Vector2Int,
     tile_res: &TileRes,
-    // assets: &renderer::PieceAssets,
     data_assets: &DataAssets
 ) {
     let entity = get_new_piece(commands, name, data_assets);
@@ -63,7 +67,6 @@ fn spawn_piece_at_v(
 fn get_new_piece(
     commands: &mut Commands,
     name: String,
-    // assets: &renderer::PieceAssets,
     data_assets: &DataAssets
 ) -> Entity {
     let data_item = &data_assets.pieces[&name];
@@ -71,7 +74,6 @@ fn get_new_piece(
     let mut piece = commands.spawn((
             Name::new(name.to_string()),
             components::Piece { name },
-            // renderer::get_piece_renderer(&data_item.sprite, &assets)
         ));
 
     components::insert_from_list(&mut piece, &data_item.components);
