@@ -1,0 +1,10 @@
+
+Player:
+  sprite: ["units", 0]
+  components:
+    Damage:
+      value: 1
+      kind: !Hit
+    Occupier:
+    Health:
+      max: 3

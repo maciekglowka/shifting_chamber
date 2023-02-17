@@ -52,16 +52,17 @@ pub struct PieceRes {
 //         .push_children(&[entity]);
 // }
 
-fn spawn_piece_at_v(
+pub fn spawn_piece_at_v(
     commands: &mut Commands,
     name: String,
     v: Vector2Int,
     tile_res: &TileRes,
     data_assets: &DataAssets
-) {
+) -> Entity {
     let entity = get_new_piece(commands, name, data_assets);
     commands.entity(tile_res.tiles[&v])
         .push_children(&[entity]);
+    entity
 }
 
 fn get_new_piece(

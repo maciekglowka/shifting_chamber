@@ -1,10 +1,9 @@
 use bevy::prelude::*;
 
+use crate::data::DataAssets;
 use crate::globals::{MAP_SIZE, PIECE_Z};
 use crate::states::GameState;
-use crate::pieces::{
-    components::{Damage, Health},
-};
+use crate::pieces::spawn_piece_at_v;
 use crate::tiles;
 use crate::vectors::Vector2Int;
 
@@ -34,45 +33,39 @@ pub struct Player;
 
 fn spawn_player(
     mut commands: Commands,
-    // assets: Res<renderer::PieceAssets>,
-    tile_res: Res<tiles::TileRes>
-
+    tile_res: Res<tiles::TileRes>,
+    data_assets: Res<DataAssets>
 ) {
-    let v = get_player_v();
-    let Some(tile_entity) = tile_res.tiles.get(&v) else { return };
-    let entity = commands.spawn((
-            Player,
-            Health { max: 3, value: 3},
-            // renderer::get_piece_renderer(
-            //     &("units".to_string(), 0),
-            //     assets.as_ref()
-            // )
-        ))
-        .id();
-    commands.entity(*tile_entity)
-        .push_children(&[entity]);
+    let entity = spawn_piece_at_v(
+        &mut commands,
+        "Player".to_string(),
+        get_player_v(),
+        tile_res.as_ref(),
+        data_assets.as_ref()
+    );
+    commands.entity(entity).insert(Player);
 }
 
 fn unpin_player(
     mut commands: Commands,
-    mut player_query: Query<(Entity, &mut Transform, &GlobalTransform), With<Player>>
+    player_query: Query<Entity, With<Player>>
 ) {
-    let Ok((entity, mut transform, global_transform)) = player_query.get_single_mut()
+    let Ok(entity) = player_query.get_single()
         else { return };
-    let translation = global_transform.translation();
+    // let translation = global_transform.translation();
     commands.entity(entity).remove_parent();
-    transform.translation = translation;
+    // transform.translation = translation;
 }
 
 fn pin_player(
     mut commands: Commands,
-    mut player_query: Query<(Entity, &mut Transform), With<Player>>,
+    player_query: Query<Entity, With<Player>>,
     tile_res: Res<tiles::TileRes>
 ) {
     let v = get_player_v();
     let Some(tile_entity) = tile_res.tiles.get(&v) else { return };
-    let Ok((entity, mut transform)) = player_query.get_single_mut() else { return };
-    transform.translation = Vec3::new(0., 0., PIECE_Z);
+    let Ok(entity) = player_query.get_single() else { return };
+    // transform.translation = Vec3::new(0., 0., PIECE_Z);
     commands.entity(*tile_entity).push_children(&[entity]);
 }
 

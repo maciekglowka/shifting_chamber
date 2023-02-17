@@ -4,9 +4,10 @@ use serde::Deserialize;
 
 use super::{DataAssets, YamlAsset};
 
-const PIECE_FILES: [&str; 4] = [
+const PIECE_FILES: [&str; 5] = [
     "data_effects.yaml",
-    "data_fixtures.yaml", "data_items.yaml", "data_units.yaml"
+    "data_fixtures.yaml", "data_items.yaml", "data_units.yaml",
+    "data_player.yaml"
 ];
 
 #[derive(Deserialize)]
