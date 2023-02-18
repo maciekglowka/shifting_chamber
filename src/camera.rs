@@ -37,7 +37,7 @@ fn spawn_background(
     parent.spawn(
         SpriteBundle {
             sprite: Sprite {
-                color: Color::DARK_GRAY,
+                color: Color::BLACK,
                 ..Default::default()
             },
             transform: Transform::from_scale(Vec3::new(WINDOW_WIDTH, WINDOW_HEIGHT, 1.))

@@ -16,23 +16,30 @@ use super::{CommandEvent, CommandType, GameRes};
 
 pub fn shift_tiles(
     mut ev_command: EventReader<CommandEvent>,
-    player_query: Query<&Player>,
-    // unit_query: Query<&Parent, With<components::Unit>>,
+    player_query: Query<&Parent, With<Player>>,
+    occupier_query: Query<&Parent, With<components::Occupier>>,
     mut tile_query: Query<&mut tiles::Tile>,
     mut tile_res: ResMut<tiles::TileRes>,
     mut game_state: ResMut<State<GameState>>,
     mut ev_tile: EventWriter<tiles::TileSwapEvent>
 ) {
+    // TODO refactor the whole process
     for ev in ev_command.iter() {
         if let CommandType::MapShift(v0, v1) = ev.0 {
             if v0.manhattan(v1) != 1 { continue; }
 
-            // let player_v = player_query.get_single().unwrap().v;
+            let player_v = match player_query.get_single() {
+                Err(_) => continue,
+                Ok(parent) => {
+                    let Ok(tile) = tile_query.get(parent.get()) else { continue };
+                    tile.v
+                }
+            };
 
-            // if tiles::can_shift(v0, v1-v0, player_v, &unit_query, &tile_res) {
+            if tiles::can_shift(v0, v1-v0, player_v, &occupier_query, &tile_res) {
                 tiles::shift_tiles(v0, v1-v0, &mut tile_query, tile_res.as_mut(), &mut ev_tile);
                 game_state.set(GameState::TileShift).expect("Switching states failed");
-            // }
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::graphics::PieceRenderer;
 use crate::states::GameState;
 
 mod bubble;
@@ -23,6 +24,7 @@ impl Plugin for UIPlugin {
             .add_event::<bubble::BubbleEvent>()
             .add_system(bubble::spawn_bubbles)
             .add_system(bubble::update_bubbles)
+            .add_system(added_piece)
             .add_system_set(SystemSet::new()
                 .with_system(command_menu::update_menu)
             )
@@ -31,6 +33,7 @@ impl Plugin for UIPlugin {
             )
             .add_system_set(SystemSet::on_update(GameState::PlayerInput)
                 .with_system(command_menu::menu_click)
+                .with_system(overlays::update_overlays)
             )
             .add_system_set(SystemSet::on_exit(GameState::PlayerInput)
             )
@@ -47,6 +50,15 @@ fn player_input(
     mut ev_ui: EventWriter<ReloadUIEvent>
 ) {
     ev_ui.send(ReloadUIEvent);
+}
+
+fn added_piece(
+    mut ev_ui: EventWriter<ReloadUIEvent>,
+    query: Query<Entity, Added<PieceRenderer>>
+) {
+    for _ in query.iter() {
+        ev_ui.send(ReloadUIEvent);
+    }
 }
 
 pub fn load_assets(

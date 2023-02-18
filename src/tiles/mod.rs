@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
-use crate::actions::{ActionKind, ActionEvent};
 use crate::globals::MAP_SIZE;
+use crate::pieces::components::Occupier;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
@@ -88,43 +88,43 @@ pub fn shift_tiles(
     }
 }
 
-// pub fn can_shift(
-//     origin: Vector2Int,
-//     dir: Vector2Int,
-//     player_v: Vector2Int,
-//     unit_query: &Query<&Parent, With<Unit>>,
-//     res: &TileRes
-// ) -> bool {
-//     // TODO needs refactoring
-//     if res.tiles.get(&(dir + origin)).is_none() { return false; }
-//     let v = match dir {
-//         Vector2Int::LEFT | Vector2Int::RIGHT => {
-//             match player_v.x {
-//                 x if x == origin.x => Some(Vector2Int::new((origin+dir).x, player_v.y)),
-//                 x if x == (origin+dir).x => Some(Vector2Int::new(origin.x, player_v.y)),
-//                 _ => None
-//             }
-//         },
-//         Vector2Int::UP | Vector2Int::DOWN => {
-//             match player_v.y {
-//                 y if y == origin.y => Some(Vector2Int::new(player_v.x, (origin+dir).y)),
-//                 y if y == (origin+dir).y => Some(Vector2Int::new(player_v.x, origin.y)),
-//                 _ => None
-//             }
-//         },
-//         _ => None
-//     };
+pub fn can_shift(
+    origin: Vector2Int,
+    dir: Vector2Int,
+    player_v: Vector2Int,
+    occupier_query: &Query<&Parent, With<Occupier>>,
+    res: &TileRes
+) -> bool {
+    // TODO needs refactoring
+    if res.tiles.get(&(dir + origin)).is_none() { return false; }
+    let v = match dir {
+        Vector2Int::LEFT | Vector2Int::RIGHT => {
+            match player_v.x {
+                x if x == origin.x => Some(Vector2Int::new((origin+dir).x, player_v.y)),
+                x if x == (origin+dir).x => Some(Vector2Int::new(origin.x, player_v.y)),
+                _ => None
+            }
+        },
+        Vector2Int::UP | Vector2Int::DOWN => {
+            match player_v.y {
+                y if y == origin.y => Some(Vector2Int::new(player_v.x, (origin+dir).y)),
+                y if y == (origin+dir).y => Some(Vector2Int::new(player_v.x, origin.y)),
+                _ => None
+            }
+        },
+        _ => None
+    };
 
-//     if v.is_none() { return true; }
-//     let tile = res.tiles[&v.unwrap()];
+    if v.is_none() { return true; }
+    let tile = res.tiles[&v.unwrap()];
 
-//     for parent in unit_query.iter() {
-//         if parent.get() == tile {
-//             return false
-//         }
-//     }
-//     true
-// }
+    for parent in occupier_query.iter() {
+        if parent.get() == tile {
+            return false
+        }
+    }
+    true
+}
 
 #[derive(Default, Resource)]
 pub struct TileRes {

@@ -1,55 +1,52 @@
 use bevy::prelude::*;
 
 use crate::globals::{OVERLAY_Z, TILE_SIZE};
-// use crate::pieces::components::{Damage, Piece, Poisonous, Unit, Walking};
+use crate::graphics::PieceRenderer;
+use crate::pieces::components::Walking;
 
 #[derive(Component)]
 pub struct Overlay;
 
-// pub fn update_overlays(
-//     mut commands: Commands,
-//     overlay_query: Query<Entity, With<Overlay>>,
-//     unit_query: Query<(Entity, &Unit, Option<&Damage>, Option<&Poisonous>, Option<&Walking>), With<Piece>>,
-//     assets: Res<super::UiAssets>,
-//     mut ev_ui: EventReader<super::ReloadUIEvent>
-// ) {
-//     for _ in ev_ui.iter() {
-//         clear_overlays(&mut commands, &overlay_query);
-//         for (entity, unit, damage, poisonous, walking) in unit_query.iter() {
-//             let overlay = spawn_unit_overlay(&mut commands, damage, poisonous, unit, assets.as_ref());
-//             commands.entity(entity)
-//                 .add_child(overlay);
+pub fn update_overlays(
+    mut commands: Commands,
+    overlay_query: Query<Entity, With<Overlay>>,
+    renderer_query: Query<(Entity, &PieceRenderer)>,
+    walking_query: Query<&Walking>,
+    // assets: Res<super::UiAssets>,
+    mut ev_ui: EventReader<super::ReloadUIEvent>
+) {
+    if ev_ui.iter().len() == 0 { return };
+    // even if there are multiple events, run only once per frame
+    clear_overlays(&mut commands, &overlay_query);
+    for (entity, renderer) in renderer_query.iter() {
+        let Ok(walking) = walking_query.get(renderer.target) else { continue };
+        let Some(planned_move) = walking.planned_move else { continue };
+        let marker = commands.spawn((
+                Overlay,
+                SpriteBundle {
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::new(TILE_SIZE / 8., TILE_SIZE / 8.)),
+                        ..Default::default()
+                    },
+                    transform: Transform::from_translation(
+                        Vec3::new(0.75 *TILE_SIZE * planned_move.x as f32, 0.75 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
+                    ),
+                    ..Default::default()
+                }
+            )).id();
+        commands.entity(entity).add_child(marker);
+    }
+}
 
-//             if let Some(walking) = walking {
-//                 if let Some(planned_move) = walking.planned_move {
-//                     let marker = commands.spawn((
-//                         SpriteBundle {
-//                             sprite: Sprite {
-//                                 custom_size: Some(Vec2::new(TILE_SIZE / 4., TILE_SIZE / 4.)),
-//                                 ..Default::default()
-//                             },
-//                             transform: Transform::from_translation(
-//                                 Vec3::new(TILE_SIZE * planned_move.x as f32, TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
-//                             ),
-//                             ..Default::default()
-//                         }
-//                     )).id();
-//                     commands.entity(entity).add_child(marker);
-//                 }
-//             }
-//         }
-//     }
-// }
-
-// fn clear_overlays(
-//     commands: &mut Commands,
-//     query: &Query<Entity, With<Overlay>>
-// ) {
-//     for overlay in query.iter() {
-//         commands.entity(overlay)
-//             .despawn_recursive();
-//     }
-// }
+fn clear_overlays(
+    commands: &mut Commands,
+    query: &Query<Entity, With<Overlay>>
+) {
+    for overlay in query.iter() {
+        commands.entity(overlay)
+            .despawn_recursive();
+    }
+}
 
 // fn spawn_unit_overlay(
 //     commands: &mut Commands,

@@ -22,22 +22,29 @@ impl Plugin for PiecesPlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::PlayerInput)
-                    .with_system(systems::units::plan_moves)
+                    .with_system(systems::walking::plan_moves)
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::NPCMove)
-                    .with_system(systems::units::move_walking)
+                    .with_system(systems::walking::move_walking)
                 )
             .add_system_set(
-                SystemSet::on_enter(GameState::TurnEnd)
-                    .with_system(systems::units::kill_units)
-                );
+                SystemSet::on_enter(GameState::MoveResult)
+                    .with_system(systems::walking::walk_damage)
+                    .with_system(systems::walking::walk_back)
+                )
+            .add_system(systems::health::kill_units);
+            // .add_system_set(
+            //     SystemSet::on_enter(GameState::TurnEnd)
+            //         .with_system(systems::units::kill_units)
+            //     );
     }
 }
 
 #[derive(Default, Resource)]
 pub struct PieceRes {
-    pub walking_queue: VecDeque<Entity>
+    pub walking_queue: VecDeque<Entity>,
+    pub walkign_active: Option<Entity>
 }
 
 // pub fn spawn_piece_at_entity(

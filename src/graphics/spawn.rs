@@ -28,7 +28,7 @@ pub fn spawn_piece_renderer(
             tile.v.x as f32 * TILE_SIZE,
             tile.v.y as f32 * TILE_SIZE,
             PIECE_Z
-        );    
+        );
         commands.spawn((
             PieceRenderer { target: entity },
             SpriteSheetBundle {
@@ -38,5 +38,18 @@ pub fn spawn_piece_renderer(
                 ..Default::default()
             }
         ));
+    }
+}
+
+pub fn despawn_piece_renderer(
+    mut commands: Commands,
+    removed: RemovedComponents<Piece>,
+    renderer_query: Query<(Entity, &PieceRenderer)>
+) {
+    for parent_entity in removed.iter() {
+        for (entity, renderer) in renderer_query.iter() {
+            if parent_entity != renderer.target { continue };
+            commands.entity(entity).despawn_recursive();
+        }
     }
 }

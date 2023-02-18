@@ -86,7 +86,7 @@ pub fn update_state(
         if let CommandType::AnimationEnd = ev.0 {
             match game_state.current() {
                 GameState::TileShift => {
-                    game_state.set(GameState::NPCMove).unwrap();
+                    game_state.set(GameState::NPCMove);
                 },
                 GameState::NPCMove => {
                     game_state.set(GameState::MoveResult);

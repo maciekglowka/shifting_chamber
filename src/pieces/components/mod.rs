@@ -5,6 +5,7 @@ use bevy::{
 use serde::Deserialize;
 use serde_yaml;
 use serde_yaml::Mapping;
+use std::cmp;
 
 use crate::actions::DamageKind;
 use crate::vectors::Vector2Int;
@@ -34,6 +35,14 @@ pub struct Health {
     #[serde(skip)]
     pub value: u32,
     pub max: u32
+}
+impl Health {
+    pub fn add(&mut self, val: u32) {
+        self.value = cmp::min(self.value + val, self.max);
+    }
+    pub fn sub(&mut self, val: u32) {
+        self.value = self.value.saturating_sub(val);
+    }
 }
 impl PieceComponent for Health {
     fn init(&mut self) {
