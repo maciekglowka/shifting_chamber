@@ -8,6 +8,11 @@ Stair:
     Interactive:
       kind: !Descend
 
+Rock:
+  sprite: ["fixtures", 3]
+  components:
+    Occupier:
+
 Fire:
   points: 2
   sprite: ["fixtures", 1]

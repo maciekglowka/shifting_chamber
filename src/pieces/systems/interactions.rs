@@ -1,27 +1,23 @@
 use bevy::prelude::*;
 
 use crate::actions::{ActionEvent, ActionKind};
-use crate::manager::{CommandType, GameRes};
-use crate::player::Player;
-use crate::tiles::Tile;
 
 use super::super::components::{
-    Damage
+    Damage,
+    Health
 };
 
-// pub fn check_damage(
-//     player_query: Query<(Entity, &Player)>,
-//     piece_query: Query<(&Parent, &Damage), With<Piece>>,
-//     tile_query: Query<&Tile>,
-//     mut ev_action: EventWriter<ActionEvent>,
-// ) {
-//     for (parent, damage) in piece_query.iter() {
-//         let (player_entity, player) = player_query.get_single().unwrap();
-//         if !is_player_tile(&player, parent, &tile_query) {
-//             continue;
-//         }
-//         ev_action.send(ActionEvent(
-//             ActionKind::Damage(player_entity, damage.kind, damage.value)
-//         ));
-//     }
-// }
+pub fn interaction_damage(
+    health_query: Query<(Entity, &Parent), With<Health>>,
+    damage_query: Query<(Entity, &Damage, &Parent)>,
+    mut ev_action: EventWriter<ActionEvent>,
+) {
+    for (entity, parent) in health_query.iter() {
+        for (dmg_entity, damage, dmg_parent) in damage_query.iter() {
+            if parent != dmg_parent || entity == dmg_entity { continue };
+            ev_action.send(ActionEvent(
+                ActionKind::Damage(entity, damage.kind, damage.value)
+            ));
+        }
+    }
+}

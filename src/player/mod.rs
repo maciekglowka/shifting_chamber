@@ -16,15 +16,15 @@ impl Plugin for PlayerPlugin {
         app.add_system_set(
                 SystemSet::on_exit(GameState::MapInit)
                     .with_system(spawn_player)
-            )
-            .add_system_set(
-                SystemSet::on_enter(GameState::TileShift)
-                    .with_system(unpin_player)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameState::TileShift)
-                    .with_system(pin_player)
             );
+            // .add_system_set(
+            //     SystemSet::on_enter(GameState::TileShift)
+            //         .with_system(unpin_player)
+            // )
+            // .add_system_set(
+            //     SystemSet::on_exit(GameState::TileShift)
+            //         .with_system(pin_player)
+            // );
     }
 }
 

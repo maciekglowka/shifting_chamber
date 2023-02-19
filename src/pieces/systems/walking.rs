@@ -19,25 +19,41 @@ use super::super::{
 
 pub fn plan_moves(
     mut walking_query: Query<(Entity, &mut Walking, &Parent)>,
-    player_query: Query<&Parent, With<Player>>,
-    tile_query: Query<&Tile>,
+    obstacle_query: Query<(Entity, Option<&Occupier>, Option<&Damage>)>,
+    player_query: Query<(Entity, &Parent), With<Player>>,
+    tile_query: Query<(&Tile, Option<&Children>)>,
     tile_res: Res<TileRes>,
     mut piece_res: ResMut<PieceRes>
 ) {
     let mut queue = VecDeque::new();
-    let Ok(player_parent) = player_query.get_single() else { return };
+    let Ok((player_entity, player_parent)) = player_query.get_single() else { return };
     let player_v = match tile_query.get(player_parent.get()) {
-        Ok(t) => t.v,
+        Ok(t) => t.0.v,
         _ => return
     };
     for (entity, mut walking, parent) in walking_query.iter_mut() {
         let mut possible = Vec::new();
-        let Ok(tile) = tile_query.get(parent.get()) else { continue };
+        let Ok((tile, _)) = tile_query.get(parent.get()) else { continue };
         for dir in ORTHO_DIRECTIONS {
             let v = tile.v + dir;
-            if !tile_res.tiles.contains_key(&v) { continue }
-            let rank = player_v.manhattan(v);
-            possible.push((rank, dir));
+            let Some(next_tile_entity) = tile_res.tiles.get(&v) else { continue };
+            let Ok((_, next_tile_children)) = tile_query.get(*next_tile_entity) else { continue };
+            let mut rank = player_v.manhattan(v);
+            let mut valid = true;
+
+            if let Some(children) = next_tile_children {
+                for child in children.iter() {
+                    let Ok((obstacle_entity, occupier, damage)) = obstacle_query.get(*child) else { continue };
+                    if obstacle_entity == player_entity {
+                        rank -= 10;
+                        continue
+                    }
+                    if damage.is_some() { rank += 15; }
+                    if occupier.is_some() { valid = false; }
+                }
+            }
+
+            if valid { possible.push((rank, dir)); }
         }
         possible.sort_by(|a, b| a.0.cmp(&b.0));
         walking.planned_move = match possible.iter().next() {
@@ -69,9 +85,6 @@ pub fn move_walking(
     let Ok(tile) = tile_query.get(parent.get()) else { return };
     let v = tile.v + dir;
 
-    // let Some(new_tile_entity) = tile_res.tiles.get(&v) else { return };
-    // commands.entity(parent.get()).remove_children(&[entity]);
-    // commands.entity(*new_tile_entity).add_child(entity);
     change_parent_tile(&mut commands, entity, parent, v, tile_res.as_ref());
     piece_res.walkign_active = Some(entity);
 }

@@ -8,7 +8,10 @@ mod player_input;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum CommandType {
-    MapShift(Vector2Int, Vector2Int),
+    // MapShift(Vector2Int, Vector2Int),
+    SwitchTiles(Vector2Int),
+    ShiftTiles(Vector2Int),
+    PlayerWait,
     AnimationEnd,
     TurnEnd
 }
@@ -32,7 +35,9 @@ impl Plugin for ManagerPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
+                    .with_system(player_input::switch_tiles)
                     .with_system(player_input::shift_tiles)
+                    .with_system(player_input::wait)
             )
             .add_system_set(
                 SystemSet::on_exit(GameState::PlayerInput)

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::actions::{ActionEvent, ActionKind};
 use crate::states::GameState;
 use crate::manager::{CommandEvent, CommandType};
 use crate::vectors::Vector2Int;
@@ -13,52 +14,88 @@ impl Plugin for InputPlugin {
         app.init_resource::<InputRes>()
             .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
-                    .with_system(mouse_input)
+                    // .with_system(mouse_input)
+                    .with_system(keys)
             );
     }
 }
 
-// fn keys(
-//     keys: ResMut<Input<KeyCode>>,
-//     mut ev_command: EventWriter<CommandEvent>
+fn keys(
+    keys: ResMut<Input<KeyCode>>,
+    mut res: ResMut<InputRes>,
+    mut ev_command: EventWriter<CommandEvent>
+) {
+    for (key, dir) in KEY_MAPPING {
+        if !keys.just_pressed(key) { continue; }
+        let command = match res.mode {
+            InputMode::TileShift => CommandType::ShiftTiles(dir),
+            InputMode::TileSwitch => CommandType::SwitchTiles(dir)
+        };
+        ev_command.send(CommandEvent(command));
+        // only one command can be sent
+        break;
+    }
+    if keys.just_pressed(KeyCode::Return) {
+        ev_command.send(CommandEvent(CommandType::PlayerWait));
+    }
+    if keys.just_pressed(KeyCode::Space) {
+        res.mode = match res.mode {
+            InputMode::TileSwitch => InputMode::TileShift,
+            InputMode::TileShift => InputMode::TileSwitch
+        }
+    }
+}
+
+const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
+    (KeyCode::W, Vector2Int::UP), (KeyCode::S, Vector2Int::DOWN),
+    (KeyCode::A, Vector2Int::LEFT), (KeyCode::D, Vector2Int::RIGHT),
+];
+
+// fn mouse_input (
+//     windows: Res<Windows>,
+//     camera_query: Query<(&Camera, &GlobalTransform)>,
+//     buttons: Res<Input<MouseButton>>,
+//     mut res: ResMut<InputRes>,
+//     mut ev_command: EventWriter<CommandEvent>,
+//     mut ev_action: EventWriter<ActionEvent>
 // ) {
-//     for (key, dir) in KEY_MAPPING {
-//         if keys.just_pressed(key) {
-//             ev_command.send(CommandEvent(CommandType::MapShift(-1 * dir)));
+//     if buttons.just_pressed(MouseButton::Left) {
+//         if let Some(world_v) = utils::mouse_to_world(&windows, &camera_query) {
+//             if let Some(v) = utils::world_to_tile_position(world_v) {
+//                 match res.mode {
+//                     InputMode::TileShift => match res.selected {
+//                         Some(s) => {
+//                             ev_command.send(
+//                                 CommandEvent(CommandType::MapShift(v, s))
+//                             );
+//                             res.selected = None;
+//                         },
+//                         None => res.selected = Some(v)
+//                     },
+//                     InputMode::Place => {
+//                         ev_action.send(ActionEvent(
+//                             ActionKind::SpawnPiece(v, "Rock".to_string())
+//                         ));
+//                     }
+//                 }
+
+//             }
 //         }
 //     }
 // }
 
-// const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
-//     (KeyCode::W, Vector2Int::UP), (KeyCode::S, Vector2Int::DOWN),
-//     (KeyCode::A, Vector2Int::LEFT), (KeyCode::D, Vector2Int::RIGHT),
-// ];
-
-fn mouse_input (
-    windows: Res<Windows>,
-    camera_query: Query<(&Camera, &GlobalTransform)>,
-    buttons: Res<Input<MouseButton>>,
-    mut res: ResMut<InputRes>,
-    mut ev_command: EventWriter<CommandEvent>
-) {
-    if buttons.just_pressed(MouseButton::Left) {
-        if let Some(world_v) = utils::mouse_to_world(&windows, &camera_query) {
-            if let Some(v) = utils::world_to_tile_position(world_v) {
-                match res.selected {
-                    Some(s) => {
-                        ev_command.send(
-                            CommandEvent(CommandType::MapShift(v, s))
-                        );
-                        res.selected = None;
-                    },
-                    None => res.selected = Some(v)
-                }
-            }
-        }
+pub enum InputMode {
+    TileShift,
+    TileSwitch
+}
+impl Default for InputMode {
+    fn default() -> Self {
+        InputMode::TileSwitch
     }
 }
 
 #[derive(Default, Resource)]
 pub struct InputRes {
-    pub selected: Option<Vector2Int>
+    pub selected: Option<Vector2Int>,
+    pub mode: InputMode
 }

@@ -7,15 +7,11 @@ use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
 mod renderer;
-
-pub struct TileSwapEvent(Entity, Entity);
-
 pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<TileRes>()
-            .add_event::<TileSwapEvent>()
             .add_startup_system(renderer::load_assets)
             .add_system_set(
                 SystemSet::on_enter(GameState::MapInit)
@@ -60,7 +56,35 @@ pub fn shift_tiles(
     dir: Vector2Int,
     tile_query: &mut Query<&mut Tile>,
     res: &mut TileRes,
-    ev_tile: &mut EventWriter<TileSwapEvent>
+) {
+    let base = match dir {
+        Vector2Int::DOWN => Vector2Int::new(origin.x, MAP_SIZE-1),
+        Vector2Int::UP => Vector2Int::new(origin.x, 0),
+        Vector2Int::RIGHT => Vector2Int::new(0, origin.y),
+        Vector2Int::LEFT => Vector2Int::new(MAP_SIZE-1, origin.y),
+        _ => return
+    };
+    // TODO avoid cloning?
+    let current_tiles = res.tiles.clone();
+    for i in 0..MAP_SIZE {
+        let v = base + i * dir;
+        let new_v = match i {
+            a if a < MAP_SIZE-1 => v + dir,
+            _ => base
+        };
+        info!("V: {:?}, new_v: {:?}", v, new_v);
+
+        let entity = current_tiles[&v];
+        if let Ok(mut tile) = tile_query.get_mut(entity) { tile.v = new_v; }
+        res.tiles.insert(new_v, entity);
+    }
+}
+
+pub fn switch_tiles(
+    origin: Vector2Int,
+    dir: Vector2Int,
+    tile_query: &mut Query<&mut Tile>,
+    res: &mut TileRes,
 ) {
     let (base, offset) = match dir {
         Vector2Int::LEFT | Vector2Int::RIGHT => {
@@ -84,46 +108,44 @@ pub fn shift_tiles(
 
         res.tiles.insert(v0, e1);
         res.tiles.insert(v1, e0);
-        ev_tile.send(TileSwapEvent(e0, e1));
     }
 }
 
-pub fn can_shift(
-    origin: Vector2Int,
-    dir: Vector2Int,
+pub fn can_switch(
     player_v: Vector2Int,
-    occupier_query: &Query<&Parent, With<Occupier>>,
+    dir: Vector2Int,
     res: &TileRes
 ) -> bool {
     // TODO needs refactoring
-    if res.tiles.get(&(dir + origin)).is_none() { return false; }
-    let v = match dir {
-        Vector2Int::LEFT | Vector2Int::RIGHT => {
-            match player_v.x {
-                x if x == origin.x => Some(Vector2Int::new((origin+dir).x, player_v.y)),
-                x if x == (origin+dir).x => Some(Vector2Int::new(origin.x, player_v.y)),
-                _ => None
-            }
-        },
-        Vector2Int::UP | Vector2Int::DOWN => {
-            match player_v.y {
-                y if y == origin.y => Some(Vector2Int::new(player_v.x, (origin+dir).y)),
-                y if y == (origin+dir).y => Some(Vector2Int::new(player_v.x, origin.y)),
-                _ => None
-            }
-        },
-        _ => None
-    };
-
-    if v.is_none() { return true; }
-    let tile = res.tiles[&v.unwrap()];
-
-    for parent in occupier_query.iter() {
-        if parent.get() == tile {
-            return false
-        }
-    }
+    if res.tiles.get(&(player_v + dir)).is_none() { return false; }
     true
+    // let v = match dir {
+    //     Vector2Int::LEFT | Vector2Int::RIGHT => {
+    //         match player_v.x {
+    //             x if x == origin.x => Some(Vector2Int::new((origin+dir).x, player_v.y)),
+    //             x if x == (origin+dir).x => Some(Vector2Int::new(origin.x, player_v.y)),
+    //             _ => None
+    //         }
+    //     },
+    //     Vector2Int::UP | Vector2Int::DOWN => {
+    //         match player_v.y {
+    //             y if y == origin.y => Some(Vector2Int::new(player_v.x, (origin+dir).y)),
+    //             y if y == (origin+dir).y => Some(Vector2Int::new(player_v.x, origin.y)),
+    //             _ => None
+    //         }
+    //     },
+    //     _ => None
+    // };
+
+    // if v.is_none() { return true; }
+    // let tile = res.tiles[&v.unwrap()];
+
+    // for parent in occupier_query.iter() {
+    //     if parent.get() == tile {
+    //         return false
+    //     }
+    // }
+    // true
 }
 
 #[derive(Default, Resource)]
