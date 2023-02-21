@@ -30,6 +30,10 @@ pub struct Damage {
 }
 impl PieceComponent for Damage {}
 
+#[derive(Component, Deserialize)]
+pub struct Fixed;
+impl PieceComponent for Fixed {}
+
 #[derive(Component, Default, Deserialize)]
 pub struct Health {
     #[serde(skip)]
@@ -73,6 +77,7 @@ pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {
 fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) {
     match name {
         "Damage" => insert::<Damage>(ec, data),
+        "Fixed" => insert::<Fixed>(ec, data),
         "Health" => insert::<Health>(ec, data),
         "Occupier" => insert::<Occupier>(ec, data),
         "Walking" => insert::<Walking>(ec, data),

@@ -84,6 +84,10 @@ pub fn move_walking(
     let Some(dir) = walking.planned_move else { return };
     let Ok(tile) = tile_query.get(parent.get()) else { return };
     let v = tile.v + dir;
+    if !tile_res.tiles.contains_key(&v) {
+        // commands.entity(entity).despawn_recursive();
+        return;
+    }
 
     change_parent_tile(&mut commands, entity, parent, v, tile_res.as_ref());
     piece_res.walkign_active = Some(entity);

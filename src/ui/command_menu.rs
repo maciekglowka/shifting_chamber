@@ -47,17 +47,17 @@ pub fn update_menu(
                     },
                     ..Default::default()
                 }
-            ))
-            .with_children(|mut parent| {
-                for command in game_res.input_commands.iter() {
-                    add_button(
-                        &mut parent,
-                        &assets,
-                        &format!("{:?}", command),
-                        command.clone()
-                    );
-                }
-            });
+            ));
+            // .with_children(|mut parent| {
+            //     for command in game_res.input_commands.iter() {
+            //         add_button(
+            //             &mut parent,
+            //             &assets,
+            //             &format!("{:?}", command),
+            //             command.clone()
+            //         );
+            //     }
+            // });
     }
 }
 

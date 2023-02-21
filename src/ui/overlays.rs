@@ -26,10 +26,11 @@ pub fn update_overlays(
                 SpriteBundle {
                     sprite: Sprite {
                         custom_size: Some(Vec2::new(TILE_SIZE / 8., TILE_SIZE / 8.)),
+                        color: Color::MAROON,
                         ..Default::default()
                     },
                     transform: Transform::from_translation(
-                        Vec3::new(0.75 *TILE_SIZE * planned_move.x as f32, 0.75 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
+                        Vec3::new(0.5 *TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
                     ),
                     ..Default::default()
                 }

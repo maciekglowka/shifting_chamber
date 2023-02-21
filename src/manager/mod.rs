@@ -1,5 +1,7 @@
 use bevy::prelude::*;
+use std::cmp;
 
+use crate::pieces::components::Walking;
 use crate::player::Player;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
@@ -11,6 +13,7 @@ pub enum CommandType {
     // MapShift(Vector2Int, Vector2Int),
     SwitchTiles(Vector2Int),
     ShiftTiles(Vector2Int),
+    Punch(Vector2Int),
     PlayerWait,
     AnimationEnd,
     TurnEnd
@@ -37,11 +40,8 @@ impl Plugin for ManagerPlugin {
                 SystemSet::on_update(GameState::PlayerInput)
                     .with_system(player_input::switch_tiles)
                     .with_system(player_input::shift_tiles)
+                    .with_system(player_input::punch)
                     .with_system(player_input::wait)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameState::PlayerInput)
-                    .with_system(clear_input_commands)
             )
             .add_system_set(
                 SystemSet::on_update(GameState::NPCMove)
@@ -67,7 +67,8 @@ fn start_map(
     mut res: ResMut<GameRes>
 ) {
     res.level += 1;
-    game_state.set(GameState::PlayerInput).expect("Switching states failed");
+    res.ap = 0;
+    game_state.set(GameState::TurnStart).expect("Switching states failed");
 }
 
 pub fn turn_end(
@@ -85,13 +86,22 @@ pub fn update_state(
     mut ev_command: EventReader<CommandEvent>,
     mut game_state: ResMut<State<GameState>>,
     player_query: Query<&Player>,
-    res: Res<GameRes>
+    npc_query: Query<&Walking>,
+    mut res: ResMut<GameRes>
 ) {
     for ev in ev_command.iter() {
         if let CommandType::AnimationEnd = ev.0 {
             match game_state.current() {
+                GameState::TurnStart => {
+                    res.ap = cmp::min(2, res.ap + 1);
+                    game_state.set(GameState::PlayerInput);
+                },
                 GameState::TileShift => {
-                    game_state.set(GameState::NPCMove);
+                    res.ap = res.ap.saturating_sub(1);
+                    match res.ap {
+                        0 => game_state.set(GameState::NPCMove),
+                        _ => game_state.set(GameState::PlayerInput)
+                    };
                 },
                 GameState::NPCMove => {
                     game_state.set(GameState::MoveResult);
@@ -102,11 +112,13 @@ pub fn update_state(
                 GameState::TurnEnd => {
                     match player_query.get_single() {
                         Ok(_) => {
-                            if res.score >= res.next_upgrade {
-                                game_state.set(GameState::Upgrade);
-                                return;
+                            // if res.score >= res.next_upgrade {
+                            //     game_state.set(GameState::Upgrade);
+                            //     return;
+                            if npc_query.iter().len() == 0 {
+                                game_state.set(GameState::MapInit);
                             } else {
-                                game_state.set(GameState::PlayerInput);
+                                game_state.set(GameState::TurnStart);
                             }          
                         },
                         _ => { game_state.set(GameState::GameOver); },
@@ -115,13 +127,9 @@ pub fn update_state(
                 _ => ()
             }
         }
+        // change state only once
+        break;
     }
-}
-
-fn clear_input_commands(
-    mut res: ResMut<GameRes>
-) {
-    res.input_commands.clear();
 }
 
 #[derive(Default, Resource)]
@@ -130,5 +138,5 @@ pub struct GameRes {
     pub level_history: Vec<String>,
     pub score: u32,
     pub next_upgrade: u32,
-    pub input_commands: Vec<CommandType>
+    pub ap: u32
 }

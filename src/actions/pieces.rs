@@ -12,15 +12,15 @@ pub fn spawn_piece(
     data_assets: Res<DataAssets>,
     tile_res: Res<TileRes>
 ) {
-    for ev in ev_action.iter() {
-        if let ActionKind::SpawnPiece(v, name) = ev.0.clone() {
-            spawn_piece_at_v(
-                &mut commands,
-                name,
-                v,
-                tile_res.as_ref(),
-                data_assets.as_ref()
-            );
-        }
-    }
+    // for ev in ev_action.iter() {
+    //     if let ActionKind::SpawnPiece(v, name) = ev.0.clone() {
+    //         spawn_piece_at_v(
+    //             &mut commands,
+    //             name,
+    //             v,
+    //             tile_res.as_ref(),
+    //             data_assets.as_ref()
+    //         );
+    //     }
+    // }
 }

@@ -19,6 +19,10 @@ impl Plugin for GraphicsPlugin {
                 CoreStage::PostUpdate, spawn::despawn_piece_renderer
             )
             .add_system_set(
+                SystemSet::on_update(GameState::TurnStart)
+                    .with_system(animate::update_pieces)
+            )
+            .add_system_set(
                 SystemSet::on_update(GameState::TileShift)
                     .with_system(animate::update_tiles)
                     .with_system(animate::update_pieces)

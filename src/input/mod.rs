@@ -13,11 +13,19 @@ impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputRes>()
             .add_system_set(
+                SystemSet::on_enter(GameState::PlayerInput)
+                    .with_system(reset_input)
+            )
+            .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
                     // .with_system(mouse_input)
                     .with_system(keys)
             );
     }
+}
+
+fn reset_input(mut res: ResMut<InputRes>) {
+    // res.mode = InputMode::TileShift;
 }
 
 fn keys(
@@ -29,7 +37,8 @@ fn keys(
         if !keys.just_pressed(key) { continue; }
         let command = match res.mode {
             InputMode::TileShift => CommandType::ShiftTiles(dir),
-            InputMode::TileSwitch => CommandType::SwitchTiles(dir)
+            InputMode::TileSwitch => CommandType::SwitchTiles(dir),
+            InputMode::Punch => CommandType::Punch(dir),
         };
         ev_command.send(CommandEvent(command));
         // only one command can be sent
@@ -41,8 +50,12 @@ fn keys(
     if keys.just_pressed(KeyCode::Space) {
         res.mode = match res.mode {
             InputMode::TileSwitch => InputMode::TileShift,
-            InputMode::TileShift => InputMode::TileSwitch
-        }
+            InputMode::TileShift => InputMode::TileSwitch,
+            InputMode::Punch => InputMode::Punch
+        };
+        info!("Mode: {:?} set", res.mode);
+        // // changing mode takes a turn as well
+        // ev_command.send(CommandEvent(CommandType::PlayerWait));
     }
 }
 
@@ -84,13 +97,15 @@ const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
 //     }
 // }
 
+#[derive(Debug)]
 pub enum InputMode {
     TileShift,
-    TileSwitch
+    TileSwitch,
+    Punch
 }
 impl Default for InputMode {
     fn default() -> Self {
-        InputMode::TileSwitch
+        InputMode::TileShift
     }
 }
 

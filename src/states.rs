@@ -3,6 +3,7 @@ pub enum GameState {
     LoadAssets,
     GameInit,
     MapInit,
+    TurnStart,
     PlayerInput,
     TileShift,
     NPCMove,

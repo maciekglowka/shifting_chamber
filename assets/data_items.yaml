@@ -1,22 +1,22 @@
 # elements with `points` not set won't be spawned randomly
 # (only explicitly by level type or specific action)
 
-Heal:
-  points: -1
-  sprite: ["items", 0]
-  components:
-    Collectable:
-    Manual:
-      kind: !Heal 2
-    Item:
+# Heal:
+#   points: -1
+#   sprite: ["items", 0]
+#   components:
+#     Collectable:
+#     Manual:
+#       kind: !Heal 2
+#     Item:
 
-HealPoison:
-  sprite: ["items", 2]
-  components:
-    Collectable:
-    Manual:
-      kind: !HealPoison
-    Item:
+# HealPoison:
+#   sprite: ["items", 2]
+#   components:
+#     Collectable:
+#     Manual:
+#       kind: !HealPoison
+#     Item:
 
 Coin:
   sprite: ["items", 1]
@@ -25,11 +25,11 @@ Coin:
       kind: !Score 1
     Item:
 
-MagicalShieldField:
-  points: -1
-  sprite: ["items", 3]
-  components:
-    Collectable:
-    Manual:
-      kind: !ApplyEffect "MagicalShield"
-    Item:
+# MagicalShieldField:
+#   points: -1
+#   sprite: ["items", 3]
+#   components:
+#     Collectable:
+#     Manual:
+#       kind: !ApplyEffect "MagicalShield"
+#     Item:

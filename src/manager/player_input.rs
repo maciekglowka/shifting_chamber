@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::cmp;
 
-use crate::actions::ActionEvent;
+use crate::actions::{ActionEvent, ActionKind, DamageKind};
 use crate::pieces::components;
 use crate::player::Player;
 use crate::states::GameState;
@@ -19,6 +19,39 @@ pub fn wait(
 ) {
     for ev in ev_command.iter() {
         if let CommandType::PlayerWait = ev.0 {
+            game_state.set(GameState::NPCMove).expect("Switching states failed");
+        }
+    }
+}
+
+pub fn punch(
+    mut ev_command: EventReader<CommandEvent>,
+    player_query: Query<&Parent, With<Player>>,
+    health_query: Query<&components::Health>,
+    mut tile_query: Query<(&mut tiles::Tile, &Children)>,
+    mut tile_res: ResMut<tiles::TileRes>,
+    mut game_state: ResMut<State<GameState>>,
+    mut ev_action: EventWriter<ActionEvent>,
+) {
+    for ev in ev_command.iter() {
+        if let CommandType::Punch(dir) = ev.0 {
+            let player_v = match player_query.get_single() {
+                Err(_) => continue,
+                Ok(parent) => {
+                    let Ok((tile, _)) = tile_query.get(parent.get()) else { continue };
+                    tile.v
+                }
+            };
+            let Some(target_tile) = tile_res.tiles.get(&(player_v + dir)) else { continue };
+            let Ok((_, tile_children)) = tile_query.get(*target_tile) else { continue };
+            for entity in tile_children.iter() {
+                if let Ok(_) = health_query.get(*entity) {
+                    ev_action.send(
+                        ActionEvent(ActionKind::Damage(*entity, DamageKind::Hit, 1)
+                    ))
+                }
+            }
+
             game_state.set(GameState::TileShift).expect("Switching states failed");
         }
     }
@@ -28,6 +61,8 @@ pub fn switch_tiles(
     mut ev_command: EventReader<CommandEvent>,
     player_query: Query<&Parent, With<Player>>,
     mut tile_query: Query<&mut tiles::Tile>,
+    tile_children: Query<&Children, With<tiles::Tile>>,
+    fixed_query: Query<&components::Fixed>,
     mut tile_res: ResMut<tiles::TileRes>,
     mut game_state: ResMut<State<GameState>>
 ) {
@@ -41,12 +76,37 @@ pub fn switch_tiles(
                 }
             };
             if tiles::can_switch(player_v, dir, &tile_res) {
-                tiles::switch_tiles(player_v, dir, &mut tile_query, tile_res.as_mut());
+                tiles::switch_tiles(player_v, dir, &mut tile_query, &tile_children, &fixed_query, tile_res.as_mut());
                 game_state.set(GameState::TileShift).expect("Switching states failed");
             }
         }
     }
 }
+
+// pub fn shift_tiles(
+//     mut commands: Commands,
+//     mut ev_command: EventReader<CommandEvent>,
+//     player_query: Query<&Parent, With<Player>>,
+//     tile_query: Query<&tiles::Tile>,
+//     tile_children: Query<&Children, With<tiles::Tile>>,
+//     occupier_query: Query<&components::Occupier>,
+//     mut tile_res: ResMut<tiles::TileRes>,
+//     mut game_state: ResMut<State<GameState>>
+// ) {
+//     for ev in ev_command.iter() {
+//         if let CommandType::ShiftTiles(dir) = ev.0 {
+//             let player_v = match player_query.get_single() {
+//                 Err(_) => continue,
+//                 Ok(parent) => {
+//                     let Ok(tile) = tile_query.get(parent.get()) else { continue };
+//                     tile.v
+//                 }
+//             };
+//             tiles::shift_tiles(&mut commands, player_v, dir, &tile_children, &occupier_query, tile_res.as_mut());
+//             game_state.set(GameState::TileShift).expect("Switching states failed");
+//         }
+//     }
+// }
 
 pub fn shift_tiles(
     mut ev_command: EventReader<CommandEvent>,
@@ -69,35 +129,3 @@ pub fn shift_tiles(
         }
     }
 }
-
-
-
-// pub fn shift_tiles(
-//     mut ev_command: EventReader<CommandEvent>,
-//     player_query: Query<&Parent, With<Player>>,
-//     occupier_query: Query<&Parent, With<components::Occupier>>,
-//     mut tile_query: Query<&mut tiles::Tile>,
-//     mut tile_res: ResMut<tiles::TileRes>,
-//     mut game_state: ResMut<State<GameState>>,
-//     mut ev_tile: EventWriter<tiles::TileSwapEvent>
-// ) {
-//     // TODO refactor the whole process
-//     for ev in ev_command.iter() {
-//         if let CommandType::MapShift(v0, v1) = ev.0 {
-//             if v0.manhattan(v1) != 1 { continue; }
-
-//             let player_v = match player_query.get_single() {
-//                 Err(_) => continue,
-//                 Ok(parent) => {
-//                     let Ok(tile) = tile_query.get(parent.get()) else { continue };
-//                     tile.v
-//                 }
-//             };
-
-//             if tiles::can_shift(v0, v1-v0, player_v, &occupier_query, &tile_res) {
-//                 tiles::shift_tiles(v0, v1-v0, &mut tile_query, tile_res.as_mut(), &mut ev_tile);
-//                 game_state.set(GameState::TileShift).expect("Switching states failed");
-//             }
-//         }
-//     }
-// }
