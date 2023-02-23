@@ -9,6 +9,7 @@ pub fn get_tile_renderer(
 ) -> SpriteSheetBundle {
     let mut sprite = TextureAtlasSprite::new(0);
     sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
+    sprite.color = Color::DARK_GRAY;
 
     SpriteSheetBundle {
         sprite: sprite,

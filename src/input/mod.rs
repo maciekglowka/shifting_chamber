@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::actions::{ActionEvent, ActionKind};
 use crate::states::GameState;
 use crate::manager::{CommandEvent, CommandType};
+use crate::ui::ReloadUIEvent;
 use crate::vectors::Vector2Int;
 
 mod utils;
@@ -31,14 +32,14 @@ fn reset_input(mut res: ResMut<InputRes>) {
 fn keys(
     keys: ResMut<Input<KeyCode>>,
     mut res: ResMut<InputRes>,
-    mut ev_command: EventWriter<CommandEvent>
+    mut ev_command: EventWriter<CommandEvent>,
+    mut ev_ui: EventWriter<ReloadUIEvent>
 ) {
     for (key, dir) in KEY_MAPPING {
         if !keys.just_pressed(key) { continue; }
         let command = match res.mode {
             InputMode::TileShift => CommandType::ShiftTiles(dir),
             InputMode::TileSwitch => CommandType::SwitchTiles(dir),
-            InputMode::Punch => CommandType::Punch(dir),
         };
         ev_command.send(CommandEvent(command));
         // only one command can be sent
@@ -50,10 +51,10 @@ fn keys(
     if keys.just_pressed(KeyCode::Space) {
         res.mode = match res.mode {
             InputMode::TileSwitch => InputMode::TileShift,
-            InputMode::TileShift => InputMode::TileSwitch,
-            InputMode::Punch => InputMode::Punch
+            InputMode::TileShift => InputMode::TileSwitch
         };
-        info!("Mode: {:?} set", res.mode);
+        ev_ui.send(ReloadUIEvent);
+        // info!("Mode: {:?} set", res.mode);
         // // changing mode takes a turn as well
         // ev_command.send(CommandEvent(CommandType::PlayerWait));
     }
@@ -100,8 +101,15 @@ const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
 #[derive(Debug)]
 pub enum InputMode {
     TileShift,
-    TileSwitch,
-    Punch
+    TileSwitch
+}
+impl InputMode {
+    pub fn to_str(&self) -> &str {
+        match self {
+            Self::TileShift => "TileShift",
+            Self::TileSwitch => "TileSwitch"
+        }
+    }
 }
 impl Default for InputMode {
     fn default() -> Self {

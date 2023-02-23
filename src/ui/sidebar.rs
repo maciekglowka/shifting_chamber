@@ -2,17 +2,12 @@ use bevy::prelude::*;
 
 // use crate::actions::{ActionEvent, ActionKind, StatKind};
 use crate::globals::{OVERLAY_FONT_SIZE, SIDEBAR_WIDTH};
+use crate::input::InputRes;
 use crate::manager::{CommandEvent, CommandType, GameRes};
 use crate::player::Player;
-// use crate::pieces::components::{
-//     get_effective_dmg,
-//     Damage,
-//     Manual,
-//     Poisoned,
-//     Protect,
-//     Temporary,
-//     Unit
-// };
+use crate::pieces::components::{
+    Health
+};
 
 #[derive(Component)]
 pub struct Sidebar;
@@ -87,8 +82,10 @@ pub struct Sidebar;
 pub fn update_sidebar(
     mut commands: Commands,
     sidebar_query: Query<Entity, With<Sidebar>>,
+    player_query: Query<&Health, With<Player>>,
     assets: Res<super::UiAssets>,
     game_res: Res<crate::manager::GameRes>,
+    input_res: Res<InputRes>,
     mut ev_ui: EventReader<super::ReloadUIEvent>
 ) {
     for _ in ev_ui.iter() {
@@ -111,6 +108,15 @@ pub fn update_sidebar(
             ))
             .with_children(|parent| {
                 spawn_text(parent, assets.as_ref(), format!("AP: {}", game_res.ap));
+                if let Ok(health) = player_query.get_single() {
+                    spawn_text(parent, assets.as_ref(), format!("HP: {}/{}", health.value, health.max));
+                }
+                spawn_text(parent, assets.as_ref(), format!("Mode: {}", input_res.mode.to_str()));
+                spawn_text(parent, assets.as_ref(), "---".to_string());
+                spawn_text(parent, assets.as_ref(), "WSAD: move".to_string());
+                spawn_text(parent, assets.as_ref(), "Space: change mode".to_string());
+                spawn_text(parent, assets.as_ref(), "Enter: wait (save AP)".to_string());
+
             });
     }
 }
