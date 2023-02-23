@@ -8,7 +8,6 @@ use crate::vectors::Vector2Int;
 
 pub mod components;
 mod placement;
-// pub mod renderer;
 mod systems;
 
 pub struct PiecesPlugin;
@@ -36,7 +35,7 @@ impl Plugin for PiecesPlugin {
             .add_system(systems::health::kill_units)
             .add_system_set(
                 SystemSet::on_enter(GameState::TurnEnd)
-                    .with_system(systems::interactions::interaction_damage)
+                    .with_system(systems::interaction::interaction_damage)
                 );
     }
 }

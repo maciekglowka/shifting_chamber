@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use std::collections::HashMap;
 
 use crate::globals::MAP_SIZE;
-use crate::pieces::components::{Fixed, Occupier};
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
@@ -125,8 +124,6 @@ pub fn switch_tiles(
     origin: Vector2Int,
     dir: Vector2Int,
     tile_query: &mut Query<&mut Tile>,
-    tile_children: &Query<&Children, With<Tile>>,
-    fixed_query: &Query<&Fixed>,
     res: &mut TileRes,
 ) -> HashMap<Vector2Int, Vector2Int> {
     let (base, offset) = match dir {
@@ -144,17 +141,7 @@ pub fn switch_tiles(
         let v1 = v0 + dir;
 
         let e0 = res.tiles[&v0];
-        let e1 = res.tiles[&v1];
-
-        let c0: Vec<_> = tile_children.get(e0).iter().flat_map(|a| *a).collect();
-        let c1: Vec<_> = tile_children.get(e1).iter().flat_map(|a| *a).collect();
-        
-        if c0.iter()
-            .chain(c1.iter())
-            .any(|a| fixed_query.get(**a).is_ok())
-            {
-                continue;
-            }
+        let e1 = res.tiles[&v1];        
 
         if let Ok(mut t0) = tile_query.get_mut(e0) { t0.v = v1; }
         if let Ok(mut t1) = tile_query.get_mut(e1) { t1.v = v0; }

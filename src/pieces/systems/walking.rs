@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 use crate::actions::{ActionEvent, ActionKind};
 use crate::manager::{CommandEvent, CommandType};
@@ -12,6 +12,7 @@ use super::super::{
         Damage,
         Health,
         Occupier,
+        Range,
         Walking
     },
     PieceRes
@@ -19,46 +20,64 @@ use super::super::{
 
 pub fn plan_moves(
     mut walking_query: Query<(Entity, &mut Walking, &Parent)>,
-    obstacle_query: Query<(Entity, Option<&Occupier>, Option<&Damage>)>,
+    obstacle_query: Query<(&Parent, Option<&Occupier>, Option<&Damage>, Option<&Range>), Without<Player>>,
     player_query: Query<(Entity, &Parent), With<Player>>,
-    tile_query: Query<(&Tile, Option<&Children>)>,
+    tile_query: Query<&Tile>,
     tile_res: Res<TileRes>,
     mut piece_res: ResMut<PieceRes>
 ) {
+    let mut avoid = HashSet::new();
+    for (parent, occupier, damage, range) in obstacle_query.iter() {
+        if occupier.is_none() && damage.is_none() { continue };
+        let Ok(tile) = tile_query.get(parent.get()) else { continue };
+        if occupier.is_some() { avoid.insert(tile.v); }
+        if damage.is_some() {
+            let Some(range) = range else { continue };
+            for v in range.fields.iter() {
+                avoid.insert(tile.v + *v);
+            }
+        }
+    }
+
     let mut queue = VecDeque::new();
     let Ok((player_entity, player_parent)) = player_query.get_single() else { return };
     let player_v = match tile_query.get(player_parent.get()) {
-        Ok(t) => t.0.v,
+        Ok(t) => t.v,
         _ => return
     };
     for (entity, mut walking, parent) in walking_query.iter_mut() {
         let mut possible = Vec::new();
-        let Ok((tile, _)) = tile_query.get(parent.get()) else { continue };
+        let Ok(tile) = tile_query.get(parent.get()) else { continue };
         for dir in ORTHO_DIRECTIONS {
             let v = tile.v + dir;
-            let Some(next_tile_entity) = tile_res.tiles.get(&v) else { continue };
-            let Ok((_, next_tile_children)) = tile_query.get(*next_tile_entity) else { continue };
-            let mut rank = player_v.manhattan(v);
-            let mut valid = true;
+            if avoid.contains(&v) { continue };
+            if !tile_res.tiles.contains_key(&v) { continue };
+            // let Some(next_tile_entity) = tile_res.tiles.get(&v) else { continue };
+            // let Ok((_, next_tile_children)) = tile_query.get(*next_tile_entity) else { continue };
+            let rank = player_v.manhattan(v);
+            possible.push((rank, dir));
 
-            if let Some(children) = next_tile_children {
-                for child in children.iter() {
-                    let Ok((obstacle_entity, occupier, damage)) = obstacle_query.get(*child) else { continue };
-                    if obstacle_entity == player_entity {
-                        rank -= 10;
-                        continue
-                    }
-                    if damage.is_some() { rank += 15; }
-                    if occupier.is_some() { valid = false; }
-                }
-            }
 
-            if valid { possible.push((rank, dir)); }
+            // let mut valid = true;
+
+            // if let Some(children) = next_tile_children {
+            //     for child in children.iter() {
+            //         let Ok((obstacle_entity, occupier, damage)) = obstacle_query.get(*child) else { continue };
+            //         if obstacle_entity == player_entity {
+            //             rank -= 10;
+            //             continue
+            //         }
+            //         if damage.is_some() { rank += 15; }
+            //         if occupier.is_some() { valid = false; }
+            //     }
+            // }
+            // if valid { possible.push((rank, dir)); }
         }
         possible.sort_by(|a, b| a.0.cmp(&b.0));
         walking.planned_move = match possible.iter().next() {
             Some(a) => {
                 queue.push_back(entity);
+                if tile.v + a.1 != player_v { avoid.insert(tile.v + a.1); }
                 Some(a.1)
             },
             None => None
@@ -85,7 +104,6 @@ pub fn move_walking(
     let Ok(tile) = tile_query.get(parent.get()) else { return };
     let v = tile.v + dir;
     if !tile_res.tiles.contains_key(&v) {
-        // commands.entity(entity).despawn_recursive();
         return;
     }
 

@@ -61,8 +61,6 @@ pub fn switch_tiles(
     mut ev_command: EventReader<CommandEvent>,
     player_query: Query<&Parent, With<Player>>,
     mut tile_query: Query<&mut tiles::Tile>,
-    tile_children: Query<&Children, With<tiles::Tile>>,
-    fixed_query: Query<&components::Fixed>,
     mut tile_res: ResMut<tiles::TileRes>,
     mut game_state: ResMut<State<GameState>>
 ) {
@@ -76,7 +74,7 @@ pub fn switch_tiles(
                 }
             };
             if tiles::can_switch(player_v, dir, &tile_res) {
-                tiles::switch_tiles(player_v, dir, &mut tile_query, &tile_children, &fixed_query, tile_res.as_mut());
+                tiles::switch_tiles(player_v, dir, &mut tile_query, tile_res.as_mut());
                 game_state.set(GameState::TileShift).expect("Switching states failed");
             }
         }

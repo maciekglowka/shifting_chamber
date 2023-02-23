@@ -12,7 +12,6 @@ Rock:
   points: -1
   sprite: ["fixtures", 0]
   components:
-    Fixed:
     Occupier:
 
 Fire:
@@ -25,6 +24,10 @@ Fire:
     Damage:
       value: 1
       kind: !Fire
+    Range:
+      fields:
+        - x: 0
+          y: 0
 
 # SmallFire:
 #   sprite: ["fixtures", 2]

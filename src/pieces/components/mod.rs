@@ -30,10 +30,6 @@ pub struct Damage {
 }
 impl PieceComponent for Damage {}
 
-#[derive(Component, Deserialize)]
-pub struct Fixed;
-impl PieceComponent for Fixed {}
-
 #[derive(Component, Default, Deserialize)]
 pub struct Health {
     #[serde(skip)]
@@ -58,6 +54,11 @@ impl PieceComponent for Health {
 pub struct Occupier;
 impl PieceComponent for Occupier {}
 
+#[derive(Component, Deserialize)]
+pub struct Range {
+    pub fields: Vec<Vector2Int>
+}
+impl PieceComponent for Range {}
 
 #[derive(Component, Deserialize)]
 pub struct Walking {
@@ -77,9 +78,9 @@ pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {
 fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) {
     match name {
         "Damage" => insert::<Damage>(ec, data),
-        "Fixed" => insert::<Fixed>(ec, data),
         "Health" => insert::<Health>(ec, data),
         "Occupier" => insert::<Occupier>(ec, data),
+        "Range" => insert::<Range>(ec, data),
         "Walking" => insert::<Walking>(ec, data),
         _ => ()
     };        

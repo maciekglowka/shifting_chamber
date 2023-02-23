@@ -16,7 +16,6 @@ pub fn receive_damage(
         if let ActionKind::Damage(entity, _kind, value) = ev.0 {
             if let Ok(mut health) = health_query.get_mut(entity) {
                 health.sub(value);
-                info!("{:?} got {} dmg", entity, value);
                 // ev_bubble.send(BubbleEvent(transform.translation(), format!("-{}", dmg)));
             }
         }
