@@ -52,26 +52,10 @@ pub fn plan_moves(
             let v = tile.v + dir;
             if avoid.contains(&v) { continue };
             if !tile_res.tiles.contains_key(&v) { continue };
-            // let Some(next_tile_entity) = tile_res.tiles.get(&v) else { continue };
-            // let Ok((_, next_tile_children)) = tile_query.get(*next_tile_entity) else { continue };
+
             let rank = player_v.manhattan(v);
             possible.push((rank, dir));
 
-
-            // let mut valid = true;
-
-            // if let Some(children) = next_tile_children {
-            //     for child in children.iter() {
-            //         let Ok((obstacle_entity, occupier, damage)) = obstacle_query.get(*child) else { continue };
-            //         if obstacle_entity == player_entity {
-            //             rank -= 10;
-            //             continue
-            //         }
-            //         if damage.is_some() { rank += 15; }
-            //         if occupier.is_some() { valid = false; }
-            //     }
-            // }
-            // if valid { possible.push((rank, dir)); }
         }
         possible.sort_by(|a, b| a.0.cmp(&b.0));
         walking.planned_move = match possible.iter().next() {

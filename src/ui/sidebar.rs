@@ -116,6 +116,7 @@ pub fn update_sidebar(
                 spawn_text(parent, assets.as_ref(), "WSAD: move".to_string());
                 spawn_text(parent, assets.as_ref(), "Space: change mode".to_string());
                 spawn_text(parent, assets.as_ref(), "Enter: wait (save AP)".to_string());
+                spawn_text(parent, assets.as_ref(), "I - unit info".to_string());
 
             });
     }

@@ -54,9 +54,10 @@ fn keys(
             InputMode::TileShift => InputMode::TileSwitch
         };
         ev_ui.send(ReloadUIEvent);
-        // info!("Mode: {:?} set", res.mode);
-        // // changing mode takes a turn as well
-        // ev_command.send(CommandEvent(CommandType::PlayerWait));
+    }
+    if keys.just_pressed(KeyCode::I) {
+        res.extra_info = !res.extra_info;
+        ev_ui.send(ReloadUIEvent);
     }
 }
 
@@ -120,5 +121,6 @@ impl Default for InputMode {
 #[derive(Default, Resource)]
 pub struct InputRes {
     pub selected: Option<Vector2Int>,
-    pub mode: InputMode
+    pub mode: InputMode,
+    pub extra_info: bool
 }
