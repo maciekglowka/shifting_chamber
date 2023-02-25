@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::actions::{ActionEvent, ActionKind};
 use crate::manager::{CommandEvent, CommandType};
@@ -18,6 +18,52 @@ use super::super::{
     PieceRes
 };
 
+fn get_obstacles(
+    obstacle_query: &Query<(&Parent, Option<&Occupier>, Option<&Damage>, Option<&Range>), Without<Player>>,
+    tile_query: &Query<&Tile>
+) -> HashSet<Vector2Int> {
+    let mut obstacles = HashSet::new();
+    for (parent, occupier, damage, range) in obstacle_query.iter() {
+        if occupier.is_none() && damage.is_none() { continue };
+        let Ok(tile) = tile_query.get(parent.get()) else { continue };
+        if occupier.is_some() { obstacles.insert(tile.v); }
+        if damage.is_some() {
+            let Some(range) = range else { continue };
+            for v in range.fields.iter() {
+                obstacles.insert(tile.v + *v);
+            }
+        }
+    }
+    obstacles
+}
+
+fn get_distance_field(
+    origin: Vector2Int,
+    tile_res: &TileRes,
+    obstacles: &HashSet<Vector2Int>
+) -> HashMap<Vector2Int, i32> {
+    let mut queue = VecDeque::new();
+    queue.push_back(origin);
+    let mut visited = HashMap::new();
+    visited.insert(origin, 0);
+
+    while let Some(cur) = queue.pop_front() {
+        for dir in ORTHO_DIRECTIONS.iter() {
+            let v = cur + *dir;
+            if !tile_res.tiles.contains_key(&v) { continue }
+            if obstacles.contains(&v) { continue }
+            let cost = visited[&cur] + 1;
+            match visited.get(&v) {
+                None => (),
+                Some(c) => if *c < cost { continue }
+            }
+            queue.push_back(v);
+            visited.insert(v, cost);
+        }
+    }
+    visited
+}
+
 pub fn plan_moves(
     mut walking_query: Query<(Entity, &mut Walking, &Parent)>,
     obstacle_query: Query<(&Parent, Option<&Occupier>, Option<&Damage>, Option<&Range>), Without<Player>>,
@@ -26,25 +72,27 @@ pub fn plan_moves(
     tile_res: Res<TileRes>,
     mut piece_res: ResMut<PieceRes>
 ) {
-    let mut avoid = HashSet::new();
-    for (parent, occupier, damage, range) in obstacle_query.iter() {
-        if occupier.is_none() && damage.is_none() { continue };
-        let Ok(tile) = tile_query.get(parent.get()) else { continue };
-        if occupier.is_some() { avoid.insert(tile.v); }
-        if damage.is_some() {
-            let Some(range) = range else { continue };
-            for v in range.fields.iter() {
-                avoid.insert(tile.v + *v);
-            }
-        }
-    }
-
+    // let mut avoid = HashSet::new();
+    // for (parent, occupier, damage, range) in obstacle_query.iter() {
+    //     if occupier.is_none() && damage.is_none() { continue };
+    //     let Ok(tile) = tile_query.get(parent.get()) else { continue };
+    //     if occupier.is_some() { avoid.insert(tile.v); }
+    //     if damage.is_some() {
+    //         let Some(range) = range else { continue };
+    //         for v in range.fields.iter() {
+    //             avoid.insert(tile.v + *v);
+    //         }
+    //     }
+    // }
+    let mut avoid = get_obstacles(&obstacle_query, &tile_query);
+    
     let mut queue = VecDeque::new();
     let Ok((player_entity, player_parent)) = player_query.get_single() else { return };
     let player_v = match tile_query.get(player_parent.get()) {
         Ok(t) => t.v,
         _ => return
     };
+    let distances = get_distance_field(player_v, tile_res.as_ref(), &avoid);
     for (entity, mut walking, parent) in walking_query.iter_mut() {
         let mut possible = Vec::new();
         let Ok(tile) = tile_query.get(parent.get()) else { continue };
@@ -53,7 +101,11 @@ pub fn plan_moves(
             if avoid.contains(&v) { continue };
             if !tile_res.tiles.contains_key(&v) { continue };
 
-            let rank = player_v.manhattan(v);
+            // let rank = match distances.get(&v) {
+            //     Some(r) => *r,
+            //     None => player_v.manhattan(v)
+            // };
+            let Some(rank) = distances.get(&v) else { continue };
             possible.push((rank, dir));
 
         }
