@@ -5,6 +5,7 @@ use crate::states::GameState;
 use crate::manager::{CommandEvent, CommandType};
 use crate::ui::ReloadUIEvent;
 use crate::vectors::Vector2Int;
+use crate::tiles::transform::TileTransform;
 
 mod utils;
 
@@ -38,8 +39,16 @@ fn keys(
     for (key, dir) in KEY_MAPPING {
         if !keys.just_pressed(key) { continue; }
         let command = match res.mode {
-            InputMode::TileShift => CommandType::ShiftTiles(dir),
-            InputMode::TileSwitch => CommandType::SwitchTiles(dir),
+            InputMode::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
+            InputMode::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
+            InputMode::TileRotate => {
+                let clockwise = match key {
+                    KeyCode::D => true,
+                    KeyCode::A => false,
+                    _ => continue
+                };
+                CommandType::TransformTiles(TileTransform::Rotate(clockwise))
+            }
         };
         ev_command.send(CommandEvent(command));
         // only one command can be sent
@@ -51,7 +60,8 @@ fn keys(
     if keys.just_pressed(KeyCode::Space) {
         res.mode = match res.mode {
             InputMode::TileSwitch => InputMode::TileShift,
-            InputMode::TileShift => InputMode::TileSwitch
+            InputMode::TileShift => InputMode::TileRotate,
+            InputMode::TileRotate => InputMode::TileSwitch
         };
         ev_ui.send(ReloadUIEvent);
     }
@@ -102,13 +112,15 @@ const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
 #[derive(Debug)]
 pub enum InputMode {
     TileShift,
-    TileSwitch
+    TileSwitch,
+    TileRotate
 }
 impl InputMode {
     pub fn to_str(&self) -> &str {
         match self {
             Self::TileShift => "TileShift",
-            Self::TileSwitch => "TileSwitch"
+            Self::TileSwitch => "TileSwitch",
+            Self::TileRotate => "TileRotate",
         }
     }
 }

@@ -5,15 +5,13 @@ use crate::pieces::components::Walking;
 use crate::player::Player;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
+use crate::tiles::transform::TileTransform;
 
 mod player_input;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum CommandType {
-    // MapShift(Vector2Int, Vector2Int),
-    SwitchTiles(Vector2Int),
-    ShiftTiles(Vector2Int),
-    Punch(Vector2Int),
+    TransformTiles(TileTransform),
     PlayerWait,
     AnimationEnd,
     TurnEnd
@@ -38,9 +36,7 @@ impl Plugin for ManagerPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::PlayerInput)
-                    .with_system(player_input::switch_tiles)
-                    .with_system(player_input::shift_tiles)
-                    .with_system(player_input::punch)
+                    .with_system(player_input::transform_tiles)
                     .with_system(player_input::wait)
             )
             .add_system_set(

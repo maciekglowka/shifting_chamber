@@ -5,10 +5,11 @@ use crate::globals::MAP_SIZE;
 use crate::vectors::Vector2Int;
 use super::{Tile, TileRes};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TileTransform {
     Shift(Vector2Int),
-    Switch(Vector2Int)
+    Switch(Vector2Int),
+    Rotate(bool)
 }
 
 pub fn can_transform(
@@ -18,7 +19,10 @@ pub fn can_transform(
 ) -> bool {
     match transform {
         TileTransform::Shift(_) => true,
-        TileTransform::Switch(dir) => res.tiles.get(&(player_v + dir)).is_some()
+        TileTransform::Switch(dir) => res.tiles.contains_key(&(player_v + dir)),
+        TileTransform::Rotate(_) => 
+            res.tiles.contains_key(&(player_v + Vector2Int::new(-1, -1))) &&
+            res.tiles.contains_key(&(player_v + Vector2Int::new(1, 1)))
     }
 }
 
@@ -30,7 +34,8 @@ pub fn execute(
 ) {
     let vs = match transform {
         TileTransform::Shift(dir) => get_shift(player_v, dir),
-        TileTransform::Switch(dir) => get_switch(player_v, dir)
+        TileTransform::Switch(dir) => get_switch(player_v, dir),
+        TileTransform::Rotate(clockwise) => get_rotate(player_v, clockwise)
     };
     let current_tiles = res.tiles.clone();
 
@@ -86,5 +91,23 @@ fn get_switch(
         output.insert(v1, v0);
     }
 
+    output
+}
+
+fn get_rotate(
+    origin: Vector2Int,
+    clockwise: bool
+) -> HashMap<Vector2Int, Vector2Int> {
+    let mut output = HashMap::new();
+    for x in -1..=1 {
+        for y in -1..=1 {
+            let base = Vector2Int::new(x, y);
+            let rotated = match clockwise {
+                true => Vector2Int::new(y ,-x),
+                false => Vector2Int::new(-y ,x)
+            };
+            output.insert(origin + base, origin + rotated);
+        }
+    }
     output
 }
