@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
 use crate::data::DataAssets;
-use crate::globals::{PIECE_Z, TILE_SIZE};
+use crate::globals::{PIECE_Z, TILE_SIZE, TILE_Z};
 use crate::pieces::components::Piece;
 use crate::tiles::Tile;
 
 use super::{
     assets::GraphicsAssets,
-    components::PieceRenderer
+    components::{PieceRenderer, TileRenderer}
 };
 
 pub fn spawn_piece_renderer(
@@ -45,6 +45,46 @@ pub fn despawn_piece_renderer(
     mut commands: Commands,
     removed: RemovedComponents<Piece>,
     renderer_query: Query<(Entity, &PieceRenderer)>
+) {
+    for parent_entity in removed.iter() {
+        for (entity, renderer) in renderer_query.iter() {
+            if parent_entity != renderer.target { continue };
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+pub fn spawn_tile_renderer(
+    mut commands: Commands,
+    tile_query: Query<(Entity, &Tile), Added<Tile>>,
+    assets: Res<GraphicsAssets>
+) {
+    for (entity, tile) in tile_query.iter() {
+        let texture = &assets.tile_texture;
+        let mut sprite = TextureAtlasSprite::new(0);
+        sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
+        sprite.color = Color::DARK_GRAY;
+        let v = Vec3::new(
+            tile.v.x as f32 * TILE_SIZE,
+            tile.v.y as f32 * TILE_SIZE,
+            TILE_Z
+        );
+        commands.spawn((
+            TileRenderer { target: entity },
+            SpriteSheetBundle {
+                sprite: sprite,
+                texture_atlas: texture.clone(),
+                transform: Transform::from_translation(v),
+                ..Default::default()
+            }
+        ));
+    }
+}
+
+pub fn despawn_tile_renderer(
+    mut commands: Commands,
+    removed: RemovedComponents<Tile>,
+    renderer_query: Query<(Entity, &TileRenderer)>
 ) {
     for parent_entity in removed.iter() {
         for (entity, renderer) in renderer_query.iter() {

@@ -15,8 +15,12 @@ impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(assets::load_assets)
             .add_system(spawn::spawn_piece_renderer)
+            .add_system(spawn::spawn_tile_renderer)
             .add_system_to_stage(
                 CoreStage::PostUpdate, spawn::despawn_piece_renderer
+            )
+            .add_system_to_stage(
+                CoreStage::PostUpdate, spawn::despawn_tile_renderer
             )
             .add_system_set(
                 SystemSet::on_update(GameState::TurnStart)

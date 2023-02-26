@@ -6,7 +6,7 @@ use crate::pieces::components::Piece;
 use crate::tiles::Tile;
 use crate::vectors::Vector2Int;
 
-use super::components::PieceRenderer;
+use super::components::{PieceRenderer, TileRenderer};
 
 const MOVEMENT_SPEED: f32 = 20.;
 
@@ -32,9 +32,11 @@ pub fn update_pieces(
 
 pub fn update_tiles(
     time: Res<Time>,
-    mut query: Query<(&Tile, &mut Transform)>,
+    mut renderer_query: Query<(&TileRenderer, &mut Transform)>,
+    tile_query: Query<&Tile>,
 ) {
-    for (tile, mut transform) in query.iter_mut() {
+    for (renderer, mut transform) in renderer_query.iter_mut() {
+        let Ok(tile) = tile_query.get(renderer.target) else { continue };
         move_towards(tile.v, TILE_Z, &mut transform, time.as_ref());
     }
 }

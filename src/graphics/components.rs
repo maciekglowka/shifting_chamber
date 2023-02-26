@@ -4,3 +4,8 @@ use bevy::prelude::*;
 pub struct PieceRenderer {
     pub target: Entity
 }
+
+#[derive(Component)]
+pub struct TileRenderer {
+    pub target: Entity
+}

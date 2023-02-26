@@ -5,14 +5,14 @@ use crate::globals::MAP_SIZE;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
-mod renderer;
+// mod renderer;
 pub mod transform;
 pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<TileRes>()
-            .add_startup_system(renderer::load_assets)
+            // .add_startup_system(renderer::load_assets)
             .add_system_set(
                 SystemSet::on_enter(GameState::MapInit)
                     .with_system(spawn_map)
@@ -22,8 +22,8 @@ impl Plugin for TilePlugin {
 
 fn spawn_map(
     mut commands: Commands,
-    mut res: ResMut<TileRes>,
-    assets: Res<renderer::TileAssets>
+    mut res: ResMut<TileRes>
+    // assets: Res<renderer::TileAssets>
 ) {
     clear_map(&mut commands, res.as_ref());
 
@@ -31,11 +31,7 @@ fn spawn_map(
     for x in 0..MAP_SIZE {
         for y in 0..MAP_SIZE {
             let v = Vector2Int::new(x, y);
-            let tile = commands.spawn((
-                    Tile::new(v),
-                    renderer::get_tile_renderer(v, assets.as_ref())
-                ))
-                .id();
+            let tile = commands.spawn(Tile::new(v)).id();
             tiles.insert(v, tile);
         }
     }

@@ -11,7 +11,8 @@ const PIECE_SPRITE_FILES: [(&str, usize, usize); 4] = [
 
 #[derive(Resource)]
 pub struct GraphicsAssets {
-    pub piece_textures: HashMap<String, Handle<TextureAtlas>>
+    pub piece_textures: HashMap<String, Handle<TextureAtlas>>,
+    pub tile_texture: Handle<TextureAtlas>
 }
 
 pub fn load_assets(
@@ -23,21 +24,60 @@ pub fn load_assets(
     let mut piece_textures = HashMap::new();
 
     for (fname, columns, rows) in PIECE_SPRITE_FILES {
-        let image = asset_server.load(fname.to_owned() + ".png");
-        asset_list.0.push(image.clone_untyped());
-        let atlas = TextureAtlas::from_grid(
-            image,
-            Vec2::splat(32.),
+        // let image = asset_server.load(fname.to_owned() + ".png");
+        // asset_list.0.push(image.clone_untyped());
+        // let atlas = TextureAtlas::from_grid(
+        //     image,
+        //     Vec2::splat(32.),
+        //     columns,
+        //     rows,
+        //     None,
+        //     None
+        // );
+        // let handle = texture_atlasses.add(atlas);
+        let handle = load_texture_file(
+            &(fname.to_string() + ".png"),
             columns,
             rows,
-            None,
-            None
+            asset_server.as_ref(),
+            texture_atlasses.as_mut(),
+            asset_list.as_mut()
         );
-        let handle = texture_atlasses.add(atlas);
         piece_textures.insert(fname.to_string(), handle);
     }
 
+    let tile_texture = load_texture_file(
+        "tiles.png",
+        1,
+        4,
+        asset_server.as_ref(),
+        texture_atlasses.as_mut(),
+        asset_list.as_mut()
+    );
+
     commands.insert_resource(GraphicsAssets{ 
-        piece_textures
+        piece_textures,
+        tile_texture
     });
+}
+
+fn load_texture_file(
+    fname: &str,
+    columns: usize,
+    rows: usize,
+    asset_server: &AssetServer,
+    texture_atlasses: &mut Assets<TextureAtlas>,
+    asset_list: &mut crate::assets::AssetList
+) -> Handle<TextureAtlas> {
+    let image = asset_server.load(fname);
+    asset_list.0.push(image.clone_untyped());
+    let atlas = TextureAtlas::from_grid(
+        image,
+        Vec2::splat(32.),
+        columns,
+        rows,
+        None,
+        None
+    );
+    texture_atlasses.add(atlas)
 }
