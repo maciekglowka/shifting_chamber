@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use rand::prelude::*;
 
 use crate::globals::{BUBBLE_LIFE, OVERLAY_FONT_SIZE, BUBBLE_Z, TILE_SIZE};
+use crate::vectors::Vector2Int;
 
 const BUBBLE_SPEED: f32 = 30.;
 
@@ -9,7 +11,7 @@ pub struct Bubble {
     pub age: f32
 }
 
-pub struct BubbleEvent(pub Vec3, pub String);
+pub struct BubbleEvent(pub Vector2Int, pub String);
 
 pub fn update_bubbles(
     mut commands: Commands,
@@ -39,13 +41,18 @@ pub fn spawn_bubbles(
             font_size: OVERLAY_FONT_SIZE,
             color: Color::GOLD
         };
+        let mut rng = thread_rng();
+        let offset = TILE_SIZE / 16.;
+        let v = Vec3::new(
+            ev.0.x as f32* TILE_SIZE + rng.gen_range(-offset..offset),
+            (ev.0.y as f32 + 0.5) * TILE_SIZE + rng.gen_range(-offset..offset),
+            BUBBLE_Z
+        );
         commands.spawn((
             Bubble { age: 0. },
             Text2dBundle {
                 text: Text::from_section(ev.1.clone(), style),
-                transform: Transform::from_translation(
-                    Vec3::new(ev.0.x, ev.0.y + 0.5 * TILE_SIZE, BUBBLE_Z)
-                ),
+                transform: Transform::from_translation(v),
                 ..Default::default()
             }
         ));
