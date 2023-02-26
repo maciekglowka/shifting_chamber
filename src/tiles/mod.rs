@@ -6,6 +6,7 @@ use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
 mod renderer;
+pub mod transform;
 pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
@@ -49,45 +50,6 @@ fn clear_map(
         commands.entity(*entity).despawn_recursive();
     }
 }
-
-// pub fn shift_tiles(
-//     commands: &mut Commands,
-//     origin: Vector2Int,
-//     dir: Vector2Int,
-//     // tile_query: Query<&Tile>,
-//     tile_children: &Query<&Children, With<Tile>>,
-//     occupier_query: &Query<&Occupier>,
-//     res: &mut TileRes,
-// ) {
-//     let base = match dir {
-//         Vector2Int::DOWN => Vector2Int::new(origin.x, MAP_SIZE-1),
-//         Vector2Int::UP => Vector2Int::new(origin.x, 0),
-//         Vector2Int::RIGHT => Vector2Int::new(0, origin.y),
-//         Vector2Int::LEFT => Vector2Int::new(MAP_SIZE-1, origin.y),
-//         _ => return
-//     };
-
-//     // last piece won;t get moved for sure -> so -1
-//     for i in (0..MAP_SIZE-1).rev() {
-//         let v = base + i * dir;
-//         let new_v = v + dir;
-//         let current_tile_entity = res.tiles[&v];
-//         let new_tile_entity = res.tiles[&new_v];
-
-//         if tile_children.get(new_tile_entity).iter()
-//             .flat_map(|a| *a)
-//             .any(|a| occupier_query.get(*a).is_ok())
-//             {
-//                 continue
-//             };
-        
-//         for child in tile_children.get(current_tile_entity).iter().flat_map(|a| *a) {
-//             info!("Moving {:?}", child);
-//             commands.entity(*child).remove_parent();
-//             commands.entity(new_tile_entity).add_child(*child);
-//         }
-//     }
-// }
 
 pub fn shift_tiles(
     origin: Vector2Int,

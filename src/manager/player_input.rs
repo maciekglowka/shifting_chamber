@@ -73,38 +73,25 @@ pub fn switch_tiles(
                     tile.v
                 }
             };
-            if tiles::can_switch(player_v, dir, &tile_res) {
-                tiles::switch_tiles(player_v, dir, &mut tile_query, tile_res.as_mut());
+            // if tiles::can_switch(player_v, dir, &tile_res) {
+            //     tiles::switch_tiles(player_v, dir, &mut tile_query, tile_res.as_mut());
+            //     game_state.set(GameState::TileShift).expect("Switching states failed");
+            // }
+
+            let transform = tiles::transform::TileTransform::Switch(dir);
+            if tiles::transform::can_transform(transform, player_v, tile_res.as_ref()) {
+                tiles::transform::execute(
+                    transform,
+                    player_v,
+                    &mut tile_query,
+                    tile_res.as_mut()
+                );
                 game_state.set(GameState::TileShift).expect("Switching states failed");
             }
         }
     }
 }
 
-// pub fn shift_tiles(
-//     mut commands: Commands,
-//     mut ev_command: EventReader<CommandEvent>,
-//     player_query: Query<&Parent, With<Player>>,
-//     tile_query: Query<&tiles::Tile>,
-//     tile_children: Query<&Children, With<tiles::Tile>>,
-//     occupier_query: Query<&components::Occupier>,
-//     mut tile_res: ResMut<tiles::TileRes>,
-//     mut game_state: ResMut<State<GameState>>
-// ) {
-//     for ev in ev_command.iter() {
-//         if let CommandType::ShiftTiles(dir) = ev.0 {
-//             let player_v = match player_query.get_single() {
-//                 Err(_) => continue,
-//                 Ok(parent) => {
-//                     let Ok(tile) = tile_query.get(parent.get()) else { continue };
-//                     tile.v
-//                 }
-//             };
-//             tiles::shift_tiles(&mut commands, player_v, dir, &tile_children, &occupier_query, tile_res.as_mut());
-//             game_state.set(GameState::TileShift).expect("Switching states failed");
-//         }
-//     }
-// }
 
 pub fn shift_tiles(
     mut ev_command: EventReader<CommandEvent>,
@@ -122,7 +109,13 @@ pub fn shift_tiles(
                     tile.v
                 }
             };
-            tiles::shift_tiles(player_v, dir, &mut tile_query, tile_res.as_mut());
+            // tiles::shift_tiles(player_v, dir, &mut tile_query, tile_res.as_mut());
+            tiles::transform::execute(
+                tiles::transform::TileTransform::Shift(dir),
+                player_v,
+                &mut tile_query,
+                tile_res.as_mut()
+            );
             game_state.set(GameState::TileShift).expect("Switching states failed");
         }
     }
