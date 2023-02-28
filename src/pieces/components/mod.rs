@@ -10,10 +10,15 @@ use std::cmp;
 use crate::actions::DamageKind;
 use crate::vectors::Vector2Int;
 
-// marker / data component
+// marker / data components - added in game
 #[derive(Component)]
 pub struct Piece {
     pub name: String
+}
+
+#[derive(Component)]
+pub struct Projectile {
+    pub target: Vector2Int
 }
 
 // common trait for dynamic components
@@ -23,7 +28,7 @@ pub trait PieceComponent {
 
 // serialized components - object data
 
-#[derive(Component, Deserialize)]
+#[derive(Clone, Component, Deserialize)]
 pub struct Damage {
     pub value: u32,
     pub kind: DamageKind

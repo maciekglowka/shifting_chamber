@@ -35,7 +35,11 @@ impl Plugin for PiecesPlugin {
             .add_system(systems::health::kill_units)
             .add_system_set(
                 SystemSet::on_enter(GameState::TurnEnd)
-                    .with_system(systems::interaction::interaction_damage)
+                    .with_system(systems::projectile::launch_projectiles)
+                )
+            .add_system_set(
+                SystemSet::on_exit(GameState::TurnEnd)
+                    .with_system(systems::projectile::hit_projectiles)
                 );
     }
 }

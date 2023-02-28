@@ -41,6 +41,25 @@ FlamingRock:
         - x: 1
           y: 0
 
+CrossFlame:
+  points: 0
+  sprite: ["fixtures", 3]
+  components:
+    Damage:
+      value: 1
+      kind: !Fire
+    Occupier:
+    Range:
+      fields:
+        - x: -1
+          y: -1
+        - x: -1
+          y: 1
+        - x: 1
+          y: 1
+        - x: 1
+          y: -1
+
 # SmallFire:
 #   sprite: ["fixtures", 2]
 #   components:
