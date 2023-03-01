@@ -14,17 +14,18 @@ pub struct GraphicsPlugin;
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(assets::load_assets)
+            .init_resource::<animate::AnimationRes>()
             .add_system(spawn::spawn_piece_renderer)
             .add_system(spawn::spawn_tile_renderer)
+            .add_system(spawn::spawn_projectile_renderer)
+            .add_system_to_stage(
+                CoreStage::PostUpdate, animate::update_state
+            )
             .add_system_to_stage(
                 CoreStage::PostUpdate, spawn::despawn_piece_renderer
             )
             .add_system_to_stage(
                 CoreStage::PostUpdate, spawn::despawn_tile_renderer
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::TurnStart)
-                    .with_system(animate::update_pieces)
             )
             .add_system_set(
                 SystemSet::on_update(GameState::TileShift)
@@ -41,7 +42,7 @@ impl Plugin for GraphicsPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::TurnEnd)
-                    .with_system(animate::update_pieces)
+                    .with_system(animate::update_projectiles)
             );
     }
 }

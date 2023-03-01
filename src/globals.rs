@@ -9,7 +9,7 @@ pub const MAX_INVENTORY: usize = 3;
 
 pub const TILE_Z: f32 = 20.;
 pub const PIECE_Z: f32 = 25.;
-pub const PLAYER_Z: f32 = 30.;
+pub const PROJECTILE_Z: f32 = 30.;
 pub const OVERLAY_Z: f32 = 50.;
 pub const BUBBLE_Z: f32 = 55.;
 // lower than piece (for now)

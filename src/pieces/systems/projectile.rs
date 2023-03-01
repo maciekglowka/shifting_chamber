@@ -25,7 +25,10 @@ pub fn launch_projectiles(
 
         for tile in affected_tiles {
             commands.spawn((
-                Projectile { target: tile.v },
+                Projectile { 
+                    source: parent_tile.v,
+                    target: tile.v
+                },
                 damage.clone()
             ));
         }

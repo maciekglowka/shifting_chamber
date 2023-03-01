@@ -12,7 +12,8 @@ const PIECE_SPRITE_FILES: [(&str, usize, usize); 4] = [
 #[derive(Resource)]
 pub struct GraphicsAssets {
     pub piece_textures: HashMap<String, Handle<TextureAtlas>>,
-    pub tile_texture: Handle<TextureAtlas>
+    pub tile_texture: Handle<TextureAtlas>,
+    pub elements_texture: Handle<TextureAtlas>
 }
 
 pub fn load_assets(
@@ -24,17 +25,6 @@ pub fn load_assets(
     let mut piece_textures = HashMap::new();
 
     for (fname, columns, rows) in PIECE_SPRITE_FILES {
-        // let image = asset_server.load(fname.to_owned() + ".png");
-        // asset_list.0.push(image.clone_untyped());
-        // let atlas = TextureAtlas::from_grid(
-        //     image,
-        //     Vec2::splat(32.),
-        //     columns,
-        //     rows,
-        //     None,
-        //     None
-        // );
-        // let handle = texture_atlasses.add(atlas);
         let handle = load_texture_file(
             &(fname.to_string() + ".png"),
             columns,
@@ -55,9 +45,19 @@ pub fn load_assets(
         asset_list.as_mut()
     );
 
+    let elements_texture = load_texture_file(
+        "elements.png",
+        1,
+        4,
+        asset_server.as_ref(),
+        texture_atlasses.as_mut(),
+        asset_list.as_mut()
+    );
+
     commands.insert_resource(GraphicsAssets{ 
         piece_textures,
-        tile_texture
+        tile_texture,
+        elements_texture
     });
 }
 

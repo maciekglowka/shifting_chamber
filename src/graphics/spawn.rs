@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
 use crate::data::DataAssets;
-use crate::globals::{PIECE_Z, TILE_SIZE, TILE_Z};
-use crate::pieces::components::Piece;
+use crate::globals::{PIECE_Z, PROJECTILE_Z, TILE_SIZE, TILE_Z};
+use crate::pieces::components::{Piece, Projectile};
 use crate::tiles::Tile;
 
 use super::{
     assets::GraphicsAssets,
-    components::{PieceRenderer, TileRenderer}
+    components::{PieceRenderer, ProjectileRenderer, TileRenderer}
 };
 
 pub fn spawn_piece_renderer(
@@ -93,3 +93,32 @@ pub fn despawn_tile_renderer(
         }
     }
 }
+
+pub fn spawn_projectile_renderer(
+    mut commands: Commands,
+    projectile_query: Query<(Entity, &Projectile), Added<Projectile>>,
+    assets: Res<GraphicsAssets>,
+    mut animation_res: ResMut<super::animate::AnimationRes>
+) {
+    for (entity, projectile) in projectile_query.iter() {
+        let texture = &assets.elements_texture;
+        let mut sprite = TextureAtlasSprite::new(0);
+        sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
+        let v = Vec3::new(
+            projectile.source.x as f32 * TILE_SIZE,
+            projectile.source.y as f32 * TILE_SIZE,
+            PROJECTILE_Z
+        );
+        commands.spawn((
+            ProjectileRenderer { target: entity, linear_position: v },
+            SpriteSheetBundle {
+                sprite: sprite,
+                texture_atlas: texture.clone(),
+                transform: Transform::from_translation(v),
+                ..Default::default()
+            }
+        ));
+        animation_res.is_animating = true;
+    }
+}
+

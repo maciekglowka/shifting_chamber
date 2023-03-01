@@ -18,6 +18,7 @@ pub struct Piece {
 
 #[derive(Component)]
 pub struct Projectile {
+    pub source: Vector2Int,
     pub target: Vector2Int
 }
 
