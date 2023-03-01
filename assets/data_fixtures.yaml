@@ -1,32 +1,13 @@
 # elements with `points` not set won't be spawned randomly
 # (only explicitly by level type or specific action)
 
-# Stair:
-#   sprite: ["fixtures", 0]
-#   components:
-#     Fixture:
-#     Interactive:
-#       kind: !Descend
-
 Rock:
   points: -1
   sprite: ["fixtures", 0]
   components:
     Occupier:
 
-Fire:
-  points: -2
-  sprite: ["fixtures", 1]
-  components:
-    Damage:
-      value: 1
-      kind: !Fire
-    Range:
-      fields:
-        - x: 0
-          y: 0
-
-FlamingRock:
+Tower:
   points: 0
   sprite: ["fixtures", 2]
   components:
@@ -41,7 +22,7 @@ FlamingRock:
         - x: 1
           y: 0
 
-CrossFlame:
+Volcano:
   points: 0
   sprite: ["fixtures", 3]
   components:
@@ -59,23 +40,3 @@ CrossFlame:
           y: 1
         - x: 1
           y: -1
-
-# SmallFire:
-#   sprite: ["fixtures", 2]
-#   components:
-#     Fixture:
-#     Damage:
-#       value: 1
-#       kind: !Fire
-
-# GreatFire:
-#   points: 4
-#   min_level: 6
-#   sprite: ["fixtures", 3]
-#   components:
-#     Fixture:
-#     Spawner:
-#       piece: "Fire"
-#     Damage:
-#       value: 3
-#       kind: !Fire

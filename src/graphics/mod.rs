@@ -46,3 +46,5 @@ impl Plugin for GraphicsPlugin {
             );
     }
 }
+
+const TILE_VARIANTS: usize = 4;

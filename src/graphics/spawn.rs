@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::prelude::*;
 
 use crate::data::DataAssets;
 use crate::globals::{PIECE_Z, PROJECTILE_Z, TILE_SIZE, TILE_Z};
@@ -60,10 +61,11 @@ pub fn spawn_tile_renderer(
     assets: Res<GraphicsAssets>
 ) {
     for (entity, tile) in tile_query.iter() {
+        let mut rng = thread_rng();
+        let idx = rng.gen_range(0..super::TILE_VARIANTS);
         let texture = &assets.tile_texture;
-        let mut sprite = TextureAtlasSprite::new(0);
+        let mut sprite = TextureAtlasSprite::new(idx);
         sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
-        sprite.color = Color::DARK_GRAY;
         let v = Vec3::new(
             tile.v.x as f32 * TILE_SIZE,
             tile.v.y as f32 * TILE_SIZE,

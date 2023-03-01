@@ -39,7 +39,7 @@ pub fn load_assets(
     let tile_texture = load_texture_file(
         "tiles.png",
         1,
-        4,
+        super::TILE_VARIANTS,
         asset_server.as_ref(),
         texture_atlasses.as_mut(),
         asset_list.as_mut()
@@ -73,7 +73,7 @@ fn load_texture_file(
     asset_list.0.push(image.clone_untyped());
     let atlas = TextureAtlas::from_grid(
         image,
-        Vec2::splat(32.),
+        Vec2::splat(16.),
         columns,
         rows,
         None,

@@ -13,21 +13,25 @@ use super::super::components::{
 pub fn launch_projectiles(
     mut commands: Commands,
     damage_query: Query<(&Damage, &Range, &Parent)>,
-    tile_query: Query<&Tile>,
+    health_query: Query<Entity, With<Health>>,
+    tile_query: Query<(&Tile, &Children)>,
     tile_res: Res<TileRes>
 ) {
     for (damage, range, parent) in damage_query.iter() {
         let Ok(parent_tile) = tile_query.get(parent.get()) else { continue };
         let affected_tiles: Vec<_> = range.fields.iter()
-            .flat_map(|v| tile_res.tiles.get(&(parent_tile.v + *v)))
+            .flat_map(|v| tile_res.tiles.get(&(parent_tile.0.v + *v)))
             .flat_map(|e| tile_query.get(*e))
             .collect();
 
         for tile in affected_tiles {
+            if !tile.1.iter()
+                .any(|a| health_query.get(*a).is_ok())
+                { continue };
             commands.spawn((
                 Projectile { 
-                    source: parent_tile.v,
-                    target: tile.v
+                    source: parent_tile.0.v,
+                    target: tile.0.v
                 },
                 damage.clone()
             ));
