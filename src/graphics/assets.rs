@@ -1,11 +1,9 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
-const PIECE_SPRITE_FILES: [(&str, usize, usize); 4] = [
+const PIECE_SPRITE_FILES: [(&str, usize, usize); 2] = [
     // atlas, columns, rows
     ("fixtures", 1, 4),
-    ("items", 1, 4),
-    ("tiles", 1, 4),
     ("units", 1, 4)
 ];
 
@@ -33,6 +31,7 @@ pub fn load_assets(
             texture_atlasses.as_mut(),
             asset_list.as_mut()
         );
+        info!("{}", fname);
         piece_textures.insert(fname.to_string(), handle);
     }
 
@@ -73,7 +72,7 @@ fn load_texture_file(
     asset_list.0.push(image.clone_untyped());
     let atlas = TextureAtlas::from_grid(
         image,
-        Vec2::splat(16.),
+        Vec2::splat(super::SPRITE_SIZE),
         columns,
         rows,
         None,

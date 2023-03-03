@@ -6,7 +6,6 @@ use crate::states::GameState;
 mod bubble;
 mod command_menu;
 mod game_over;
-mod cursor;
 mod overlays;
 mod sidebar;
 mod upgrade_menu;
@@ -82,19 +81,6 @@ pub fn load_assets(
 
     let overlay_handle = texture_atlasses.add(overlay_atlas);
 
-    let cursor_img = asset_server.load("cursor.png");
-    asset_list.0.push(cursor_img.clone_untyped());
-    let cursor_atlas = TextureAtlas::from_grid(
-        cursor_img,
-        Vec2::splat(16.),
-        1,
-        1,
-        None,
-        None
-    );
-
-    let cursor_handle = texture_atlasses.add(cursor_atlas);
-
     let pico_img = asset_server.load("pico.png");
     asset_list.0.push(pico_img.clone_untyped());
     let pico_atlas = TextureAtlas::from_grid(
@@ -111,8 +97,7 @@ pub fn load_assets(
         UiAssets { 
             font: font_handle,
             pico_font: pico_handle,
-            overlay_texture: overlay_handle,
-            cursor_texture: cursor_handle
+            overlay_texture: overlay_handle
         }
     );
 }
@@ -122,6 +107,5 @@ pub struct UiAssets {
     font: Handle<Font>,
     pico_font: Handle<TextureAtlas>,
     overlay_texture: Handle<TextureAtlas>,
-    cursor_texture: Handle<TextureAtlas>,
 }
 

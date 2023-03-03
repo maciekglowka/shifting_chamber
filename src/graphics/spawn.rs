@@ -25,11 +25,7 @@ pub fn spawn_piece_renderer(
         let mut sprite = TextureAtlasSprite::new(data.sprite.1);
         sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
         sprite.color = Color::WHITE;
-        let v = Vec3::new(
-            tile.v.x as f32 * TILE_SIZE,
-            tile.v.y as f32 * TILE_SIZE,
-            PIECE_Z
-        );
+        let v = super::get_world_position(tile.v, PIECE_Z);
         commands.spawn((
             PieceRenderer { target: entity },
             SpriteSheetBundle {
@@ -66,11 +62,7 @@ pub fn spawn_tile_renderer(
         let texture = &assets.tile_texture;
         let mut sprite = TextureAtlasSprite::new(idx);
         sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
-        let v = Vec3::new(
-            tile.v.x as f32 * TILE_SIZE,
-            tile.v.y as f32 * TILE_SIZE,
-            TILE_Z
-        );
+        let v = super::get_world_position(tile.v, TILE_Z);
         commands.spawn((
             TileRenderer { target: entity },
             SpriteSheetBundle {
@@ -106,11 +98,7 @@ pub fn spawn_projectile_renderer(
         let texture = &assets.elements_texture;
         let mut sprite = TextureAtlasSprite::new(0);
         sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
-        let v = Vec3::new(
-            projectile.source.x as f32 * TILE_SIZE,
-            projectile.source.y as f32 * TILE_SIZE,
-            PROJECTILE_Z
-        );
+        let v = super::get_world_position(projectile.source, PROJECTILE_Z);
         commands.spawn((
             ProjectileRenderer { target: entity, linear_position: v },
             SpriteSheetBundle {

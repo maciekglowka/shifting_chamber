@@ -39,6 +39,7 @@ fn main() {
                 ImagePlugin::default_nearest()
             )
         )
+        .insert_resource(Msaa { samples: 1 })
         .add_state(states::GameState::LoadAssets)
         .add_plugin(actions::ActionPlugin)
         .add_plugin(assets::AssetPlugin)

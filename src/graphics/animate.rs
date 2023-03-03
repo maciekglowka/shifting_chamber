@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::globals::{MAX_ANIMATION_DIST, PIECE_Z, PROJECTILE_Z, TILE_SIZE, TILE_Z};
+use crate::globals::{MAX_ANIMATION_DIST, PIECE_Z, PROJECTILE_Z, TILE_Z};
 use crate::manager::{CommandEvent, CommandType};
 use crate::pieces::components::{Piece, Projectile};
 use crate::states::GameState;
@@ -11,7 +11,7 @@ use super::components::{PieceRenderer, ProjectileRenderer, TileRenderer};
 
 const MOVEMENT_SPEED: f32 = 20.;
 const PROJECTILE_SPEED: f32 = 40.;
-const PROJECTILE_HEIGHT: f32 = 10.;
+const PROJECTILE_HEIGHT: f32 = 16.;
 
 pub fn update_state(
     mut res: ResMut<AnimationRes>,
@@ -78,8 +78,8 @@ pub fn update_projectiles(
     for (entity, mut renderer, mut transform) in renderer_query.iter_mut() {
         let Ok(projectile) = projectile_query.get(renderer.target) else { continue };
 
-        let source = Vec3::new(projectile.source.x as f32 * TILE_SIZE, projectile.source.y as f32 * TILE_SIZE, PROJECTILE_Z);
-        let target = Vec3::new(projectile.target.x as f32 * TILE_SIZE, projectile.target.y as f32 * TILE_SIZE, PROJECTILE_Z);
+        let source = super::get_world_position(projectile.source, PROJECTILE_Z);
+        let target = super::get_world_position(projectile.target, PROJECTILE_Z);
         let d = (target - renderer.linear_position).length();
         if d > MAX_ANIMATION_DIST {
             let total = (target - source).length();
@@ -106,7 +106,7 @@ fn move_towards(
     transform: &mut Transform,
     time: &Time
 ) -> bool {
-    let target = Vec3::new(v.x as f32 * TILE_SIZE, v.y as f32 * TILE_SIZE, z);
+    let target = super::get_world_position(v, z);
     let d = (target - transform.translation).length();
     if d > MAX_ANIMATION_DIST {
         transform.translation = transform.translation.lerp(

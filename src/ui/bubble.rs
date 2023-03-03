@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use rand::prelude::*;
 
 use crate::globals::{BUBBLE_LIFE, OVERLAY_FONT_SIZE, BUBBLE_Z, TILE_SIZE};
+use crate::graphics::get_world_position;
 use crate::vectors::Vector2Int;
 
 const BUBBLE_SPEED: f32 = 30.;
@@ -43,11 +44,8 @@ pub fn spawn_bubbles(
         };
         let mut rng = thread_rng();
         let offset = TILE_SIZE / 16.;
-        let v = Vec3::new(
-            ev.0.x as f32* TILE_SIZE + rng.gen_range(-offset..offset),
-            (ev.0.y as f32 + 0.5) * TILE_SIZE + rng.gen_range(-offset..offset),
-            BUBBLE_Z
-        );
+        let offset_v = Vec3::new(rng.gen_range(-offset..offset), rng.gen_range(-offset..offset), 0.);
+        let v = get_world_position(ev.0, BUBBLE_Z) + offset_v;
         commands.spawn((
             Bubble { age: 0. },
             Text2dBundle {

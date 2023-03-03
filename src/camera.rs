@@ -3,9 +3,10 @@ use bevy::prelude::*;
 use crate::globals::{
     MAP_SIZE,
     SIDEBAR_WIDTH,
+    Y_PERSPECTIVE,
     TILE_SIZE,
     WINDOW_HEIGHT,
-    WINDOW_WIDTH
+    WINDOW_WIDTH,
 };
 
 pub struct CameraPlugin;
@@ -21,8 +22,8 @@ fn setup(
 ) {
     let mut camera = Camera2dBundle::default();
     camera.transform.translation = Vec3::new(
-        0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32,
-        0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32,
+        0.5 * (TILE_SIZE * (MAP_SIZE - 1) as f32 + SIDEBAR_WIDTH),
+        Y_PERSPECTIVE * 0.5 * TILE_SIZE * (MAP_SIZE - 1) as f32,
         camera.transform.translation.z
     );
     let bg_z = -camera.transform.translation.z;
