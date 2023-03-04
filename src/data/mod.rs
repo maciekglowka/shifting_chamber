@@ -13,7 +13,7 @@ mod levels;
 mod pieces;
 
 pub use levels::LevelData;
-pub use pieces::PieceData;
+pub use pieces::{PieceData, SpriteData, SpriteColumns};
 
 pub struct DataPlugin;
 
@@ -37,7 +37,6 @@ pub struct DataAssets {
     pub pieces: HashMap<String, PieceData>,
     pub raw_pieces: Vec<(String, Handle<YamlAsset>)>,
     pub unit_names: Vec<String>,
-    pub item_names: Vec<String>,
     pub fixture_names: Vec<String>,
     pub raw_levels: Handle<YamlAsset>,
     pub levels: HashMap<String, LevelData>

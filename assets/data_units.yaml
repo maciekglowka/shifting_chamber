@@ -4,7 +4,9 @@
 Mask:
   min_level: 1
   points: 1
-  sprite: ["units", 1]
+  sprite: 
+    atlas: units
+    index: 1
   components:
     Damage:
       value: 1
@@ -17,7 +19,9 @@ Mask:
 Minotaur:
   min_level: 2
   points: 2
-  sprite: ["units", 2]
+  sprite: 
+    atlas: units
+    index: 2
   components:
     Damage:
       value: 1

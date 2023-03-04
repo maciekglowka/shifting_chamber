@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::data::DataAssets;
+use crate::data::{DataAssets, SpriteColumns};
 use crate::globals::{PIECE_Z, PROJECTILE_Z, TILE_SIZE, TILE_Z};
 use crate::pieces::components::{Piece, Projectile};
 use crate::tiles::Tile;
@@ -21,20 +21,27 @@ pub fn spawn_piece_renderer(
     for (entity, piece, parent) in piece_query.iter() {
         let Ok(tile) = tile_query.get(parent.get()) else { continue };
         let data = &data_assets.pieces[&piece.name];
-        let texture = &assets.piece_textures[&data.sprite.0];
-        let mut sprite = TextureAtlasSprite::new(data.sprite.1);
+        let texture = &assets.piece_textures[&data.sprite.atlas];
+        let mut sprite = TextureAtlasSprite::new(super::get_base_piece_sprite_idx(&data.sprite));
         sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
-        sprite.color = Color::WHITE;
         let v = super::get_world_position(tile.v, PIECE_Z);
-        commands.spawn((
-            PieceRenderer { target: entity },
-            SpriteSheetBundle {
-                sprite: sprite,
-                texture_atlas: texture.clone(),
-                transform: Transform::from_translation(v),
-                ..Default::default()
-            }
-        ));
+        let renderer = commands.spawn((
+                PieceRenderer { target: entity },
+                SpriteSheetBundle {
+                    sprite: sprite,
+                    texture_atlas: texture.clone(),
+                    transform: Transform::from_translation(v),
+                    ..Default::default()
+                }
+            ))
+            .id();
+        match data.sprite.columns {
+            Some(SpriteColumns::Frames(_)) => {
+                commands.entity(renderer)
+                    .insert(super::frames::Frames::new(&data.sprite));
+                },
+            _ => ()
+        }
     }
 }
 

@@ -21,12 +21,6 @@ pub fn generate_pieces(
     let level_type = get_level_type(&mut game_res, &data_assets, target_points);
     let player_v = Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2);
 
-    let item_pool = get_name_pool(
-        &data_assets.pieces,
-        &data_assets.item_names,
-        game_res.level,
-        false
-    );
     let fixture_pool = get_name_pool(
         &data_assets.pieces,
         &data_assets.fixture_names,
@@ -44,14 +38,7 @@ pub fn generate_pieces(
 
     let mut points = level_data.initial_points;
     let mut pieces = level_data.required_pieces.clone();
-    // pieces.push("Stair".to_string());
     let mut rng = thread_rng();
-
-    // for _ in 0..rng.gen_range(level_data.extra_items.0..=level_data.extra_items.1) {
-    //     let name = &item_pool.choose_weighted(&mut rng, |v| v.1).unwrap().0;
-    //     points += data_assets.pieces[name].points.unwrap_or(0);
-    //     pieces.push(name.to_string());
-    // }
 
     for _ in 0..rng.gen_range(level_data.extra_features.0..=level_data.extra_features.1) {
         let name = &fixture_pool.choose_weighted(&mut rng, |v| v.1).unwrap().0;

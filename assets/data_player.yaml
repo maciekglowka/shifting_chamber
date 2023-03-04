@@ -1,6 +1,8 @@
 
 Player:
-  sprite: ["units", 0]
+  sprite: 
+    atlas: units
+    index: 0
   components:
     Damage:
       value: 1

@@ -4,17 +4,26 @@ use serde::Deserialize;
 
 use super::{DataAssets, YamlAsset};
 
-const PIECE_FILES: [&str; 5] = [
-    "data_effects.yaml",
-    "data_fixtures.yaml", "data_items.yaml", "data_units.yaml",
-    "data_player.yaml"
-];
+const PIECE_FILES: [&str; 3] = ["data_fixtures.yaml", "data_units.yaml", "data_player.yaml"];
+
+#[derive(Deserialize)]
+pub enum SpriteColumns {
+    Frames(usize),
+    Variants(usize)
+}
+
+#[derive(Deserialize)]
+pub struct SpriteData {
+    pub atlas: String,
+    pub index: usize,
+    pub columns: Option<SpriteColumns>
+}
 
 #[derive(Deserialize)]
 pub struct PieceData {
     pub min_level: Option<u32>,
     pub points: Option<i32>,
-    pub sprite: (String, usize),
+    pub sprite: SpriteData,
     pub components: serde_yaml::Mapping
 }
 
@@ -23,7 +32,6 @@ pub fn parse_data(
     yaml_assets: Res<Assets<YamlAsset>>
 ) {
     assets.unit_names = Vec::new();
-    assets.item_names = Vec::new();
     assets.fixture_names = Vec::new();
 
     for (name, piece) in assets.raw_pieces.clone() {
@@ -34,11 +42,10 @@ pub fn parse_data(
             let key: String = k.as_str().expect("Keys must be strings!").into();
             assets.pieces.insert(
                 key.clone(),
-                serde_yaml::from_value(v.clone()).expect("Wrong data item!")
+                serde_yaml::from_value(v.clone()).expect(&format!("Wrong data item {:?}!", k))
             );
             match name.as_str() {
                 "data_units" => assets.unit_names.push(key),
-                "data_items" => assets.item_names.push(key),
                 "data_fixtures" => assets.fixture_names.push(key),
                 _ => ()
             }

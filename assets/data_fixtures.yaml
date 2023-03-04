@@ -3,13 +3,17 @@
 
 Rock:
   points: -1
-  sprite: ["fixtures", 0]
+  sprite: 
+    atlas: fixtures
+    index: 0
   components:
     Occupier:
 
 Tower:
   points: 0
-  sprite: ["fixtures", 2]
+  sprite: 
+    atlas: fixtures
+    index: 2
   components:
     Damage:
       value: 1
@@ -24,7 +28,10 @@ Tower:
 
 Volcano:
   points: 0
-  sprite: ["fixtures", 3]
+  sprite: 
+    atlas: fixtures
+    index: 3
+    columns: !Frames 4
   components:
     Damage:
       value: 1

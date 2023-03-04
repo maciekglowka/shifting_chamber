@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
+use super::PIECE_SPRITE_COLUMNS;
 const PIECE_SPRITE_FILES: [(&str, usize, usize); 2] = [
     // atlas, columns, rows
-    ("fixtures", 1, 4),
-    ("units", 1, 4)
+    ("fixtures", PIECE_SPRITE_COLUMNS, 4),
+    ("units", PIECE_SPRITE_COLUMNS, 4)
 ];
 
 #[derive(Resource)]
@@ -31,7 +32,6 @@ pub fn load_assets(
             texture_atlasses.as_mut(),
             asset_list.as_mut()
         );
-        info!("{}", fname);
         piece_textures.insert(fname.to_string(), handle);
     }
 

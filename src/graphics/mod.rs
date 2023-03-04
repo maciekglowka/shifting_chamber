@@ -1,12 +1,14 @@
 use bevy::prelude::*;
 
-use crate::states::GameState;
+use crate::data::{SpriteData, SpriteColumns};
 use crate::globals::{MAP_SIZE, Y_PERSPECTIVE, TILE_SIZE, TILE_Z};
+use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
 mod animate;
 mod assets;
 mod components;
+mod frames;
 mod spawn;
 
 pub use components::PieceRenderer;
@@ -17,9 +19,11 @@ impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(assets::load_assets)
             .init_resource::<animate::AnimationRes>()
+            .insert_resource(frames::SpriteTimer::new())
             .add_system(spawn::spawn_piece_renderer)
             .add_system(spawn::spawn_tile_renderer)
             .add_system(spawn::spawn_projectile_renderer)
+            .add_system(frames::animate_frames)
             .add_system_to_stage(
                 CoreStage::PostUpdate, animate::update_state
             )
@@ -51,7 +55,7 @@ impl Plugin for GraphicsPlugin {
 
 const TILE_VARIANTS: usize = 4;
 const SPRITE_SIZE: f32 = 32.;
-const PIECE_FRAMES: usize = 4;
+const PIECE_SPRITE_COLUMNS: usize = 4;
 
 pub fn get_world_position(v: Vector2Int, z: f32) -> Vec3 {
     let offset = if z == TILE_Z { 0. } else {TILE_SIZE * 0.25};
@@ -59,4 +63,8 @@ pub fn get_world_position(v: Vector2Int, z: f32) -> Vec3 {
         v.x as f32 * TILE_SIZE,
         v.y as f32 * TILE_SIZE * Y_PERSPECTIVE + offset,
         z + (MAP_SIZE - v.y) as f32)
+}
+
+fn get_base_piece_sprite_idx(data: &SpriteData) -> usize {
+    data.index * PIECE_SPRITE_COLUMNS
 }
