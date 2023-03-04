@@ -67,7 +67,7 @@ fn spawn_level_pieces(
     tile_res: &TileRes,
 ) {
     let mut tile_pool: Vec<_> = tile_res.tiles.keys()
-        .filter(|a| **a != player_v)
+        .filter(|a| a.manhattan(player_v) > 1)
         .map(|a| *a)
         .collect();
 
