@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::prelude::*;
 
 use crate::data::{SpriteData, SpriteColumns};
 use crate::globals::{MAP_SIZE, Y_PERSPECTIVE, TILE_SIZE, TILE_Z};
@@ -66,5 +67,12 @@ pub fn get_world_position(v: Vector2Int, z: f32) -> Vec3 {
 }
 
 fn get_base_piece_sprite_idx(data: &SpriteData) -> usize {
-    data.index * PIECE_SPRITE_COLUMNS
+    let base = data.index * PIECE_SPRITE_COLUMNS;
+    match data.columns {
+        Some(SpriteColumns::Variants(i)) => {
+            let mut rng = thread_rng();
+            base + rng.gen_range(0..i)
+        }
+        _ => base
+    }
 }
