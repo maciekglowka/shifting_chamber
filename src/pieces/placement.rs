@@ -4,22 +4,20 @@ use std::collections::HashMap;
 
 use crate::data::{DataAssets, PieceData};
 use crate::globals::{MAP_SIZE, MAP_POINTS_MUL};
+use crate::player::get_player_v;
 use crate::manager::GameRes;
 use crate::tiles::TileRes;
 use crate::vectors::Vector2Int;
 
-// use super::renderer::PieceAssets;
-
 pub fn generate_pieces(
     mut commands: Commands,
     tile_res: Res<TileRes>,
-    // assets: Res<PieceAssets>,
     data_assets: Res<DataAssets>,
     mut game_res: ResMut<GameRes>
 ) {
     let target_points = (game_res.level * MAP_POINTS_MUL) as i32;
     let level_type = get_level_type(&mut game_res, &data_assets, target_points);
-    let player_v = Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2);
+    let player_v = get_player_v();
 
     let fixture_pool = get_name_pool(
         &data_assets.pieces,
@@ -58,7 +56,6 @@ pub fn generate_pieces(
         data_assets.as_ref(),
         player_v,
         tile_res.as_ref(),
-        // assets.as_ref()
     )
 }
 
@@ -68,12 +65,11 @@ fn spawn_level_pieces(
     data_assets: &DataAssets,
     player_v: Vector2Int,
     tile_res: &TileRes,
-    // assets: &PieceAssets
 ) {
     let mut tile_pool: Vec<_> = tile_res.tiles.keys()
-    .filter(|a| a.manhattan(player_v) > 1)
-    .map(|a| *a)
-    .collect();
+        .filter(|a| **a != player_v)
+        .map(|a| *a)
+        .collect();
 
     for name in pieces {
         let v = match data_assets.pieces[&name].points {

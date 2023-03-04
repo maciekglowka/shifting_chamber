@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use rand::prelude::*;
 
 use crate::data::{SpriteData, SpriteColumns};
-use crate::globals::{MAP_SIZE, Y_PERSPECTIVE, TILE_SIZE, TILE_Z};
+use crate::globals::{MAP_SIZE, PROJECTILE_Z, Y_PERSPECTIVE, TILE_SIZE, TILE_Z};
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
@@ -75,4 +75,8 @@ fn get_base_piece_sprite_idx(data: &SpriteData) -> usize {
         }
         _ => base
     }
+}
+
+fn get_projectile_base_position(v: Vector2Int) -> Vec3 {
+    get_world_position(v, PROJECTILE_Z) + Vec3::new(0., TILE_SIZE * 0.25, 0.)
 }

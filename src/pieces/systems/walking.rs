@@ -72,18 +72,6 @@ pub fn plan_moves(
     tile_res: Res<TileRes>,
     mut piece_res: ResMut<PieceRes>
 ) {
-    // let mut avoid = HashSet::new();
-    // for (parent, occupier, damage, range) in obstacle_query.iter() {
-    //     if occupier.is_none() && damage.is_none() { continue };
-    //     let Ok(tile) = tile_query.get(parent.get()) else { continue };
-    //     if occupier.is_some() { avoid.insert(tile.v); }
-    //     if damage.is_some() {
-    //         let Some(range) = range else { continue };
-    //         for v in range.fields.iter() {
-    //             avoid.insert(tile.v + *v);
-    //         }
-    //     }
-    // }
     let mut avoid = get_obstacles(&obstacle_query, &tile_query);
     
     let mut queue = VecDeque::new();
@@ -101,11 +89,10 @@ pub fn plan_moves(
             if avoid.contains(&v) { continue };
             if !tile_res.tiles.contains_key(&v) { continue };
 
-            // let rank = match distances.get(&v) {
-            //     Some(r) => *r,
-            //     None => player_v.manhattan(v)
-            // };
-            let Some(rank) = distances.get(&v) else { continue };
+            let rank = match distances.get(&v) {
+                Some(a) => *a,
+                _ => i32::MAX
+            };
             possible.push((rank, dir));
 
         }

@@ -2,7 +2,7 @@
 # (only explicitly by level type or specific action)
 
 Rock:
-  points: -1
+  points: 0
   sprite: 
     atlas: fixtures
     index: 0

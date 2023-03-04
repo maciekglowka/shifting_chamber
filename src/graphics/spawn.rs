@@ -105,7 +105,7 @@ pub fn spawn_projectile_renderer(
         let texture = &assets.elements_texture;
         let mut sprite = TextureAtlasSprite::new(0);
         sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
-        let v = super::get_world_position(projectile.source, PROJECTILE_Z);
+        let v = super::get_projectile_base_position(projectile.source);
         commands.spawn((
             ProjectileRenderer { target: entity, linear_position: v },
             SpriteSheetBundle {

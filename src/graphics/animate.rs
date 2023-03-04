@@ -78,8 +78,8 @@ pub fn update_projectiles(
     for (entity, mut renderer, mut transform) in renderer_query.iter_mut() {
         let Ok(projectile) = projectile_query.get(renderer.target) else { continue };
 
-        let source = super::get_world_position(projectile.source, PROJECTILE_Z);
-        let target = super::get_world_position(projectile.target, PROJECTILE_Z);
+        let source = super::get_projectile_base_position(projectile.source);
+        let target = super::get_projectile_base_position(projectile.target);
         let d = (target - renderer.linear_position).length();
         if d > MAX_ANIMATION_DIST {
             let total = (target - source).length();

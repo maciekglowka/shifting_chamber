@@ -3,7 +3,10 @@ use bevy::prelude::*;
 use crate::data::DataAssets;
 use crate::globals::{MAP_SIZE, PIECE_Z};
 use crate::states::GameState;
-use crate::pieces::spawn_piece_at_v;
+use crate::pieces::{
+    components::Piece,
+    spawn_piece_at_v
+};
 use crate::tiles;
 use crate::vectors::Vector2Int;
 
@@ -16,15 +19,16 @@ impl Plugin for PlayerPlugin {
         app.add_system_set(
                 SystemSet::on_exit(GameState::MapInit)
                     .with_system(spawn_player)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::MapInit)
+                    .with_system(unpin_player)
+                    .label("player")
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameState::MapInit)
+                    .with_system(pin_player)
             );
-            // .add_system_set(
-            //     SystemSet::on_enter(GameState::TileShift)
-            //         .with_system(unpin_player)
-            // )
-            // .add_system_set(
-            //     SystemSet::on_exit(GameState::TileShift)
-            //         .with_system(pin_player)
-            // );
     }
 }
 
@@ -33,9 +37,14 @@ pub struct Player;
 
 fn spawn_player(
     mut commands: Commands,
+    player_query: Query<&Player>,
     tile_res: Res<tiles::TileRes>,
     data_assets: Res<DataAssets>
 ) {
+    if player_query.get_single().is_ok() {
+        // do not spawn the player if exists,
+        return;
+    }
     let entity = spawn_piece_at_v(
         &mut commands,
         "Player".to_string(),
@@ -52,9 +61,8 @@ fn unpin_player(
 ) {
     let Ok(entity) = player_query.get_single()
         else { return };
-    // let translation = global_transform.translation();
     commands.entity(entity).remove_parent();
-    // transform.translation = translation;
+    commands.entity(entity).remove::<Piece>();
 }
 
 fn pin_player(
@@ -65,10 +73,10 @@ fn pin_player(
     let v = get_player_v();
     let Some(tile_entity) = tile_res.tiles.get(&v) else { return };
     let Ok(entity) = player_query.get_single() else { return };
-    // transform.translation = Vec3::new(0., 0., PIECE_Z);
     commands.entity(*tile_entity).push_children(&[entity]);
+    commands.entity(entity).insert(Piece { name: "Player".to_string()} );
 }
 
-fn get_player_v() -> Vector2Int {
+pub fn get_player_v() -> Vector2Int {
     Vector2Int::new(MAP_SIZE / 2, MAP_SIZE / 2)
 }
