@@ -25,32 +25,20 @@ impl Plugin for GraphicsPlugin {
             .add_system(spawn::spawn_tile_renderer)
             .add_system(spawn::spawn_projectile_renderer)
             .add_system(frames::animate_frames)
-            .add_system_to_stage(
-                CoreStage::PostUpdate, animate::update_state
+            .add_systems(
+                (
+                    animate::update_state,
+                    spawn::despawn_piece_renderer,
+                    spawn::despawn_tile_renderer
+                ).in_base_set(CoreSet::PostUpdate)
             )
-            .add_system_to_stage(
-                CoreStage::PostUpdate, spawn::despawn_piece_renderer
+            .add_systems(
+                (animate::update_tiles, animate::update_pieces)
+                .in_set(OnUpdate(GameState::TileShift))
             )
-            .add_system_to_stage(
-                CoreStage::PostUpdate, spawn::despawn_tile_renderer
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::TileShift)
-                    .with_system(animate::update_tiles)
-                    .with_system(animate::update_pieces)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::NPCMove)
-                    .with_system(animate::update_pieces)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::MoveResult)
-                    .with_system(animate::update_pieces)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::TurnEnd)
-                    .with_system(animate::update_projectiles)
-            );
+            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::NPCMove)))
+            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::MoveResult)))
+            .add_system(animate::update_projectiles.in_set(OnUpdate(GameState::TurnEnd)));
     }
 }
 

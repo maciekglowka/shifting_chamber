@@ -24,23 +24,17 @@ impl Plugin for UIPlugin {
             .add_system(bubble::spawn_bubbles)
             .add_system(bubble::update_bubbles)
             .add_system(added_piece)
-            .add_system_set(SystemSet::new()
-                .with_system(command_menu::update_menu)
-                .with_system(sidebar::update_sidebar)
+            .add_systems((
+                command_menu::update_menu,
+                sidebar::update_sidebar
+            ))
+            .add_system(player_input.in_schedule(OnEnter(GameState::PlayerInput)))
+            .add_systems(
+                (command_menu::menu_click, overlays::update_overlays)
+                .in_set(OnUpdate(GameState::PlayerInput))
             )
-            .add_system_set(SystemSet::on_enter(GameState::PlayerInput)
-                .with_system(player_input)
-            )
-            .add_system_set(SystemSet::on_update(GameState::PlayerInput)
-                .with_system(command_menu::menu_click)
-                .with_system(overlays::update_overlays)
-            )
-            .add_system_set(SystemSet::on_enter(GameState::GameOver)
-                .with_system(game_over::show_menu)
-            )
-            .add_system_set(SystemSet::on_exit(GameState::GameOver)
-                .with_system(game_over::clear_menu)
-            );  
+            .add_system(game_over::show_menu.in_schedule(OnEnter(GameState::GameOver)))
+            .add_system(game_over::clear_menu.in_schedule(OnExit(GameState::GameOver)));
     }  
 }
 

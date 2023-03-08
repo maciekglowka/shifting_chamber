@@ -1,5 +1,8 @@
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+use bevy::prelude::*;
+
+#[derive(Clone, Debug, Default, Hash, Eq, States, PartialEq)]
 pub enum GameState {
+    #[default]
     LoadAssets,
     GameInit,
     MapInit,

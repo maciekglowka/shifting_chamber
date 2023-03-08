@@ -4,14 +4,14 @@ use crate::globals::{MAP_SIZE, TILE_SIZE};
 use crate::vectors::Vector2Int;
 
 pub fn mouse_to_world(
-    windows: &Res<Windows>,
+    windows: &Query<&Window>,
     camera_query: &Query<(&Camera, &GlobalTransform)>
 ) -> Option<Vec2> {
     let (camera, camera_transform) = match camera_query.get_single() {
         Ok(c) => c,
         Err(_) => return None
     };
-    let window = windows.get_primary()?;
+    let Ok(window) = windows.get_single() else { return None };
 
     let screen_pos = window.cursor_position()?;
     let window_size = Vec2::new(window.width() as f32, window.height() as f32);

@@ -12,18 +12,13 @@ pub struct TilePlugin;
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<TileRes>()
-            .add_system_set(
-                SystemSet::on_enter(GameState::MapInit)
-                    .with_system(spawn_map)
-                    .after("player")
-            );
+            .add_system(spawn_map.in_schedule(OnEnter(GameState::MapInit)));
     }
 }
 
 fn spawn_map(
     mut commands: Commands,
     mut res: ResMut<TileRes>
-    // assets: Res<renderer::TileAssets>
 ) {
     clear_map(&mut commands, res.as_ref());
 
@@ -42,7 +37,9 @@ fn clear_map(
     commands: &mut Commands,
     res: &TileRes
 ) {
+    info!("Clear");
     for entity in res.tiles.values() {
+        info!("Clear {:?}", entity);
         commands.entity(*entity).despawn_recursive();
     }
 }

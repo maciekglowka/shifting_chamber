@@ -16,19 +16,11 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-                SystemSet::on_exit(GameState::MapInit)
-                    .with_system(spawn_player)
+        app.add_systems(
+                (spawn_player, pin_player)
+                .in_schedule(OnExit(GameState::MapInit))
             )
-            .add_system_set(
-                SystemSet::on_enter(GameState::MapInit)
-                    .with_system(unpin_player)
-                    .label("player")
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameState::MapInit)
-                    .with_system(pin_player)
-            );
+            .add_system(unpin_player.in_schedule(OnEnter(GameState::MapInit)));
     }
 }
 

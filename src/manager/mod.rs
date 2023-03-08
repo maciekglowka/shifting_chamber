@@ -4,7 +4,6 @@ use std::cmp;
 use crate::pieces::components::Walking;
 use crate::player::Player;
 use crate::states::GameState;
-use crate::vectors::Vector2Int;
 use crate::tiles::transform::TileTransform;
 
 mod player_input;
@@ -26,84 +25,77 @@ impl Plugin for ManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CommandEvent>()
             .init_resource::<GameRes>()
-            .add_system_set(
-                SystemSet::on_update(GameState::GameInit)
-                    .with_system(start_game)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::MapInit)
-                    .with_system(start_map)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::PlayerInput)
-                    .with_system(player_input::transform_tiles)
-                    .with_system(player_input::wait)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::NPCMove)
-                    .with_system(turn_end)
-            )
+            .add_system(start_game.in_set(OnUpdate(GameState::GameInit)))
+            .add_system(start_map.in_set(OnUpdate(GameState::MapInit)))
+            .add_systems(
+                (player_input::transform_tiles, player_input::wait)
+                .in_set(OnUpdate(GameState::PlayerInput)))
             .add_system(update_state);
 
     }
 }
 
 fn start_game(
-    mut game_state: ResMut<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
     mut res: ResMut<GameRes>
 ) {
     res.score = 0;
     res.level = 0;
     res.next_upgrade = 2;
-    game_state.set(GameState::MapInit).expect("Switching states failed");
+    next_state.set(GameState::MapInit);
 }
 
 fn start_map(
-    mut game_state: ResMut<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
     mut res: ResMut<GameRes>
 ) {
     res.level += 1;
     res.ap = 0;
-    game_state.set(GameState::TurnStart).expect("Switching states failed");
+    next_state.set(GameState::TurnStart);
 }
 
-pub fn turn_end(
-    mut ev_command: EventReader<CommandEvent>,
-    mut game_state: ResMut<State<GameState>>,
-) {
-    for ev in ev_command.iter() {
-        if let CommandType::TurnEnd = ev.0 {
-            game_state.set(GameState::TurnEnd);
-        }
-    }
-}
+// pub fn turn_end(
+//     mut ev_command: EventReader<CommandEvent>,
+//     mut next_state: ResMut<NextState<GameState>>
+// ) {
+//     for ev in ev_command.iter() {
+//         if let CommandType::TurnEnd = ev.0 {
+//             next_state.set(GameState::TurnEnd);
+//         }
+//     }
+// }
 
 pub fn update_state(
     mut ev_command: EventReader<CommandEvent>,
-    mut game_state: ResMut<State<GameState>>,
+    game_state: Res<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
     player_query: Query<&Player>,
     npc_query: Query<&Walking>,
     mut res: ResMut<GameRes>
 ) {
     for ev in ev_command.iter() {
+        if let CommandType::TurnEnd = ev.0 {
+            next_state.set(GameState::TurnEnd);
+            break;
+        }
         if let CommandType::AnimationEnd = ev.0 {
-            match game_state.current() {
+            match game_state.0 {
                 GameState::TurnStart => {
                     res.ap = cmp::min(2, res.ap + 1);
-                    game_state.set(GameState::PlayerInput);
+                    next_state.set(GameState::PlayerInput);
                 },
                 GameState::TileShift => {
                     res.ap = res.ap.saturating_sub(1);
                     match res.ap {
-                        0 => game_state.set(GameState::NPCMove),
-                        _ => game_state.set(GameState::PlayerInput)
+                        0 => next_state.set(GameState::NPCMove),
+                        _ => next_state.set(GameState::PlayerInput)
                     };
                 },
                 GameState::NPCMove => {
-                    game_state.set(GameState::MoveResult);
+                    next_state.set(GameState::MoveResult);
                 },
                 GameState::MoveResult => {
-                    game_state.set(GameState::NPCMove);
+                    next_state.set(GameState::NPCMove);
                 },
                 GameState::TurnEnd => {
                     match player_query.get_single() {
@@ -112,12 +104,12 @@ pub fn update_state(
                             //     game_state.set(GameState::Upgrade);
                             //     return;
                             if npc_query.iter().len() == 0 {
-                                game_state.set(GameState::MapInit);
+                                next_state.set(GameState::MapInit);
                             } else {
-                                game_state.set(GameState::TurnStart);
+                                next_state.set(GameState::TurnStart);
                             }          
                         },
-                        _ => { game_state.set(GameState::GameOver); },
+                        _ => { next_state.set(GameState::GameOver) },
                     }
                 },
                 _ => ()

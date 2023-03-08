@@ -47,7 +47,7 @@ pub fn spawn_piece_renderer(
 
 pub fn despawn_piece_renderer(
     mut commands: Commands,
-    removed: RemovedComponents<Piece>,
+    mut removed: RemovedComponents<Piece>,
     renderer_query: Query<(Entity, &PieceRenderer)>
 ) {
     for parent_entity in removed.iter() {
@@ -84,7 +84,7 @@ pub fn spawn_tile_renderer(
 
 pub fn despawn_tile_renderer(
     mut commands: Commands,
-    removed: RemovedComponents<Tile>,
+    mut removed: RemovedComponents<Tile>,
     renderer_query: Query<(Entity, &TileRenderer)>
 ) {
     for parent_entity in removed.iter() {

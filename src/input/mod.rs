@@ -13,15 +13,8 @@ pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputRes>()
-            .add_system_set(
-                SystemSet::on_enter(GameState::PlayerInput)
-                    .with_system(reset_input)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::PlayerInput)
-                    // .with_system(mouse_input)
-                    .with_system(keys)
-            );
+            .add_system(reset_input.in_schedule(OnEnter(GameState::PlayerInput)))
+            .add_system(keys.in_set(OnUpdate(GameState::PlayerInput)));
     }
 }
 
@@ -74,39 +67,6 @@ const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
     (KeyCode::W, Vector2Int::UP), (KeyCode::S, Vector2Int::DOWN),
     (KeyCode::A, Vector2Int::LEFT), (KeyCode::D, Vector2Int::RIGHT),
 ];
-
-// fn mouse_input (
-//     windows: Res<Windows>,
-//     camera_query: Query<(&Camera, &GlobalTransform)>,
-//     buttons: Res<Input<MouseButton>>,
-//     mut res: ResMut<InputRes>,
-//     mut ev_command: EventWriter<CommandEvent>,
-//     mut ev_action: EventWriter<ActionEvent>
-// ) {
-//     if buttons.just_pressed(MouseButton::Left) {
-//         if let Some(world_v) = utils::mouse_to_world(&windows, &camera_query) {
-//             if let Some(v) = utils::world_to_tile_position(world_v) {
-//                 match res.mode {
-//                     InputMode::TileShift => match res.selected {
-//                         Some(s) => {
-//                             ev_command.send(
-//                                 CommandEvent(CommandType::MapShift(v, s))
-//                             );
-//                             res.selected = None;
-//                         },
-//                         None => res.selected = Some(v)
-//                     },
-//                     InputMode::Place => {
-//                         ev_action.send(ActionEvent(
-//                             ActionKind::SpawnPiece(v, "Rock".to_string())
-//                         ));
-//                     }
-//                 }
-
-//             }
-//         }
-//     }
-// }
 
 #[derive(Debug)]
 pub enum InputMode {

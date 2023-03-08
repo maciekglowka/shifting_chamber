@@ -19,11 +19,10 @@ pub struct ActionPlugin;
 impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ActionEvent>()
-            .add_system_set(
-                SystemSet::new()
-                    .with_system(units::receive_damage)
-                    .with_system(pieces::spawn_piece)
-            );
+            .add_systems((
+                units::receive_damage,
+                pieces::spawn_piece
+            ));
     }
 }
 

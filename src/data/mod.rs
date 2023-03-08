@@ -24,10 +24,9 @@ impl Plugin for DataPlugin {
             .init_asset_loader::<YamlAssetLoader>()
             .add_startup_system(pieces::load_assets)
             .add_startup_system(levels::load_assets)
-            .add_system_set(
-                SystemSet::on_exit(GameState::LoadAssets)
-                    .with_system(pieces::parse_data)
-                    .with_system(levels::parse_data)
+            .add_systems(
+                (pieces::parse_data, levels::parse_data)
+                .in_schedule(OnExit(GameState::LoadAssets))
             );
     }
 }

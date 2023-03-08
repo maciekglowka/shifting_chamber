@@ -18,7 +18,7 @@ pub fn update_state(
     mut ev_command: EventWriter<CommandEvent>,
     game_state: Res<State<GameState>>
 ) {
-    match game_state.current() {
+    match game_state.0 {
         GameState::TurnStart | GameState::TileShift | GameState::NPCMove | GameState::MoveResult | GameState::TurnEnd => (),
         _ => return
     }
@@ -77,7 +77,8 @@ pub fn update_projectiles(
     let mut animating = false;
     for (entity, mut renderer, mut transform) in renderer_query.iter_mut() {
         let Ok(projectile) = projectile_query.get(renderer.target) else { continue };
-
+        
+        info!("Projectile update");
         let source = super::get_projectile_base_position(projectile.source);
         let target = super::get_projectile_base_position(projectile.target);
         let d = (target - renderer.linear_position).length();
@@ -96,6 +97,7 @@ pub fn update_projectiles(
         }
     }
     if animating {
+        info!("Animating");
         res.is_animating = true;
     }
 }

@@ -28,19 +28,21 @@ fn main() {
     app.add_plugins(
             DefaultPlugins.set(
                 WindowPlugin {
-                    window: WindowDescriptor {
-                        height: globals::WINDOW_HEIGHT,
-                        width: globals::WINDOW_WIDTH,
+                    primary_window: Some(Window {
+                        resolution: (
+                            globals::WINDOW_WIDTH,
+                            globals::WINDOW_HEIGHT
+                        ).into(),
                         ..Default::default()
-                    },
+                    }),
                     ..Default::default()
                 }
             ).set(
                 ImagePlugin::default_nearest()
             )
         )
-        .insert_resource(Msaa { samples: 1 })
-        .add_state(states::GameState::LoadAssets)
+        .insert_resource(Msaa::Off)
+        .add_state::<states::GameState>()
         .add_plugin(actions::ActionPlugin)
         .add_plugin(assets::AssetPlugin)
         .add_plugin(camera::CameraPlugin)

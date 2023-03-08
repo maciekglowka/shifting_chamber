@@ -15,32 +15,16 @@ pub struct PiecesPlugin;
 impl Plugin for PiecesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PieceRes>()
-            .add_system_set(
-                SystemSet::on_exit(GameState::MapInit)
-                    .with_system(placement::generate_pieces)
+            .add_system(placement::generate_pieces.in_schedule(OnExit(GameState::MapInit)))
+            .add_system(systems::walking::plan_moves.in_schedule(OnEnter(GameState::TurnStart)))
+            .add_system(systems::walking::move_walking.in_schedule(OnEnter(GameState::NPCMove)))
+            .add_systems(
+                (systems::walking::walk_damage, systems::walking::walk_back)
+                .in_schedule(OnEnter(GameState::MoveResult))
             )
-            .add_system_set(
-                SystemSet::on_enter(GameState::TurnStart)
-                    .with_system(systems::walking::plan_moves)
-            )
-            .add_system_set(
-                SystemSet::on_enter(GameState::NPCMove)
-                    .with_system(systems::walking::move_walking)
-                )
-            .add_system_set(
-                SystemSet::on_enter(GameState::MoveResult)
-                    .with_system(systems::walking::walk_damage)
-                    .with_system(systems::walking::walk_back)
-                )
             .add_system(systems::health::kill_units)
-            .add_system_set(
-                SystemSet::on_enter(GameState::TurnEnd)
-                    .with_system(systems::projectile::launch_projectiles)
-                )
-            .add_system_set(
-                SystemSet::on_exit(GameState::TurnEnd)
-                    .with_system(systems::projectile::hit_projectiles)
-                );
+            .add_system(systems::projectile::launch_projectiles.in_schedule(OnEnter(GameState::TurnEnd)))
+            .add_system(systems::projectile::hit_projectiles.in_schedule(OnExit(GameState::TurnEnd)));
     }
 }
 
