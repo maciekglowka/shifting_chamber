@@ -9,9 +9,9 @@ pub enum GameState {
     TurnStart,
     PlayerInput,
     TileShift,
-    NPCMove,
-    MoveResult,
+    NPCAction,
+    NPCResult,
     TurnEnd,
-    Upgrade,
+    MapEnd,
     GameOver,
 }

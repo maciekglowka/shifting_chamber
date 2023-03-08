@@ -27,6 +27,7 @@ impl Plugin for ManagerPlugin {
             .init_resource::<GameRes>()
             .add_system(start_game.in_set(OnUpdate(GameState::GameInit)))
             .add_system(start_map.in_set(OnUpdate(GameState::MapInit)))
+            .add_system(map_end.in_set(OnUpdate(GameState::MapEnd)))
             .add_systems(
                 (player_input::transform_tiles, player_input::wait)
                 .in_set(OnUpdate(GameState::PlayerInput)))
@@ -52,6 +53,13 @@ fn start_map(
     res.level += 1;
     res.ap = 0;
     next_state.set(GameState::TurnStart);
+}
+
+fn map_end(
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    // TODO
+    next_state.set(GameState::MapInit);
 }
 
 // pub fn turn_end(
@@ -87,15 +95,15 @@ pub fn update_state(
                 GameState::TileShift => {
                     res.ap = res.ap.saturating_sub(1);
                     match res.ap {
-                        0 => next_state.set(GameState::NPCMove),
+                        0 => next_state.set(GameState::NPCAction),
                         _ => next_state.set(GameState::PlayerInput)
                     };
                 },
-                GameState::NPCMove => {
-                    next_state.set(GameState::MoveResult);
+                GameState::NPCAction => {
+                    next_state.set(GameState::NPCResult);
                 },
-                GameState::MoveResult => {
-                    next_state.set(GameState::NPCMove);
+                GameState::NPCResult => {
+                    next_state.set(GameState::NPCAction);
                 },
                 GameState::TurnEnd => {
                     match player_query.get_single() {
@@ -104,7 +112,7 @@ pub fn update_state(
                             //     game_state.set(GameState::Upgrade);
                             //     return;
                             if npc_query.iter().len() == 0 {
-                                next_state.set(GameState::MapInit);
+                                next_state.set(GameState::MapEnd);
                             } else {
                                 next_state.set(GameState::TurnStart);
                             }          

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::data::DataAssets;
-use crate::globals::{MAP_SIZE, PIECE_Z};
+use crate::globals::MAP_SIZE;
 use crate::states::GameState;
 use crate::pieces::{
     components::Piece,
@@ -20,7 +20,7 @@ impl Plugin for PlayerPlugin {
                 (spawn_player, pin_player)
                 .in_schedule(OnExit(GameState::MapInit))
             )
-            .add_system(unpin_player.in_schedule(OnEnter(GameState::MapInit)));
+            .add_system(unpin_player.in_schedule(OnEnter(GameState::MapEnd)));
     }
 }
 

@@ -36,8 +36,8 @@ impl Plugin for GraphicsPlugin {
                 (animate::update_tiles, animate::update_pieces)
                 .in_set(OnUpdate(GameState::TileShift))
             )
-            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::NPCMove)))
-            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::MoveResult)))
+            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::NPCAction)))
+            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::NPCResult)))
             .add_system(animate::update_projectiles.in_set(OnUpdate(GameState::TurnEnd)));
     }
 }

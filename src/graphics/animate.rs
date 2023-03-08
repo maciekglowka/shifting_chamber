@@ -19,7 +19,7 @@ pub fn update_state(
     game_state: Res<State<GameState>>
 ) {
     match game_state.0 {
-        GameState::TurnStart | GameState::TileShift | GameState::NPCMove | GameState::MoveResult | GameState::TurnEnd => (),
+        GameState::TurnStart | GameState::TileShift | GameState::NPCAction | GameState::NPCResult | GameState::TurnEnd => (),
         _ => return
     }
     if res.is_animating {

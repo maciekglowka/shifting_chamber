@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::actions::{ActionEvent, ActionKind};
-use crate::manager::{CommandEvent, CommandType};
 use crate::player::Player;
 use crate::tiles::{Tile, TileRes};
 use crate::vectors::{Vector2Int, ORTHO_DIRECTIONS};
@@ -74,7 +73,6 @@ pub fn plan_moves(
 ) {
     let mut avoid = get_obstacles(&obstacle_query, &tile_query);
     
-    let mut queue = VecDeque::new();
     let Ok((player_entity, player_parent)) = player_query.get_single() else { return };
     let player_v = match tile_query.get(player_parent.get()) {
         Ok(t) => t.v,
@@ -99,14 +97,12 @@ pub fn plan_moves(
         possible.sort_by(|a, b| a.0.cmp(&b.0));
         walking.planned_move = match possible.iter().next() {
             Some(a) => {
-                queue.push_back(entity);
                 if tile.v + a.1 != player_v { avoid.insert(tile.v + a.1); }
                 Some(a.1)
             },
             None => None
         }
     }
-    piece_res.walking_queue = queue;
 }
 
 pub fn move_walking(
@@ -114,24 +110,17 @@ pub fn move_walking(
     walking_query: Query<(&Walking, &Parent)>,
     tile_query: Query<&Tile>,
     tile_res: Res<TileRes>,
-    mut piece_res: ResMut<PieceRes>,
-    mut ev_command: EventWriter<CommandEvent>
+    mut piece_res: ResMut<PieceRes>
 ) {
-    piece_res.walkign_active = None;
-    let Some(entity) = piece_res.walking_queue.pop_front() else {
-        ev_command.send(CommandEvent(CommandType::TurnEnd));
-        return;
-    };
-    let Ok((walking, parent)) = walking_query.get(entity) else { return };
+    let Some(entity) = piece_res.action_queue.get(0) else { return };
+    let Ok((walking, parent)) = walking_query.get(*entity) else { return };
     let Some(dir) = walking.planned_move else { return };
     let Ok(tile) = tile_query.get(parent.get()) else { return };
     let v = tile.v + dir;
     if !tile_res.tiles.contains_key(&v) {
         return;
     }
-
-    change_parent_tile(&mut commands, entity, parent, v, tile_res.as_ref());
-    piece_res.walkign_active = Some(entity);
+    change_parent_tile(&mut commands, *entity, parent, v, tile_res.as_ref());
 }
 
 pub fn walk_back(
@@ -142,18 +131,20 @@ pub fn walk_back(
     piece_res: Res<PieceRes>,
     tile_res: Res<TileRes>,
 ) {
-    let Some(entity) = piece_res.walkign_active else { return };
+    let Some(entity) = piece_res.action_queue.get(0) else { return };
+    // check if active entity is a walker
+    let Ok(walking) = walking_query.get(*entity) else { return };
     // if the occupier query won't have result it means our walker
     // is not an occupier and should not be checked
-    let Ok((_, parent)) = occupier_query.get(entity) else { return };
+    let Ok((_, parent)) = occupier_query.get(*entity) else { return };
     for (other, other_parent) in occupier_query.iter() {
-        if parent.get() != other_parent.get() || other == entity { continue };
-        // confilct -> move back to the previous position
-        let Ok(walking) = walking_query.get(entity) else { continue };
+        if parent.get() != other_parent.get() || other == *entity { continue };
+
+        // confilct -> move back to the previous position      
         let Ok(tile) = tile_query.get(parent.get()) else { continue };
         let Some(dir) = walking.planned_move else { continue };
         let v = tile.v - dir;
-        change_parent_tile(&mut commands, entity, parent, v, tile_res.as_ref());
+        change_parent_tile(&mut commands, *entity, parent, v, tile_res.as_ref());
     }
 }
 
@@ -163,10 +154,10 @@ pub fn walk_damage(
     piece_res: Res<PieceRes>,
     mut ev_action: EventWriter<ActionEvent>
 ) {
-    let Some(entity) = piece_res.walkign_active else { return };
-    let Ok((damage, parent)) = damage_query.get(entity) else { return };
+    let Some(entity) = piece_res.action_queue.get(0) else { return };
+    let Ok((damage, parent)) = damage_query.get(*entity) else { return };
     for (other, other_parent) in health_query.iter() {
-        if parent.get() != other_parent.get() || other == entity { continue };
+        if parent.get() != other_parent.get() || other == *entity { continue };
         ev_action.send(ActionEvent(
             ActionKind::Damage(other, damage.kind, damage.value)
         ));

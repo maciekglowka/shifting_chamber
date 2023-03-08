@@ -5,7 +5,6 @@ use crate::globals::MAP_SIZE;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
-// mod renderer;
 pub mod transform;
 pub struct TilePlugin;
 
@@ -18,9 +17,10 @@ impl Plugin for TilePlugin {
 
 fn spawn_map(
     mut commands: Commands,
+    query: Query<Entity, With<Tile>>,
     mut res: ResMut<TileRes>
 ) {
-    clear_map(&mut commands, res.as_ref());
+    clear_map(&mut commands, &query);
 
     let mut tiles = HashMap::new();
     for x in 0..MAP_SIZE {
@@ -35,12 +35,10 @@ fn spawn_map(
 
 fn clear_map(
     commands: &mut Commands,
-    res: &TileRes
+    query: &Query<Entity, With<Tile>>
 ) {
-    info!("Clear");
-    for entity in res.tiles.values() {
-        info!("Clear {:?}", entity);
-        commands.entity(*entity).despawn_recursive();
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
     }
 }
 

@@ -19,7 +19,7 @@ debug = ["dep:bevy-inspector-egui"]
 
 [dependencies]
 bevy = "0.10"
-bevy-inspector-egui = { version = "0.15", optional = true }
+bevy-inspector-egui = { version = "0.18", optional = true }
 console_error_panic_hook = "0.1"
 rand = { version = "0.8.5", features = ["alloc"] }
 serde = { version = "1.0", features = ["derive"]}

@@ -19,7 +19,7 @@ pub fn wait(
 ) {
     for ev in ev_command.iter() {
         if let CommandType::PlayerWait = ev.0 {
-            next_state.set(GameState::NPCMove);
+            next_state.set(GameState::NPCAction);
         }
     }
 }

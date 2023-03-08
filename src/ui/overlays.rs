@@ -50,7 +50,7 @@ pub fn update_overlays(
                     )).id();
                 commands.entity(entity).add_child(marker);
 
-                if let Some(order) = piece_res.walking_queue.iter().position(|a| *a == renderer.target) {
+                if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
                     symbols.push((order as u32 + 1, Color::GOLD));
                 }
             }

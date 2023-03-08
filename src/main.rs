@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 
 #[cfg(feature = "debug")]
-use bevy_inspector_egui::WorldInspectorPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 mod actions;
 mod assets;
