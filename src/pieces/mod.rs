@@ -20,15 +20,19 @@ impl Plugin for PiecesPlugin {
                 (systems::walking::plan_moves, systems::queue::plan_queue)
                 .in_schedule(OnEnter(GameState::TurnStart))
             )
-            .add_system(systems::walking::move_walking.in_schedule(OnEnter(GameState::NPCAction)))
             .add_systems(
-                (systems::walking::walk_damage, systems::walking::walk_back)
+                (systems::walking::move_walking, systems::projectile::launch_projectiles)
+                .in_schedule(OnEnter(GameState::NPCAction)))
+            .add_systems(
+                (
+                    systems::walking::walk_damage,
+                    systems::walking::walk_back,
+                    systems::projectile::hit_projectiles
+                )
                 .in_schedule(OnEnter(GameState::NPCResult))
             )
             .add_system(systems::queue::update_queue.in_schedule(OnExit(GameState::NPCResult)))
-            .add_system(systems::health::kill_units)
-            .add_system(systems::projectile::launch_projectiles.in_schedule(OnEnter(GameState::TurnEnd)))
-            .add_system(systems::projectile::hit_projectiles.in_schedule(OnExit(GameState::TurnEnd)));
+            .add_system(systems::health::kill_units);
     }
 }
 

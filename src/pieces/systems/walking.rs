@@ -64,12 +64,11 @@ fn get_distance_field(
 }
 
 pub fn plan_moves(
-    mut walking_query: Query<(Entity, &mut Walking, &Parent)>,
+    mut walking_query: Query<(&mut Walking, &Parent)>,
     obstacle_query: Query<(&Parent, Option<&Occupier>, Option<&Damage>, Option<&Range>), Without<Player>>,
     player_query: Query<(Entity, &Parent), With<Player>>,
     tile_query: Query<&Tile>,
     tile_res: Res<TileRes>,
-    mut piece_res: ResMut<PieceRes>
 ) {
     let mut avoid = get_obstacles(&obstacle_query, &tile_query);
     
@@ -79,7 +78,7 @@ pub fn plan_moves(
         _ => return
     };
     let distances = get_distance_field(player_v, tile_res.as_ref(), &avoid);
-    for (entity, mut walking, parent) in walking_query.iter_mut() {
+    for (mut walking, parent) in walking_query.iter_mut() {
         let mut possible = Vec::new();
         let Ok(tile) = tile_query.get(parent.get()) else { continue };
         for dir in ORTHO_DIRECTIONS {
@@ -110,7 +109,7 @@ pub fn move_walking(
     walking_query: Query<(&Walking, &Parent)>,
     tile_query: Query<&Tile>,
     tile_res: Res<TileRes>,
-    mut piece_res: ResMut<PieceRes>
+    piece_res: Res<PieceRes>
 ) {
     let Some(entity) = piece_res.action_queue.get(0) else { return };
     let Ok((walking, parent)) = walking_query.get(*entity) else { return };

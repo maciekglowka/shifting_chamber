@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::actions::{ActionEvent, ActionKind};
 use crate::tiles::{Tile, TileRes};
 
+use super::super::PieceRes;
 use super::super::components::{
     Damage,
     Health,
@@ -12,30 +13,32 @@ use super::super::components::{
 
 pub fn launch_projectiles(
     mut commands: Commands,
-    damage_query: Query<(&Damage, &Range, &Parent)>,
+    range_query: Query<(&Damage, &Range, &Parent)>,
     health_query: Query<Entity, With<Health>>,
     tile_query: Query<(&Tile, &Children)>,
-    tile_res: Res<TileRes>
+    tile_res: Res<TileRes>,
+    piece_res: Res<PieceRes>
 ) {
-    for (damage, range, parent) in damage_query.iter() {
-        let Ok(parent_tile) = tile_query.get(parent.get()) else { continue };
-        let affected_tiles: Vec<_> = range.fields.iter()
-            .flat_map(|v| tile_res.tiles.get(&(parent_tile.0.v + *v)))
-            .flat_map(|e| tile_query.get(*e))
-            .collect();
+    let Some(entity) = piece_res.action_queue.get(0) else { return };
+    let Ok((damage, range, parent)) = range_query.get(*entity) else { return };
 
-        for tile in affected_tiles {
-            if !tile.1.iter()
-                .any(|a| health_query.get(*a).is_ok())
-                { continue };
-            commands.spawn((
-                Projectile { 
-                    source: parent_tile.0.v,
-                    target: tile.0.v
-                },
-                damage.clone()
-            ));
-        }
+    let Ok(parent_tile) = tile_query.get(parent.get()) else { return };
+    let affected_tiles: Vec<_> = range.fields.iter()
+        .flat_map(|v| tile_res.tiles.get(&(parent_tile.0.v + *v)))
+        .flat_map(|e| tile_query.get(*e))
+        .collect();
+
+    for tile in affected_tiles {
+        if !tile.1.iter()
+            .any(|a| health_query.get(*a).is_ok())
+            { continue };
+        commands.spawn((
+            Projectile { 
+                source: parent_tile.0.v,
+                target: tile.0.v
+            },
+            damage.clone()
+        ));
     }
 }
 
@@ -53,7 +56,6 @@ pub fn hit_projectiles(
         commands.entity(entity).despawn_recursive();
         let Some(tile_entity) = tile_res.tiles.get(&projectile.target) else { continue };
         let Ok(tile_children) = tile_query.get(*tile_entity) else { continue };
-
         for child in tile_children {
             if let Ok(health_entity) = health_query.get(*child) {
                 ev_action.send(ActionEvent(

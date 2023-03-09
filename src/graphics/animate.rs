@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::globals::{MAX_ANIMATION_DIST, PIECE_Z, PROJECTILE_Z, TILE_Z};
+use crate::globals::{MAX_ANIMATION_DIST, PIECE_Z, TILE_Z};
 use crate::manager::{CommandEvent, CommandType};
 use crate::pieces::components::{Piece, Projectile};
 use crate::states::GameState;
@@ -15,13 +15,8 @@ const PROJECTILE_HEIGHT: f32 = 16.;
 
 pub fn update_state(
     mut res: ResMut<AnimationRes>,
-    mut ev_command: EventWriter<CommandEvent>,
-    game_state: Res<State<GameState>>
+    mut ev_command: EventWriter<CommandEvent>
 ) {
-    match game_state.0 {
-        GameState::TurnStart | GameState::TileShift | GameState::NPCAction | GameState::NPCResult | GameState::TurnEnd => (),
-        _ => return
-    }
     if res.is_animating {
         res.is_animating = false;
     } else {
@@ -77,8 +72,6 @@ pub fn update_projectiles(
     let mut animating = false;
     for (entity, mut renderer, mut transform) in renderer_query.iter_mut() {
         let Ok(projectile) = projectile_query.get(renderer.target) else { continue };
-        
-        info!("Projectile update");
         let source = super::get_projectile_base_position(projectile.source);
         let target = super::get_projectile_base_position(projectile.target);
         let d = (target - renderer.linear_position).length();
@@ -97,7 +90,6 @@ pub fn update_projectiles(
         }
     }
     if animating {
-        info!("Animating");
         res.is_animating = true;
     }
 }

@@ -14,6 +14,13 @@ mod spawn;
 
 pub use components::PieceRenderer;
 
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+enum AnimationSet {
+    Spawn,
+    Update,
+    Last
+}
+
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
@@ -21,24 +28,55 @@ impl Plugin for GraphicsPlugin {
         app.add_startup_system(assets::load_assets)
             .init_resource::<animate::AnimationRes>()
             .insert_resource(frames::SpriteTimer::new())
-            .add_system(spawn::spawn_piece_renderer)
-            .add_system(spawn::spawn_tile_renderer)
-            .add_system(spawn::spawn_projectile_renderer)
-            .add_system(frames::animate_frames)
+            .configure_set(
+                AnimationSet::Update.after(AnimationSet::Spawn)
+            )
+            .configure_set(
+                AnimationSet::Last.after(AnimationSet::Update)
+            )
             .add_systems(
                 (
-                    animate::update_state,
+                    spawn::spawn_piece_renderer,
+                    spawn::spawn_tile_renderer,
+                    spawn::spawn_projectile_renderer
+                ).in_set(AnimationSet::Spawn)
+            )
+            .add_system(frames::animate_frames)
+            .add_system(animate::update_state
+                .in_set(OnUpdate(GameState::TurnStart))
+            )
+            .add_system(animate::update_state
+                .in_set(OnUpdate(GameState::TileShift))
+                .in_set(AnimationSet::Last)
+            )
+            .add_system(animate::update_state
+                .in_set(OnUpdate(GameState::NPCAction))
+                .in_set(AnimationSet::Last)
+            )
+            .add_system(animate::update_state
+                .in_set(OnUpdate(GameState::NPCResult))
+                .in_set(AnimationSet::Last)
+            )
+            .add_systems(
+                (
                     spawn::despawn_piece_renderer,
-                    spawn::despawn_tile_renderer
+                    spawn::despawn_tile_renderer,
                 ).in_base_set(CoreSet::PostUpdate)
             )
             .add_systems(
                 (animate::update_tiles, animate::update_pieces)
                 .in_set(OnUpdate(GameState::TileShift))
+                .in_set(AnimationSet::Update)
             )
-            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::NPCAction)))
-            .add_system(animate::update_pieces.in_set(OnUpdate(GameState::NPCResult)))
-            .add_system(animate::update_projectiles.in_set(OnUpdate(GameState::TurnEnd)));
+            .add_systems(
+                (animate::update_pieces, animate::update_projectiles)
+                .in_set(OnUpdate(GameState::NPCAction))
+                .in_set(AnimationSet::Update)
+            )
+            .add_system(
+                animate::update_pieces.in_set(OnUpdate(GameState::NPCResult))
+                .in_set(AnimationSet::Update)
+            );
     }
 }
 
