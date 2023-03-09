@@ -69,9 +69,12 @@ pub fn explode_projectiles(
                     Damage { kind: DamageKind::Hit, value: 1}
                 ));
             }
-            // add dummy entity to the begining of the queue
+            // add dummy entity to the second spot of the queue
             // to make room explosion projectiles
+            // current first will be popped on the beggining of next NPCAction phase
+            let first = piece_res.action_queue.pop_front().unwrap();
             piece_res.action_queue.push_front(entity);
+            piece_res.action_queue.push_front(first);
         }
     }
 }
