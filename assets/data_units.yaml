@@ -2,7 +2,7 @@
 # (only explicitly by level type or specific action)
 
 Pikemen:
-  min_level: 3
+  min_level: 1
   points: 1
   sprite: 
     atlas: units

@@ -9,7 +9,7 @@ use crate::vectors::Vector2Int;
 use super::components::{PieceRenderer, ProjectileRenderer, TileRenderer};
 
 const MOVEMENT_SPEED: f32 = 20.;
-const PROJECTILE_SPEED: f32 = 20.;
+const PROJECTILE_SPEED: f32 = 30.;
 const PROJECTILE_HEIGHT: f32 = 16.;
 
 pub fn update_state(
