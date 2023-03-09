@@ -1,8 +1,8 @@
 # elements with `points` not set won't be spawned randomly
 # (only explicitly by level type or specific action)
 
-Mask:
-  min_level: 1
+Pikemen:
+  min_level: 3
   points: 1
   sprite: 
     atlas: units
@@ -16,7 +16,7 @@ Mask:
       max: 1
     Walking:
 
-Minotaur:
+Viking:
   min_level: 2
   points: 2
   sprite: 
@@ -29,4 +29,20 @@ Minotaur:
     Occupier:
     Health:
       max: 2
+    Walking:
+
+Alchemist:
+  min_level: 1
+  points: 1
+  sprite: 
+    atlas: units
+    index: 3
+  components:
+    Damage:
+      value: 1
+      kind: !Hit
+    Explosive:
+    Occupier:
+    Health:
+      max: 1
     Walking:

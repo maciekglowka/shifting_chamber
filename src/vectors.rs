@@ -72,17 +72,19 @@ impl Mul<Vector2Int> for i32 {
     }
 }
 
-// pub const ORTHO_DIRECTIONS: [Vector2Int; 4] = [
-//     Vector2Int{x:1, y:0}, Vector2Int{x:-1, y:0},
-//     Vector2Int{x:0, y:1}, Vector2Int{x:0, y:-1}
-// ];
-
 pub const ORTHO_DIRECTIONS: [Vector2Int; 4] = [
     Vector2Int::UP, Vector2Int::DOWN,
     Vector2Int::LEFT, Vector2Int::RIGHT
 ];
 
-// pub const DIAGONAL_DIRECTIONS: [Vector2Int; 4] = [
-//     Vector2Int{x:1, y:1}, Vector2Int{x:-1, y:1},
-//     Vector2Int{x:-1, y:-1}, Vector2Int{x:1, y:-1}
-// ];
+pub const DIAGONAL_DIRECTIONS: [Vector2Int; 4] = [
+    Vector2Int{x:1, y:1}, Vector2Int{x:-1, y:1},
+    Vector2Int{x:-1, y:-1}, Vector2Int{x:1, y:-1}
+];
+
+pub const OMNI_DIRECTIONS: [Vector2Int; 8] = [
+    Vector2Int::UP, Vector2Int::DOWN,
+    Vector2Int::LEFT, Vector2Int::RIGHT,
+    Vector2Int{x:1, y:1}, Vector2Int{x:-1, y:1},
+    Vector2Int{x:-1, y:-1}, Vector2Int{x:1, y:-1}
+];

@@ -3,14 +3,13 @@ use bevy::prelude::*;
 use crate::globals::{MAX_ANIMATION_DIST, PIECE_Z, TILE_Z};
 use crate::manager::{CommandEvent, CommandType};
 use crate::pieces::components::{Piece, Projectile};
-use crate::states::GameState;
 use crate::tiles::Tile;
 use crate::vectors::Vector2Int;
 
 use super::components::{PieceRenderer, ProjectileRenderer, TileRenderer};
 
 const MOVEMENT_SPEED: f32 = 20.;
-const PROJECTILE_SPEED: f32 = 40.;
+const PROJECTILE_SPEED: f32 = 20.;
 const PROJECTILE_HEIGHT: f32 = 16.;
 
 pub fn update_state(

@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionEvent, ActionKind};
+use crate::actions::{ActionEvent, ActionKind, DamageKind};
 use crate::tiles::{Tile, TileRes};
+use crate::vectors::OMNI_DIRECTIONS;
 
-use super::super::PieceRes;
+use super::super::{PieceEvent, PieceEventKind, PieceRes};
 use super::super::components::{
     Damage,
+    Explosive,
     Health,
     Projectile,
     Range
@@ -39,6 +41,38 @@ pub fn launch_projectiles(
             },
             damage.clone()
         ));
+    }
+}
+
+pub fn explode_projectiles(
+    mut commands: Commands,
+    mut removed: RemovedComponents<Explosive>,
+    mut ev_piece: EventReader<PieceEvent>,
+    tile_query: Query<&Tile>,
+    tile_res: Res<TileRes>,
+    mut piece_res: ResMut<PieceRes>
+) {
+    for ev in ev_piece.iter() {
+        if let PieceEventKind::Kill(entity, v) = ev.0 {
+            if !removed.iter().any(|a| a == entity) { continue }
+
+            let affected_tiles: Vec<_> = OMNI_DIRECTIONS.iter()
+                .flat_map(|d| tile_res.tiles.get(&(v + *d)))
+                .flat_map(|e| tile_query.get(*e))
+                .collect();
+            for tile in affected_tiles {
+                commands.spawn((
+                    Projectile { 
+                        source: v,
+                        target: tile.v
+                    },
+                    Damage { kind: DamageKind::Hit, value: 1}
+                ));
+            }
+            // add dummy entity to the begining of the queue
+            // to make room explosion projectiles
+            piece_res.action_queue.push_front(entity);
+        }
     }
 }
 

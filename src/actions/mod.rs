@@ -11,7 +11,7 @@ pub struct ActionEvent(pub ActionKind);
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 pub enum ActionKind {
     Damage(Entity, DamageKind, u32),
-    SpawnPiece(Vector2Int, String)
+    // SpawnPiece(Vector2Int, String)
 }
 
 pub struct ActionPlugin;

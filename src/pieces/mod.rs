@@ -10,11 +10,17 @@ pub mod components;
 mod placement;
 mod systems;
 
+pub struct PieceEvent(pub PieceEventKind);
+pub enum PieceEventKind {
+    Kill(Entity, Vector2Int)
+}
+
 pub struct PiecesPlugin;
 
 impl Plugin for PiecesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PieceRes>()
+            .add_event::<PieceEvent>()
             .add_system(placement::generate_pieces.in_schedule(OnExit(GameState::MapInit)))
             .add_systems(
                 (systems::walking::plan_moves, systems::queue::plan_queue)
@@ -32,7 +38,14 @@ impl Plugin for PiecesPlugin {
                 .in_schedule(OnEnter(GameState::NPCResult))
             )
             .add_system(systems::queue::update_queue.in_schedule(OnExit(GameState::NPCResult)))
-            .add_system(systems::health::kill_units);
+            .add_systems(
+                (systems::health::init_health, systems::health::kill_units)
+                .chain()
+            )
+            .add_system(
+                systems::projectile::explode_projectiles
+                .in_base_set(CoreSet::PostUpdate)
+            );
     }
 }
 

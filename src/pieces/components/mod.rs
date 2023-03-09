@@ -22,11 +22,6 @@ pub struct Projectile {
     pub target: Vector2Int
 }
 
-// common trait for dynamic components
-pub trait PieceComponent {
-    fn init(&mut self) {}
-}
-
 // serialized components - object data
 
 #[derive(Clone, Component, Deserialize)]
@@ -34,9 +29,11 @@ pub struct Damage {
     pub value: u32,
     pub kind: DamageKind
 }
-impl PieceComponent for Damage {}
 
-#[derive(Component, Default, Deserialize)]
+#[derive(Clone, Component, Deserialize)]
+pub struct Explosive;
+
+#[derive(Component, Debug, Default, Deserialize)]
 pub struct Health {
     #[serde(skip)]
     pub value: u32,
@@ -50,28 +47,20 @@ impl Health {
         self.value = self.value.saturating_sub(val);
     }
 }
-impl PieceComponent for Health {
-    fn init(&mut self) {
-        self.value = self.max;
-    }
-}
 
 #[derive(Component, Deserialize)]
 pub struct Occupier;
-impl PieceComponent for Occupier {}
 
 #[derive(Component, Deserialize)]
 pub struct Range {
     pub fields: Vec<Vector2Int>
 }
-impl PieceComponent for Range {}
 
 #[derive(Component, Deserialize)]
 pub struct Walking {
     #[serde(skip)]
     pub planned_move: Option<Vector2Int>
 }
-impl PieceComponent for Walking {}
 
 pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {
     for (k, v) in component_list.iter() {
@@ -84,6 +73,7 @@ pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {
 fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) {
     match name {
         "Damage" => insert::<Damage>(ec, data),
+        "Explosive" => insert::<Explosive>(ec, data),
         "Health" => insert::<Health>(ec, data),
         "Occupier" => insert::<Occupier>(ec, data),
         "Range" => insert::<Range>(ec, data),
@@ -93,9 +83,8 @@ fn insert_by_name(ec: &mut EntityCommands, name: &str, data: serde_yaml::Value) 
 }
 
 fn insert<T>(ec: &mut EntityCommands, data: serde_yaml::Value)
-where for<'de> T: Bundle + PieceComponent + Deserialize<'de>
+where for<'de> T: Bundle + Deserialize<'de>
 {
     let mut component = serde_yaml::from_value::<T>(data).expect("Wrong component list!");
-    component.init();
     ec.insert(component);
 }
