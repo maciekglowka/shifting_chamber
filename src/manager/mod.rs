@@ -4,7 +4,6 @@ use std::{
     collections::HashSet
 };
 
-use crate::actions::ActionKind;
 use crate::pieces::components::Walking;
 use crate::player::{
     Player,
@@ -21,7 +20,7 @@ pub enum CommandType {
     PlayerWait,
     AnimationEnd,
     TurnEnd,
-    Upgrade(ActionKind)
+    Upgrade(UpgradeKind)
 }
 
 pub struct CommandEvent(pub CommandType);

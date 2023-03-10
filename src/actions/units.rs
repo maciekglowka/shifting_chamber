@@ -24,3 +24,16 @@ pub fn receive_damage(
         }
     }
 }
+
+pub fn heal(
+    mut health_query: Query<&mut Health>,
+    mut ev_action: EventReader<ActionEvent>,
+) {
+    for ev in ev_action.iter() {
+        if let ActionKind::Heal(entity, value) = ev.0 {
+            let Ok(mut health) = health_query.get_mut(entity) else { continue };
+            health.add(value);
+        }
+    }
+}
+

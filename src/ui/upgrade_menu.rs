@@ -1,14 +1,15 @@
 use bevy::prelude::*;
+use rand::prelude::*;
 
-use crate::actions::ActionKind;
 use crate::globals::OVERLAY_FONT_SIZE;
 use crate::manager::{CommandEvent, CommandType};
+use crate::player::upgrades::UpgradeKind;
 
 #[derive(Component)]
 pub struct UpgradeMenu;
 
 #[derive(Component)]
-pub struct UpgradeButton(bool, ActionKind);
+pub struct UpgradeButton(bool, UpgradeKind);
 
 const BUTTON_WIDTH: f32 = 480.;
 const BUTTON_HEIGHT: f32 = 64.;
@@ -42,6 +43,7 @@ pub fn menu_click(
 pub fn show_menu(
     mut commands: Commands,
     assets: Res<super::UiAssets>,
+    game_res: Res<crate::manager::GameRes>
 ) {
     commands.spawn((
             UpgradeMenu,
@@ -87,7 +89,10 @@ pub fn show_menu(
                         },
                         ..Default::default()
                     });
-                    add_button(parent, assets.as_ref(), "HP +3", ActionKind::HealPlayer(3));
+                    let mut rng = thread_rng();
+                    for choice in game_res.possible_upgrades.iter().choose_multiple(&mut rng, 2) {
+                        add_button(parent, assets.as_ref(), choice.to_str(), *choice);
+                    }
                 });
         });
 }
@@ -106,7 +111,7 @@ fn add_button(
     parent: &mut ChildBuilder,
     assets: &super::UiAssets,
     msg: &str,
-    action: ActionKind
+    action: UpgradeKind
 ) {
     parent.spawn(
         NodeBundle {

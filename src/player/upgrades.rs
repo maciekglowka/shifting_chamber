@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Hash, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum UpgradeKind {
     TileTransform(TransformKind),
     HealPlayer,
@@ -14,9 +14,17 @@ impl UpgradeKind {
             _ => true
         }
     }
+    pub fn to_str(&self) -> &str {
+        match self {
+            Self::HealPlayer => "Heal 3HP",
+            Self::IncreaseAP => "Increase AP +1",
+            Self::IncreaseHP => "Increase HP +1",
+            Self::TileTransform(a) => a.to_str()
+        }
+    }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum TransformKind {
     TileShift,
     TileSwitch,
