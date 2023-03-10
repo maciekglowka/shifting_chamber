@@ -52,3 +52,16 @@ pub fn transform_tiles(
         }
     }
 }
+
+pub fn upgrade(
+    mut ev_command: EventReader<CommandEvent>,
+    mut next_state: ResMut<NextState<crate::states::GameState>>,
+    mut ev_action: EventWriter<ActionEvent>
+) {
+    for ev in ev_command.iter() {
+        if let CommandType::Upgrade(action) = ev.0 {
+            ev_action.send(ActionEvent(action));
+            next_state.set(GameState::MapInit);
+        }
+    }
+}

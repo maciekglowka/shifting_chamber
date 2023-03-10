@@ -50,9 +50,6 @@ pub fn update_overlays(
                                 .with_translation(
                                     Vec3::new(0.5 * TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
                                 ),
-                            // transform: Transform::from_translation(
-                            //     Vec3::new(0.5 *TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
-                            // ),
                             ..Default::default()
                         }
                     )).id();

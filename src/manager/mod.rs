@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use std::cmp;
 
+use crate::actions::ActionKind;
 use crate::pieces::components::Walking;
 use crate::player::Player;
 use crate::states::GameState;
@@ -13,7 +14,8 @@ pub enum CommandType {
     TransformTiles(TileTransform),
     PlayerWait,
     AnimationEnd,
-    TurnEnd
+    TurnEnd,
+    Upgrade(ActionKind)
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -31,6 +33,7 @@ impl Plugin for ManagerPlugin {
             .add_systems(
                 (player_input::transform_tiles, player_input::wait)
                 .in_set(OnUpdate(GameState::PlayerInput)))
+            .add_system(player_input::upgrade.in_set(OnUpdate(GameState::Upgrade)))
             .add_system(update_state);
 
     }
@@ -58,8 +61,7 @@ fn start_map(
 fn map_end(
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    // TODO
-    next_state.set(GameState::MapInit);
+    next_state.set(GameState::Upgrade);
 }
 
 // pub fn turn_end(
@@ -108,9 +110,6 @@ pub fn update_state(
                 GameState::TurnEnd => {
                     match player_query.get_single() {
                         Ok(_) => {
-                            // if res.score >= res.next_upgrade {
-                            //     game_state.set(GameState::Upgrade);
-                            //     return;
                             if npc_query.iter().len() == 0 {
                                 next_state.set(GameState::MapEnd);
                             } else {

@@ -4,7 +4,6 @@ use crate::graphics::PieceRenderer;
 use crate::states::GameState;
 
 mod bubble;
-mod command_menu;
 mod game_over;
 mod overlays;
 mod sidebar;
@@ -12,6 +11,7 @@ mod upgrade_menu;
 
 pub use bubble::BubbleEvent;
 
+pub const BG_COLOR: Color = Color::rgb(0.15, 0.25, 0.35);
 pub struct ReloadUIEvent;
 
 pub struct UIPlugin;
@@ -24,15 +24,12 @@ impl Plugin for UIPlugin {
             .add_system(bubble::spawn_bubbles)
             .add_system(bubble::update_bubbles)
             .add_system(added_piece)
-            .add_systems((
-                command_menu::update_menu,
-                sidebar::update_sidebar
-            ))
+            .add_system(sidebar::update_sidebar)
             .add_system(player_input.in_schedule(OnEnter(GameState::PlayerInput)))
-            .add_systems(
-                (command_menu::menu_click, overlays::update_overlays)
-                .in_set(OnUpdate(GameState::PlayerInput))
-            )
+            .add_system(overlays::update_overlays.in_set(OnUpdate(GameState::PlayerInput)))
+            .add_system(upgrade_menu::show_menu.in_schedule(OnEnter(GameState::Upgrade)))
+            .add_system(upgrade_menu::clear_menu.in_schedule(OnExit(GameState::Upgrade)))
+            .add_system(upgrade_menu::menu_click.in_set(OnUpdate(GameState::Upgrade)))
             .add_system(game_over::show_menu.in_schedule(OnEnter(GameState::GameOver)))
             .add_system(game_over::clear_menu.in_schedule(OnExit(GameState::GameOver)));
     }  
@@ -87,11 +84,15 @@ pub fn load_assets(
     );
     let pico_handle = texture_atlasses.add(pico_atlas);
 
+    let button_handle = asset_server.load("button.png");
+    asset_list.0.push(button_handle.clone_untyped());
+
     commands.insert_resource(
         UiAssets { 
             font: font_handle,
             pico_font: pico_handle,
-            overlay_texture: overlay_handle
+            overlay_texture: overlay_handle,
+            button_texture: button_handle
         }
     );
 }
@@ -101,5 +102,6 @@ pub struct UiAssets {
     font: Handle<Font>,
     pico_font: Handle<TextureAtlas>,
     overlay_texture: Handle<TextureAtlas>,
+    button_texture: Handle<Image>
 }
 

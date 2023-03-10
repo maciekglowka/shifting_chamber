@@ -13,5 +13,6 @@ pub enum GameState {
     NPCResult,
     TurnEnd,
     MapEnd,
+    Upgrade,
     GameOver,
 }
