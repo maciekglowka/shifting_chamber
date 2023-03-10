@@ -12,7 +12,8 @@ const PIECE_SPRITE_FILES: [(&str, usize, usize); 2] = [
 pub struct GraphicsAssets {
     pub piece_textures: HashMap<String, Handle<TextureAtlas>>,
     pub tile_texture: Handle<TextureAtlas>,
-    pub elements_texture: Handle<TextureAtlas>
+    pub elements_texture: Handle<TextureAtlas>,
+    pub fx_texture: Handle<TextureAtlas>
 }
 
 pub fn load_assets(
@@ -53,10 +54,20 @@ pub fn load_assets(
         asset_list.as_mut()
     );
 
+    let fx_texture = load_texture_file(
+        "fx.png",
+        4,
+        4,
+        asset_server.as_ref(),
+        texture_atlasses.as_mut(),
+        asset_list.as_mut()
+    );
+
     commands.insert_resource(GraphicsAssets{ 
         piece_textures,
         tile_texture,
-        elements_texture
+        elements_texture,
+        fx_texture
     });
 }
 

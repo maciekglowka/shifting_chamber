@@ -67,6 +67,7 @@ pub fn update_projectiles(
     mut renderer_query: Query<(Entity, &mut ProjectileRenderer, &mut Transform)>,
     projectile_query: Query<&Projectile>,
     mut res: ResMut<AnimationRes>,
+    mut ev_fx: EventWriter<super::FXEvent>
 ) {
     let mut animating = false;
     for (entity, mut renderer, mut transform) in renderer_query.iter_mut() {
@@ -86,6 +87,9 @@ pub fn update_projectiles(
             animating = true;
         } else {
             commands.entity(entity).despawn_recursive();
+            ev_fx.send(super::FXEvent(
+                transform.translation, super::FXType::Explosion
+            ))
         }
     }
     if animating {

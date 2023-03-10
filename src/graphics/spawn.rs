@@ -8,7 +8,7 @@ use crate::tiles::Tile;
 
 use super::{
     assets::GraphicsAssets,
-    components::{PieceRenderer, ProjectileRenderer, TileRenderer}
+    components::{FXRenderer, PieceRenderer, ProjectileRenderer, TileRenderer}
 };
 
 pub fn spawn_piece_renderer(
@@ -38,7 +38,7 @@ pub fn spawn_piece_renderer(
         match data.sprite.columns {
             Some(SpriteColumns::Frames(_)) => {
                 commands.entity(renderer)
-                    .insert(super::frames::Frames::new(&data.sprite));
+                    .insert(super::components::Frames::new(&data.sprite));
                 },
             _ => ()
         }
@@ -116,6 +116,33 @@ pub fn spawn_projectile_renderer(
             }
         ));
         animation_res.is_animating = true;
+    }
+}
+
+pub fn spawn_fx(
+    mut commands: Commands,
+    assets: Res<GraphicsAssets>,
+    mut ev_fx: EventReader<super::FXEvent>
+) {
+    for ev in ev_fx.iter() {
+        let texture = &assets.fx_texture;
+        let mut sprite = TextureAtlasSprite::new(0);
+        sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
+        match ev.1 {
+            super::FXType::Explosion => {
+                sprite.index = 0;
+                commands.spawn((
+                    FXRenderer { looping: false },
+                    SpriteSheetBundle {
+                        sprite,
+                        texture_atlas: texture.clone(),
+                        transform: Transform::from_translation(ev.0),
+                        ..Default::default()
+                    },
+                    super::components::Frames { base_idx: 0, current_idx: 0, frame_count: 4}
+                ));
+            }
+        } 
     }
 }
 

@@ -21,13 +21,22 @@ enum AnimationSet {
     Last
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum FXType {
+    Explosion
+}
+
+pub struct FXEvent(pub Vec3, pub FXType);
+
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(assets::load_assets)
+            .add_event::<FXEvent>()
             .init_resource::<animate::AnimationRes>()
             .insert_resource(frames::SpriteTimer::new())
+            .insert_resource(frames::FXTimer::new())
             .configure_set(
                 AnimationSet::Update.after(AnimationSet::Spawn)
             )
@@ -38,10 +47,13 @@ impl Plugin for GraphicsPlugin {
                 (
                     spawn::spawn_piece_renderer,
                     spawn::spawn_tile_renderer,
-                    spawn::spawn_projectile_renderer
+                    spawn::spawn_projectile_renderer,
+                    spawn::spawn_fx
                 ).in_set(AnimationSet::Spawn)
             )
-            .add_system(frames::animate_frames)
+            .add_systems(
+                (frames::animate_frames, frames::animate_fx_frames)
+            )
             .add_system(animate::update_state
                 .in_set(OnUpdate(GameState::TurnStart))
             )
