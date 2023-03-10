@@ -66,9 +66,9 @@ pub fn load_assets(
     asset_list.0.push(overlay_img.clone_untyped());
     let overlay_atlas = TextureAtlas::from_grid(
         overlay_img,
-        Vec2::splat(8.),
-        2,
-        2,
+        Vec2::splat(32.),
+        1,
+        4,
         None,
         None
     );

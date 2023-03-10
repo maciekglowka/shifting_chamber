@@ -34,17 +34,25 @@ pub fn update_overlays(
 
         if let Ok(walking) = walking_query.get(renderer.target) {
             if let Some(planned_move) = walking.planned_move {
+                let angle = Vec2::new(1., 0.)
+                    .angle_between(Vec2::new(planned_move.x as f32, planned_move.y as f32));
+                let rotation = Quat::from_axis_angle(Vec3::new(0., 0., 1.), angle);
                 let marker = commands.spawn((
                         Overlay,
-                        SpriteBundle {
-                            sprite: Sprite {
-                                custom_size: Some(Vec2::new(TILE_SIZE / 8., TILE_SIZE / 8.)),
-                                color: Color::GOLD,
+                        SpriteSheetBundle {
+                            sprite: TextureAtlasSprite {
+                                index: 0,
+                                custom_size: Some(Vec2::splat(TILE_SIZE)),
                                 ..Default::default()
                             },
-                            transform: Transform::from_translation(
-                                Vec3::new(0.5 *TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
-                            ),
+                            texture_atlas: assets.overlay_texture.clone(),
+                            transform: Transform::from_rotation(rotation)
+                                .with_translation(
+                                    Vec3::new(0.5 * TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
+                                ),
+                            // transform: Transform::from_translation(
+                            //     Vec3::new(0.5 *TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
+                            // ),
                             ..Default::default()
                         }
                     )).id();
