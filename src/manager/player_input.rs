@@ -1,9 +1,12 @@
 use bevy::prelude::*;
 use std::cmp;
 
-use crate::actions::{ActionEvent, ActionKind, DamageKind};
+use crate::actions::{ActionEvent, ActionKind};
 use crate::pieces::components;
-use crate::player::Player;
+use crate::player::{
+    Player,
+    upgrades::UpgradeKind
+};
 use crate::states::GameState;
 use crate::tiles;
 use crate::ui;
@@ -56,11 +59,23 @@ pub fn transform_tiles(
 pub fn upgrade(
     mut ev_command: EventReader<CommandEvent>,
     mut next_state: ResMut<NextState<crate::states::GameState>>,
+    player_query: Query<Entity, With<Player>>,
+    mut res: ResMut<GameRes>,
     mut ev_action: EventWriter<ActionEvent>
 ) {
     for ev in ev_command.iter() {
         if let CommandType::Upgrade(kind) = ev.0 {
-            // ev_action.send(ActionEvent(action));
+            let Ok(player) = player_query.get_single() else { return };
+            info!("Upgrading {:?}", kind);
+            match kind {
+                UpgradeKind::HealPlayer => ev_action.send(ActionEvent(ActionKind::Heal(player, 3))),
+                UpgradeKind::IncreaseAP => res.max_ap += 1,
+                UpgradeKind::IncreaseHP => ev_action.send(ActionEvent(ActionKind::IncreaseHP(player, 1))),
+                UpgradeKind::TileTransform(t) => res.available_transforms.push(t)
+            };
+            if kind.is_single() {
+                res.possible_upgrades.remove(&kind);
+            }
             next_state.set(GameState::MapInit);
         }
     }

@@ -37,3 +37,15 @@ pub fn heal(
     }
 }
 
+pub fn increase_hp(
+    mut health_query: Query<&mut Health>,
+    mut ev_action: EventReader<ActionEvent>,
+) {
+    for ev in ev_action.iter() {
+        if let ActionKind::IncreaseHP(entity, value) = ev.0 {
+            let Ok(mut health) = health_query.get_mut(entity) else { continue };
+            health.max += value;
+            health.add(value);
+        }
+    }
+}

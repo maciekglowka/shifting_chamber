@@ -49,6 +49,7 @@ fn start_game(
     mut res: ResMut<GameRes>
 ) {
     res.level = 0;
+    res.max_ap = 1;
     res.available_transforms = vec!(TransformKind::TileShift);
     res.possible_upgrades = crate::player::upgrades::get_initial_upgrades();
     next_state.set(GameState::MapInit);
@@ -96,11 +97,17 @@ pub fn update_state(
         if let CommandType::AnimationEnd = ev.0 {
             match game_state.0 {
                 GameState::TurnStart => {
-                    res.ap = cmp::min(2, res.ap + 1);
+                    if res.ap_stacking {
+                        res.ap = cmp::min(res.max_ap, res.ap + 1);
+                    } else {
+                        res.ap = 1;
+                    }
+                    res.ap_stacking = true;
                     next_state.set(GameState::PlayerInput);
                 },
                 GameState::TileShift => {
                     res.ap = res.ap.saturating_sub(1);
+                    res.ap_stacking = false;
                     match res.ap {
                         0 => next_state.set(GameState::NPCAction),
                         _ => next_state.set(GameState::PlayerInput)
@@ -137,6 +144,8 @@ pub struct GameRes {
     pub level: u32,
     pub level_history: Vec<String>,
     pub ap: u32,
+    pub max_ap: u32,
+    pub ap_stacking: bool,
     pub possible_upgrades: HashSet<UpgradeKind>,
     pub available_transforms: Vec<TransformKind>
 }

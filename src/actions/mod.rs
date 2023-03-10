@@ -12,7 +12,8 @@ pub struct ActionEvent(pub ActionKind);
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
 pub enum ActionKind {
     Damage(Entity, DamageKind, u32),
-    Heal(Entity, u32)
+    Heal(Entity, u32),
+    IncreaseHP(Entity, u32)
 }
 
 pub struct ActionPlugin;
@@ -23,6 +24,7 @@ impl Plugin for ActionPlugin {
             .add_systems((
                 units::receive_damage,
                 units::heal,
+                units::increase_hp,
                 pieces::spawn_piece,
             ));
     }

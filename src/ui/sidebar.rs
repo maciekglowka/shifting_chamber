@@ -38,7 +38,7 @@ pub fn update_sidebar(
             }  
             ))
             .with_children(|parent| {
-                spawn_text(parent, assets.as_ref(), format!("AP: {}", game_res.ap));
+                spawn_text(parent, assets.as_ref(), format!("AP: {}/{}", game_res.ap, game_res.max_ap));
                 if let Ok(health) = player_query.get_single() {
                     spawn_text(parent, assets.as_ref(), format!("HP: {}/{}", health.value, health.max));
                 }

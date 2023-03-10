@@ -17,8 +17,8 @@ impl UpgradeKind {
     pub fn to_str(&self) -> &str {
         match self {
             Self::HealPlayer => "Heal 3HP",
-            Self::IncreaseAP => "Increase AP +1",
-            Self::IncreaseHP => "Increase HP +1",
+            Self::IncreaseAP => "Increase Max AP +1",
+            Self::IncreaseHP => "Increase Max HP +1",
             Self::TileTransform(a) => a.to_str()
         }
     }
