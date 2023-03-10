@@ -10,7 +10,7 @@ use crate::pieces::{
 use crate::tiles;
 use crate::vectors::Vector2Int;
 
-// mod renderer;
+pub mod upgrades;
 
 pub struct PlayerPlugin;
 

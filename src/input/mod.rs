@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
 use crate::manager::{CommandEvent, CommandType};
 use crate::ui::ReloadUIEvent;
@@ -25,15 +26,17 @@ fn reset_input(mut res: ResMut<InputRes>) {
 fn keys(
     keys: ResMut<Input<KeyCode>>,
     mut res: ResMut<InputRes>,
+    game_res: Res<crate::manager::GameRes>,
     mut ev_command: EventWriter<CommandEvent>,
     mut ev_ui: EventWriter<ReloadUIEvent>
 ) {
     for (key, dir) in KEY_MAPPING {
         if !keys.just_pressed(key) { continue; }
-        let command = match res.mode {
-            InputMode::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
-            InputMode::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
-            InputMode::TileRotate => {
+        let mode = &game_res.available_transforms[res.mode];
+        let command = match mode {
+            TransformKind::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
+            TransformKind::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
+            TransformKind::TileRotate => {
                 let clockwise = match key {
                     KeyCode::D => true,
                     KeyCode::A => false,
@@ -46,15 +49,12 @@ fn keys(
         // only one command can be sent
         break;
     }
-    if keys.just_pressed(KeyCode::Return) {
+    if keys.just_pressed(KeyCode::Space) {
         ev_command.send(CommandEvent(CommandType::PlayerWait));
     }
-    if keys.just_pressed(KeyCode::Space) {
-        res.mode = match res.mode {
-            InputMode::TileSwitch => InputMode::TileShift,
-            InputMode::TileShift => InputMode::TileRotate,
-            InputMode::TileRotate => InputMode::TileSwitch
-        };
+    if keys.just_pressed(KeyCode::T) {
+        res.mode += 1;
+        if res.mode > game_res.available_transforms.len() - 1 { res.mode = 0 }
         ev_ui.send(ReloadUIEvent);
     }
     if keys.just_pressed(KeyCode::I) {
@@ -68,30 +68,9 @@ const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
     (KeyCode::A, Vector2Int::LEFT), (KeyCode::D, Vector2Int::RIGHT),
 ];
 
-#[derive(Debug)]
-pub enum InputMode {
-    TileShift,
-    TileSwitch,
-    TileRotate
-}
-impl InputMode {
-    pub fn to_str(&self) -> &str {
-        match self {
-            Self::TileShift => "TileShift",
-            Self::TileSwitch => "TileSwitch",
-            Self::TileRotate => "TileRotate",
-        }
-    }
-}
-impl Default for InputMode {
-    fn default() -> Self {
-        InputMode::TileShift
-    }
-}
-
 #[derive(Default, Resource)]
 pub struct InputRes {
     pub selected: Option<Vector2Int>,
-    pub mode: InputMode,
+    pub mode: usize,
     pub extra_info: bool
 }

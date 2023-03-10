@@ -1,9 +1,15 @@
 use bevy::prelude::*;
-use std::cmp;
+use std::{
+    cmp,
+    collections::HashSet
+};
 
 use crate::actions::ActionKind;
 use crate::pieces::components::Walking;
-use crate::player::Player;
+use crate::player::{
+    Player,
+    upgrades::{UpgradeKind, TransformKind}
+};
 use crate::states::GameState;
 use crate::tiles::transform::TileTransform;
 
@@ -43,9 +49,9 @@ fn start_game(
     mut next_state: ResMut<NextState<GameState>>,
     mut res: ResMut<GameRes>
 ) {
-    res.score = 0;
     res.level = 0;
-    res.next_upgrade = 2;
+    res.available_transforms = vec!(TransformKind::TileShift);
+    res.possible_upgrades = crate::player::upgrades::get_initial_upgrades();
     next_state.set(GameState::MapInit);
 }
 
@@ -131,7 +137,7 @@ pub fn update_state(
 pub struct GameRes {
     pub level: u32,
     pub level_history: Vec<String>,
-    pub score: u32,
-    pub next_upgrade: u32,
-    pub ap: u32
+    pub ap: u32,
+    pub possible_upgrades: HashSet<UpgradeKind>,
+    pub available_transforms: Vec<TransformKind>
 }

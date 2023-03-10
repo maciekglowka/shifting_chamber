@@ -42,7 +42,7 @@ pub fn update_sidebar(
                 if let Ok(health) = player_query.get_single() {
                     spawn_text(parent, assets.as_ref(), format!("HP: {}/{}", health.value, health.max));
                 }
-                spawn_text(parent, assets.as_ref(), format!("Mode: {}", input_res.mode.to_str()));
+                spawn_text(parent, assets.as_ref(), format!("Mode: {}", game_res.available_transforms[input_res.mode].to_str()));
                 spawn_text(parent, assets.as_ref(), "---".to_string());
                 spawn_text(parent, assets.as_ref(), "WSAD: move".to_string());
                 spawn_text(parent, assets.as_ref(), "Space: change mode".to_string());

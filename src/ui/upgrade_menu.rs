@@ -15,15 +15,12 @@ const BUTTON_HEIGHT: f32 = 64.;
 
 pub fn menu_click(
     mut interactions: Query<(&Interaction, &mut UpgradeButton, &mut Style), Changed<Interaction>>, 
-    // mut style_query: Query<&mut Style>,
     mut ev_command: EventWriter<CommandEvent>
 ) {
     for (interaction, mut button, mut style) in interactions.iter_mut() {
-        // let Ok(mut style) = style_query.get_mut(parent.get()) else { continue };
         match *interaction {
             Interaction::Clicked => {
                 button.0 = true;
-                // style.padding = UiRect::all(Val::Px(8.));
                 style.size = Size { width: Val::Px(BUTTON_WIDTH - 8.), height: Val::Px(BUTTON_HEIGHT - 8.)};
             },
             Interaction::Hovered => {
@@ -33,11 +30,9 @@ pub fn menu_click(
                     );
                 }
                 button.0 = false;
-                // style.padding = UiRect::all(Val::Px(0.));
             },
             Interaction::None => {
                 button.0 = false;
-                // style.padding = UiRect::all(Val::Px(0.));
                 style.size = Size { width: Val::Px(BUTTON_WIDTH), height: Val::Px(BUTTON_HEIGHT)};
             },
         }
