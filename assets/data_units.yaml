@@ -32,8 +32,8 @@ Viking:
     Walking:
 
 Alchemist:
-  min_level: 1
-  points: 1
+  min_level: 4
+  points: 3
   sprite: 
     atlas: units
     index: 3

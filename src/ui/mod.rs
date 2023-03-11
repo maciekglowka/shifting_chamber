@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use std::collections::HashMap;
 
 use crate::graphics::PieceRenderer;
+use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
 
 mod bubble;
@@ -26,7 +28,10 @@ impl Plugin for UIPlugin {
             .add_system(added_piece)
             .add_system(sidebar::update_sidebar)
             .add_system(player_input.in_schedule(OnEnter(GameState::PlayerInput)))
-            .add_system(overlays::update_overlays.in_set(OnUpdate(GameState::PlayerInput)))
+            .add_systems(
+                (overlays::update_overlays, sidebar::tile_button_click)
+                .in_set(OnUpdate(GameState::PlayerInput))
+            )
             .add_system(upgrade_menu::show_menu.in_schedule(OnEnter(GameState::Upgrade)))
             .add_system(upgrade_menu::clear_menu.in_schedule(OnExit(GameState::Upgrade)))
             .add_system(upgrade_menu::menu_click.in_set(OnUpdate(GameState::Upgrade)))
@@ -56,10 +61,10 @@ pub fn load_assets(
     mut asset_list: ResMut<crate::assets::AssetList>,
     mut texture_atlasses: ResMut<Assets<TextureAtlas>> 
 ) {
-    let font_handle = asset_server.load("pixel.ttf");
+    let font_handle = asset_server.load("ui/pixel.ttf");
     asset_list.0.push(font_handle.clone_untyped());
 
-    let overlay_img = asset_server.load("icons.png");
+    let overlay_img = asset_server.load("ui/icons.png");
     asset_list.0.push(overlay_img.clone_untyped());
     let overlay_atlas = TextureAtlas::from_grid(
         overlay_img,
@@ -72,7 +77,7 @@ pub fn load_assets(
 
     let overlay_handle = texture_atlasses.add(overlay_atlas);
 
-    let pico_img = asset_server.load("pico.png");
+    let pico_img = asset_server.load("ui/pico.png");
     asset_list.0.push(pico_img.clone_untyped());
     let pico_atlas = TextureAtlas::from_grid(
         pico_img,
@@ -84,15 +89,28 @@ pub fn load_assets(
     );
     let pico_handle = texture_atlasses.add(pico_atlas);
 
-    let button_handle = asset_server.load("button.png");
+    let button_handle = asset_server.load("ui/button.png");
     asset_list.0.push(button_handle.clone_untyped());
+
+    let shift = asset_server.load("ui/shift.png");
+    asset_list.0.push(shift.clone_untyped());
+    let switch = asset_server.load("ui/switch.png");
+    asset_list.0.push(switch.clone_untyped());
+    let rotate = asset_server.load("ui/rotate.png");
+    asset_list.0.push(rotate.clone_untyped());
+    let tiles = HashMap::from([
+        (TransformKind::TileShift, shift),
+        (TransformKind::TileSwitch, switch),
+        (TransformKind::TileRotate, rotate),
+    ]);
 
     commands.insert_resource(
         UiAssets { 
             font: font_handle,
             pico_font: pico_handle,
             overlay_texture: overlay_handle,
-            button_texture: button_handle
+            button_texture: button_handle,
+            tile_buttons: tiles
         }
     );
 }
@@ -102,6 +120,7 @@ pub struct UiAssets {
     font: Handle<Font>,
     pico_font: Handle<TextureAtlas>,
     overlay_texture: Handle<TextureAtlas>,
-    button_texture: Handle<Image>
+    button_texture: Handle<Image>,
+    tile_buttons: HashMap<TransformKind, Handle<Image>>
 }
 

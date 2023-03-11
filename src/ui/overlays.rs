@@ -18,7 +18,6 @@ pub fn update_overlays(
     walking_query: Query<&Walking>,
     health_query: Query<&Health>,
     piece_res: Res<PieceRes>,
-    input_res: Res<InputRes>,
     assets: Res<super::UiAssets>,
     mut ev_ui: EventReader<super::ReloadUIEvent>
 ) {
@@ -38,8 +37,6 @@ pub fn update_overlays(
             if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
                 spawn_order_overlay(&mut commands, entity, assets.as_ref(), order + 1);
                 // symbols.push((order as u32 + 1, Color::WHITE));
-            }
-            if input_res.extra_info {
             }
         }
 
@@ -93,14 +90,15 @@ fn spawn_order_overlay(
     assets: &super::UiAssets,
     order: usize
 ) {
-    let entity = commands.spawn(
+    let entity = commands.spawn((
+        Overlay,
         get_icon_bundle(
             48 + order,
             Color::WHITE, 
             &assets.pico_font,
             Vec2::splat(TILE_SIZE / 4.),
             Vec3::new(TILE_SIZE * 7. / 16., - TILE_SIZE * 3. / 8., OVERLAY_Z)
-        )
+        ))
     ).id();
     commands.entity(parent).add_child(entity);
 }
@@ -138,15 +136,6 @@ fn spawn_symbols_overlay(
             for j in 0..*count {
                 let offset = base_offset + Vec3::new(j as f32 * cell_size, 0., 0.);
                 parent.spawn(
-                    // SpriteBundle {
-                    //     sprite: Sprite {
-                    //         color: *color,
-                    //         custom_size: Some(Vec2::splat(size)),
-                    //         ..Default::default()
-                    //     },
-                    //     transform: Transform::from_translation(offset),
-                    //     ..Default::default()
-                    // }
                     get_icon_bundle(
                         23 + 16*7,
                         *color, 

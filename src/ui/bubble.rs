@@ -40,7 +40,7 @@ pub fn spawn_bubbles(
         let style = TextStyle {
             font: res.font.clone(),
             font_size: OVERLAY_FONT_SIZE,
-            color: Color::GOLD
+            color: Color::MAROON
         };
         let mut rng = thread_rng();
         let offset = TILE_SIZE / 16.;

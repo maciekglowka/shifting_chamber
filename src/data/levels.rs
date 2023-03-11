@@ -9,7 +9,6 @@ const LEVEL_FILE: &str = "data_levels.yaml";
 pub struct LevelData {
     pub initial_points: i32,
     pub required_pieces: Vec<String>,
-    pub extra_items: (usize, usize),
     pub extra_features: (usize, usize),
 }
 

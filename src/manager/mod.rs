@@ -153,5 +153,5 @@ pub struct GameRes {
     pub max_ap: u32,
     pub ap_stacking: bool,
     pub possible_upgrades: HashSet<UpgradeKind>,
-    pub available_transforms: Vec<TransformKind>
+    pub tile_transforms: Vec<TransformKind>
 }
