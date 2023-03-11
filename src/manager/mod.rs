@@ -4,6 +4,7 @@ use std::{
     collections::HashSet
 };
 
+use crate::globals::UPGRADE_EVERY_LEVELS;
 use crate::pieces::components::Walking;
 use crate::player::{
     Player,
@@ -66,8 +67,13 @@ fn start_map(
 
 fn map_end(
     mut next_state: ResMut<NextState<GameState>>,
+    res: Res<GameRes>
 ) {
-    next_state.set(GameState::Upgrade);
+    if res.level % UPGRADE_EVERY_LEVELS == 0 {
+        next_state.set(GameState::Upgrade);
+    } else {
+        next_state.set(GameState::MapInit);
+    }
 }
 
 // pub fn turn_end(

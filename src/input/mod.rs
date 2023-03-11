@@ -52,13 +52,9 @@ fn keys(
     if keys.just_pressed(KeyCode::Space) {
         ev_command.send(CommandEvent(CommandType::PlayerWait));
     }
-    if keys.just_pressed(KeyCode::T) {
+    if keys.just_pressed(KeyCode::Return) {
         res.mode += 1;
         if res.mode > game_res.available_transforms.len() - 1 { res.mode = 0 }
-        ev_ui.send(ReloadUIEvent);
-    }
-    if keys.just_pressed(KeyCode::I) {
-        res.extra_info = !res.extra_info;
         ev_ui.send(ReloadUIEvent);
     }
 }
@@ -71,6 +67,5 @@ const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
 #[derive(Default, Resource)]
 pub struct InputRes {
     pub selected: Option<Vector2Int>,
-    pub mode: usize,
-    pub extra_info: bool
+    pub mode: usize
 }

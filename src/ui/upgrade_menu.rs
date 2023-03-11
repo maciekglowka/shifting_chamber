@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::globals::OVERLAY_FONT_SIZE;
+use crate::globals::{OVERLAY_FONT_SIZE, UPGRADE_CHOICES};
 use crate::manager::{CommandEvent, CommandType};
 use crate::player::upgrades::UpgradeKind;
 
@@ -90,7 +90,7 @@ pub fn show_menu(
                         ..Default::default()
                     });
                     let mut rng = thread_rng();
-                    for choice in game_res.possible_upgrades.iter().choose_multiple(&mut rng, 2) {
+                    for choice in game_res.possible_upgrades.iter().choose_multiple(&mut rng, UPGRADE_CHOICES) {
                         add_button(parent, assets.as_ref(), choice.to_str(), *choice);
                     }
                 });

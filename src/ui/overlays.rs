@@ -27,21 +27,22 @@ pub fn update_overlays(
     clear_overlays(&mut commands, &overlay_query);
     for (entity, renderer) in renderer_query.iter() {
         let mut symbols = Vec::new();
-
         if let Ok(health) = health_query.get(renderer.target) {
-            symbols.push((health.value, Color::RED));
+            symbols.push((health.value, Color::MAROON));
         }
+        let symbol_overlay = spawn_symbols_overlay(&mut commands, symbols, assets.as_ref());
+        commands.entity(entity).add_child(symbol_overlay);
 
         if let Ok(walking) = walking_query.get(renderer.target) {
             spawn_walk_overlay(&mut commands, walking, assets.as_ref(), entity);
-            // if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
-            //     symbols.push((order as u32 + 1, Color::WHITE));
-            // }
+            if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
+                spawn_order_overlay(&mut commands, entity, assets.as_ref(), order + 1);
+                // symbols.push((order as u32 + 1, Color::WHITE));
+            }
+            if input_res.extra_info {
+            }
         }
-        if input_res.extra_info {
-            let overlay = spawn_symbols_overlay(&mut commands, symbols, assets.as_ref());
-            commands.entity(entity).add_child(overlay);
-        }
+
     }
 }
 
@@ -86,6 +87,24 @@ fn spawn_walk_overlay(
     }
 }
 
+fn spawn_order_overlay(
+    commands: &mut Commands,
+    parent: Entity,
+    assets: &super::UiAssets,
+    order: usize
+) {
+    let entity = commands.spawn(
+        get_icon_bundle(
+            48 + order,
+            Color::WHITE, 
+            &assets.pico_font,
+            Vec2::splat(TILE_SIZE / 4.),
+            Vec3::new(TILE_SIZE * 7. / 16., - TILE_SIZE * 3. / 8., OVERLAY_Z)
+        )
+    ).id();
+    commands.entity(parent).add_child(entity);
+}
+
 fn spawn_symbols_overlay(
     commands: &mut Commands,
     symbols: Vec<(u32, Color)>,
@@ -101,15 +120,15 @@ fn spawn_symbols_overlay(
                 ..Default::default()
             },
             transform: Transform::from_translation(
-                Vec3::new(0., -TILE_SIZE * 3. / 8., OVERLAY_Z)
+                Vec3::new(0., -TILE_SIZE * 3. / 8., 0.)
             ),
             ..Default::default()
         },
         Overlay
     ))
     .with_children(|parent| {
-        let size = TILE_SIZE / 16.;
-        let cell_size = 1.5 * size;
+        let size = TILE_SIZE / 8.;
+        let cell_size = 0.75 * size;
         for (i, (count, color)) in symbols.iter().enumerate() {
             let base_offset = Vec3::new(
                 - 0.5 * (count-1) as f32 * cell_size,
@@ -117,17 +136,24 @@ fn spawn_symbols_overlay(
                 0.
             );
             for j in 0..*count {
-                let offset = base_offset + Vec3::new(j as f32 * 1.5 * size, 0., 0.);
+                let offset = base_offset + Vec3::new(j as f32 * cell_size, 0., 0.);
                 parent.spawn(
-                    SpriteBundle {
-                        sprite: Sprite {
-                            color: *color,
-                            custom_size: Some(Vec2::splat(size)),
-                            ..Default::default()
-                        },
-                        transform: Transform::from_translation(offset),
-                        ..Default::default()
-                    }
+                    // SpriteBundle {
+                    //     sprite: Sprite {
+                    //         color: *color,
+                    //         custom_size: Some(Vec2::splat(size)),
+                    //         ..Default::default()
+                    //     },
+                    //     transform: Transform::from_translation(offset),
+                    //     ..Default::default()
+                    // }
+                    get_icon_bundle(
+                        23 + 16*7,
+                        *color, 
+                        &assets.pico_font,
+                        Vec2::splat(size),
+                        offset
+                    )
                 );
             }
         }
@@ -140,7 +166,7 @@ fn get_icon_bundle(
     color: Color,
     atlas: &Handle<TextureAtlas>,
     size: Vec2,
-    offset: Vec2,
+    offset: Vec3,
 ) -> SpriteSheetBundle {
     let mut sprite = TextureAtlasSprite::new(sprite_idx);
     sprite.custom_size = Some(size);
@@ -150,7 +176,8 @@ fn get_icon_bundle(
         sprite: sprite,
         texture_atlas: atlas.clone(),
         transform: Transform::from_translation(
-            Vec3::new(offset.x, offset.y, OVERLAY_Z + 1.)
+            offset
+            // Vec3::new(offset.x, offset.y, OVERLAY_Z + 1.)
         ),
         ..Default::default()
     }
