@@ -29,39 +29,17 @@ pub fn update_overlays(
         let mut symbols = Vec::new();
 
         if let Ok(health) = health_query.get(renderer.target) {
-            symbols.push((health.value, Color::MAROON));
+            symbols.push((health.value, Color::RED));
         }
 
         if let Ok(walking) = walking_query.get(renderer.target) {
-            if let Some(planned_move) = walking.planned_move {
-                let angle = Vec2::new(1., 0.)
-                    .angle_between(Vec2::new(planned_move.x as f32, planned_move.y as f32));
-                let rotation = Quat::from_axis_angle(Vec3::new(0., 0., 1.), angle);
-                let marker = commands.spawn((
-                        Overlay,
-                        SpriteSheetBundle {
-                            sprite: TextureAtlasSprite {
-                                index: 0,
-                                custom_size: Some(Vec2::splat(TILE_SIZE)),
-                                ..Default::default()
-                            },
-                            texture_atlas: assets.overlay_texture.clone(),
-                            transform: Transform::from_rotation(rotation)
-                                .with_translation(
-                                    Vec3::new(0.5 * TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
-                                ),
-                            ..Default::default()
-                        }
-                    )).id();
-                commands.entity(entity).add_child(marker);
-
-                if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
-                    symbols.push((order as u32 + 1, Color::GOLD));
-                }
-            }
+            spawn_walk_overlay(&mut commands, walking, assets.as_ref(), entity);
+            // if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
+            //     symbols.push((order as u32 + 1, Color::WHITE));
+            // }
         }
         if input_res.extra_info {
-            let overlay = spawn_overlay(&mut commands, symbols, assets.as_ref());
+            let overlay = spawn_symbols_overlay(&mut commands, symbols, assets.as_ref());
             commands.entity(entity).add_child(overlay);
         }
     }
@@ -77,64 +55,81 @@ fn clear_overlays(
     }
 }
 
-// fn spawn_unit_overlay(
-//     commands: &mut Commands,
-//     damage: Option<&Damage>,
-//     poisonous: Option<&Poisonous>,
-//     unit: &Unit,
-//     assets: &super::UiAssets
-// ) -> Entity {
-//     let mut symbols = vec!(
-//         (unit.hp(), Color::GOLD),
-//     );
-//     if let Some(d) = damage {
-//         symbols.push((d.value, Color::WHITE))
-//     }
-//     if let Some(p) = poisonous {
-//         symbols.push((p.value, Color::LIME_GREEN))
-//     }
-//     spawn_overlay(commands, symbols, assets)
-// }
+fn spawn_walk_overlay(
+    commands: &mut Commands,
+    walking: &Walking,
+    assets: &super::UiAssets,
+    parent: Entity
+)
+{
+    if let Some(planned_move) = walking.planned_move {
+        let angle = Vec2::new(1., 0.)
+            .angle_between(Vec2::new(planned_move.x as f32, planned_move.y as f32));
+        let rotation = Quat::from_axis_angle(Vec3::new(0., 0., 1.), angle);
+        let marker = commands.spawn((
+                Overlay,
+                SpriteSheetBundle {
+                    sprite: TextureAtlasSprite {
+                        index: 0,
+                        custom_size: Some(Vec2::splat(TILE_SIZE)),
+                        ..Default::default()
+                    },
+                    texture_atlas: assets.overlay_texture.clone(),
+                    transform: Transform::from_rotation(rotation)
+                        .with_translation(
+                            Vec3::new(0.5 * TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
+                        ),
+                    ..Default::default()
+                }
+            )).id();
+        commands.entity(parent).add_child(marker);
+    }
+}
 
-fn spawn_overlay(
+fn spawn_symbols_overlay(
     commands: &mut Commands,
     symbols: Vec<(u32, Color)>,
     assets: &super::UiAssets
 ) -> Entity {
+    let bar_width = TILE_SIZE / 2.;
+    let bar_height = TILE_SIZE / 8.;
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 color: Color::Rgba { red: 0., green: 0., blue: 0., alpha: 0. },
-                custom_size: Some(Vec2::new(TILE_SIZE / 4., TILE_SIZE)),
+                custom_size: Some(Vec2::new(bar_width, bar_height)),
                 ..Default::default()
             },
             transform: Transform::from_translation(
-                // Vec3::new(TILE_SIZE * 0.375, 0., OVERLAY_Z)
-                Vec3::new(0., 0., OVERLAY_Z)
+                Vec3::new(0., -TILE_SIZE * 3. / 8., OVERLAY_Z)
             ),
             ..Default::default()
         },
         Overlay
     ))
     .with_children(|parent| {
-        let size = TILE_SIZE / 3.;
-        for (x, (count, color)) in symbols.iter().enumerate() {
-            // let offset = Vec2::new(
-            //     size * 0.4,
-            //     - TILE_SIZE * 0.4 + y as f32 * 0.75 * size
-            // );
-            let offset = Vec2::new(
-                0.5 * TILE_SIZE - x as f32 * 0.8 * TILE_SIZE,
-                - TILE_SIZE * 0.4
+        let size = TILE_SIZE / 16.;
+        let cell_size = 1.5 * size;
+        for (i, (count, color)) in symbols.iter().enumerate() {
+            let base_offset = Vec3::new(
+                - 0.5 * (count-1) as f32 * cell_size,
+                i as f32 * 1.5 * size,
+                0.
             );
-            let sprite_idx = 48 + count;
-            parent.spawn(get_icon_bundle(
-                sprite_idx as usize,
-                *color,
-                &assets.pico_font,
-                Vec2::splat(size),
-                offset
-            ));
+            for j in 0..*count {
+                let offset = base_offset + Vec3::new(j as f32 * 1.5 * size, 0., 0.);
+                parent.spawn(
+                    SpriteBundle {
+                        sprite: Sprite {
+                            color: *color,
+                            custom_size: Some(Vec2::splat(size)),
+                            ..Default::default()
+                        },
+                        transform: Transform::from_translation(offset),
+                        ..Default::default()
+                    }
+                );
+            }
         }
     })
     .id()
