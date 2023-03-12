@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 use std::{
     cmp,
-    collections::HashSet
+    collections::{HashMap, HashSet}
 };
 
 use crate::globals::UPGRADE_EVERY_LEVELS;
 use crate::pieces::components::Walking;
 use crate::player::{
     Player,
-    upgrades::{UpgradeKind, TransformKind}
+    upgrades::{UpgradeKind, TransformKind, get_all_transforms}
 };
 use crate::states::GameState;
 use crate::tiles::transform::TileTransform;
@@ -51,7 +51,11 @@ fn start_game(
 ) {
     res.level = 0;
     res.max_ap = 1;
-    res.available_transforms = vec!(TransformKind::TileShift);
+    res.tile_transforms = HashMap::from_iter(
+        get_all_transforms().iter().map(|a| (*a, false))
+    );
+    // at the beggining only the default action is enabled
+    res.tile_transforms.insert(TransformKind::default(), true);
     res.possible_upgrades = crate::player::upgrades::get_initial_upgrades();
     next_state.set(GameState::MapInit);
 }
@@ -153,5 +157,6 @@ pub struct GameRes {
     pub max_ap: u32,
     pub ap_stacking: bool,
     pub possible_upgrades: HashSet<UpgradeKind>,
-    pub tile_transforms: Vec<TransformKind>
+    // actions with 'true' value are enabled for the player
+    pub tile_transforms: HashMap<TransformKind, bool>
 }

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
-use crate::manager::{CommandEvent, CommandType};
+use crate::manager::{CommandEvent, CommandType, GameRes};
 use crate::ui::ReloadUIEvent;
 use crate::vectors::Vector2Int;
 use crate::tiles::transform::TileTransform;
@@ -32,8 +32,7 @@ fn keys(
 ) {
     for (key, dir) in KEY_MAPPING {
         if !keys.just_pressed(key) { continue; }
-        let mode = &game_res.available_transforms[res.mode];
-        let command = match mode {
+        let command = match res.mode {
             TransformKind::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
             TransformKind::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
             TransformKind::TileRotate => {
@@ -52,11 +51,11 @@ fn keys(
     if keys.just_pressed(KeyCode::Space) {
         ev_command.send(CommandEvent(CommandType::PlayerWait));
     }
-    if keys.just_pressed(KeyCode::Return) {
-        res.mode += 1;
-        if res.mode > game_res.available_transforms.len() - 1 { res.mode = 0 }
-        ev_ui.send(ReloadUIEvent);
-    }
+    // if keys.just_pressed(KeyCode::Return) {
+    //     res.mode += 1;
+    //     if res.mode > game_res.available_transforms.len() - 1 { res.mode = 0 }
+    //     ev_ui.send(ReloadUIEvent);
+    // }
 }
 
 const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
@@ -67,5 +66,12 @@ const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
 #[derive(Default, Resource)]
 pub struct InputRes {
     pub selected: Option<Vector2Int>,
-    pub mode: usize
+    pub mode: TransformKind
+}
+impl InputRes {
+    pub fn set_mode_by_kind(&mut self, kind: TransformKind, game_res: &GameRes) {
+        if game_res.tile_transforms[&kind] {
+            self.mode = kind;
+        }
+    }
 }

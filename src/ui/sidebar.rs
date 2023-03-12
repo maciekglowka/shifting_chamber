@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::globals::{OVERLAY_FONT_SIZE, SIDEBAR_WIDTH};
 use crate::input::InputRes;
+use crate::manager::GameRes;
 use crate::player::{
     Player,
     upgrades::TransformKind
@@ -17,28 +18,36 @@ pub struct Sidebar;
 
 
 #[derive(Component)]
-pub struct TileButton(bool, usize);
+pub struct TileButton{
+    pub available: bool,
+    pub pressed: bool,
+    pub kind: TransformKind
+}
 
 pub fn tile_button_click(
     mut interactions: Query<(&Interaction, &mut TileButton, &mut Style), Changed<Interaction>>,
+    mut input_res: ResMut<InputRes>,
+    game_res: Res<GameRes>,
+    mut ev_ui: EventWriter<super::ReloadUIEvent>
 ) {
     for (interaction, mut button, mut style) in interactions.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                button.0 = true;
-                style.size = Size::all(Val::Px(TILE_BUTTION_DIM - 4.));
+                if button.available {
+                    button.pressed = true;
+                    style.size = Size::all(Val::Px(TILE_BUTTION_DIM - 4.));
+                }
             },
             Interaction::Hovered => {
-                if button.0 {
-                    // ev_command.send(
-                    //     CommandEvent(CommandType::Upgrade(button.1.clone()))
-                    // );
+                if button.pressed {
+                    input_res.set_mode_by_kind(button.kind, game_res.as_ref());
+                    ev_ui.send(super::ReloadUIEvent);
                 }
-                button.0 = false;
+                button.pressed = false;
                 style.size = Size::all(Val::Px(TILE_BUTTION_DIM));
             },
             Interaction::None => {
-                button.0 = false;
+                button.pressed = false;
                 style.size = Size::all(Val::Px(TILE_BUTTION_DIM));
             },
         }
@@ -77,9 +86,15 @@ pub fn update_sidebar(
             if let Ok(health) = player_query.get_single() {
                 spawn_text(parent, assets.as_ref(), format!("HP: {}/{}", health.value, health.max));
             }
-            // spawn_text(parent, assets.as_ref(), format!("Mode: {}", game_res.available_transforms[input_res.mode].to_str()));
-            for (idx, kind) in [TransformKind::TileShift, TransformKind::TileSwitch, TransformKind::TileRotate].iter().enumerate() {
-                spawn_tile_button(parent, assets.as_ref(), false, true, idx, *kind);
+            for (kind, available) in game_res.tile_transforms.iter() {
+                spawn_tile_button(
+                    parent,
+                    assets.as_ref(),
+                    input_res.mode == *kind,
+                    *available,
+                    0,
+                    *kind
+                );
             }
             spawn_text(parent, assets.as_ref(), "---".to_string());
             spawn_text(parent, assets.as_ref(), "WASD: move".to_string());
@@ -141,7 +156,7 @@ fn spawn_tile_button(
     )
         .with_children(|node| {
             node.spawn((
-                TileButton(false, idx),
+                TileButton{ available, pressed: false, kind },
                 ButtonBundle {
                     style: Style {
                         size: Size::all(Val::Percent(100.)),

@@ -71,7 +71,7 @@ pub fn upgrade(
                 UpgradeKind::HealPlayer => ev_action.send(ActionEvent(ActionKind::Heal(player, 3))),
                 UpgradeKind::IncreaseAP => res.max_ap += 1,
                 UpgradeKind::IncreaseHP => ev_action.send(ActionEvent(ActionKind::IncreaseHP(player, 1))),
-                UpgradeKind::TileTransform(t) => res.available_transforms.push(t)
+                UpgradeKind::TileTransform(t) => { res.tile_transforms.insert(t, true); }
             };
             if kind.is_single() {
                 res.possible_upgrades.remove(&kind);

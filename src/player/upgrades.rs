@@ -39,6 +39,15 @@ impl TransformKind {
         }
     }
 }
+impl Default for TransformKind {
+    fn default() -> Self {
+        Self::TileShift
+    }
+}
+
+pub fn get_all_transforms() -> Vec<TransformKind> {
+    vec![TransformKind::TileShift, TransformKind::TileSwitch, TransformKind::TileRotate]
+}
 
 pub fn get_initial_upgrades() -> HashSet<UpgradeKind> {
     HashSet::from_iter(
