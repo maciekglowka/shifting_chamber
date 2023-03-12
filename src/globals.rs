@@ -16,7 +16,7 @@ pub const PROJECTILE_Z: f32 = 60.;
 pub const OVERLAY_Z: f32 = 80.;
 pub const BUBBLE_Z: f32 = 100.;
 
-pub const OVERLAY_FONT_SIZE: f32 = 24.;
+pub const FONT_SIZE: f32 = 16.;
 
 pub const MAX_ANIMATION_DIST: f32 = 1.;
 

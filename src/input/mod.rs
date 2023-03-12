@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::collections::HashMap;
 
 use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
@@ -30,7 +31,7 @@ fn keys(
     mut ev_command: EventWriter<CommandEvent>,
     mut ev_ui: EventWriter<ReloadUIEvent>
 ) {
-    for (key, dir) in KEY_MAPPING {
+    for (key, dir) in DIR_KEY_MAPPING {
         if !keys.just_pressed(key) { continue; }
         let command = match res.mode {
             TransformKind::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
@@ -48,19 +49,22 @@ fn keys(
         // only one command can be sent
         break;
     }
+    for (key, idx) in DIGIT_KEYS {
+        if !keys.just_pressed(key) { continue; }
+        res.set_mode_by_idx(idx, game_res.as_ref());
+        ev_ui.send(ReloadUIEvent);
+    }
     if keys.just_pressed(KeyCode::Space) {
         ev_command.send(CommandEvent(CommandType::PlayerWait));
     }
-    // if keys.just_pressed(KeyCode::Return) {
-    //     res.mode += 1;
-    //     if res.mode > game_res.available_transforms.len() - 1 { res.mode = 0 }
-    //     ev_ui.send(ReloadUIEvent);
-    // }
 }
 
-const KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
+const DIR_KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
     (KeyCode::W, Vector2Int::UP), (KeyCode::S, Vector2Int::DOWN),
     (KeyCode::A, Vector2Int::LEFT), (KeyCode::D, Vector2Int::RIGHT),
+];
+const DIGIT_KEYS: [(KeyCode, usize); 3] = [
+    (KeyCode::Key1, 1), (KeyCode::Key2, 2), (KeyCode::Key3, 3)
 ];
 
 #[derive(Default, Resource)]
@@ -72,6 +76,18 @@ impl InputRes {
     pub fn set_mode_by_kind(&mut self, kind: TransformKind, game_res: &GameRes) {
         if game_res.tile_transforms[&kind] {
             self.mode = kind;
+        }
+    }
+    pub fn set_mode_by_idx(&mut self, idx: usize, game_res: &GameRes) {
+        let kind = InputRes::get_transform_by_idx(idx);
+        self.set_mode_by_kind(kind, game_res);
+    }
+    pub fn get_transform_by_idx(idx: usize) -> TransformKind {
+        match idx {
+            1 => TransformKind::TileShift,
+            2 => TransformKind::TileSwitch,
+            3 => TransformKind::TileRotate,
+            _ => panic!("Wrong tile transform mode!")
         }
     }
 }

@@ -56,6 +56,8 @@ fn start_game(
     );
     // at the beggining only the default action is enabled
     res.tile_transforms.insert(TransformKind::default(), true);
+    // tests only
+    res.tile_transforms.insert(TransformKind::TileSwitch, true);
     res.possible_upgrades = crate::player::upgrades::get_initial_upgrades();
     next_state.set(GameState::MapInit);
 }

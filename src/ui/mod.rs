@@ -61,7 +61,7 @@ pub fn load_assets(
     mut asset_list: ResMut<crate::assets::AssetList>,
     mut texture_atlasses: ResMut<Assets<TextureAtlas>> 
 ) {
-    let font_handle = asset_server.load("ui/pixel.ttf");
+    let font_handle = asset_server.load("ui/PICO-8 mono.ttf");
     asset_list.0.push(font_handle.clone_untyped());
 
     let overlay_img = asset_server.load("ui/icons.png");

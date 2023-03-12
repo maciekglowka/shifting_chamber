@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::globals::{OVERLAY_FONT_SIZE, UPGRADE_CHOICES};
+use crate::globals::{FONT_SIZE, UPGRADE_CHOICES};
 use crate::manager::{CommandEvent, CommandType};
 use crate::player::upgrades::UpgradeKind;
 
@@ -79,7 +79,7 @@ pub fn show_menu(
                             TextStyle {
                                 color: Color::WHITE,
                                 font: assets.font.clone(),
-                                font_size: OVERLAY_FONT_SIZE,
+                                font_size: FONT_SIZE,
                                 ..Default::default()
                             }
                         ),
@@ -146,7 +146,7 @@ fn add_button(
                         TextStyle {
                             color: Color::WHITE,
                             font: assets.font.clone(),
-                            font_size: OVERLAY_FONT_SIZE,
+                            font_size: FONT_SIZE,
                             ..Default::default()
                         }
                     ),

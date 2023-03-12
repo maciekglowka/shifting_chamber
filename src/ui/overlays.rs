@@ -137,7 +137,7 @@ fn spawn_symbols_overlay(
                 let offset = base_offset + Vec3::new(j as f32 * cell_size, 0., 0.);
                 parent.spawn(
                     get_icon_bundle(
-                        23 + 16*7,
+                        135,
                         *color, 
                         &assets.pico_font,
                         Vec2::splat(size),

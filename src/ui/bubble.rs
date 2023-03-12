@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::globals::{BUBBLE_LIFE, OVERLAY_FONT_SIZE, BUBBLE_Z, TILE_SIZE};
+use crate::globals::{BUBBLE_LIFE, FONT_SIZE, BUBBLE_Z, TILE_SIZE};
 use crate::graphics::get_world_position;
 use crate::vectors::Vector2Int;
 
@@ -39,7 +39,7 @@ pub fn spawn_bubbles(
     for ev in ev_bubble.iter() {
         let style = TextStyle {
             font: res.font.clone(),
-            font_size: OVERLAY_FONT_SIZE,
+            font_size: FONT_SIZE,
             color: Color::MAROON
         };
         let mut rng = thread_rng();
