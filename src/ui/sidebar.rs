@@ -76,11 +76,30 @@ pub fn update_sidebar(
                 ..Default::default()
             },
             // background_color: Color::NONE.into(),
-            background_color: Color::Rgba { red: 0.12, green: 0.2, blue: 0.28, alpha: 1. }.into(),
+            background_color: Color::Rgba { red: 0.18, green: 0.3, blue: 0.42, alpha: 1. }.into(),
             ..Default::default()
         }  
         ))
         .with_children(|parent| {
+            spawn_text(parent, assets.as_ref(), "Level ".to_string(), Some((format!("{}", game_res.level), Color::ORANGE_RED)), None);
+            spawn_text(parent, assets.as_ref(), "[H] for help".to_string(), None, None);
+            spawn_text(parent, assets.as_ref(), String::new(), None, None);
+            spawn_text(
+                parent,
+                assets.as_ref(),
+                "AP ".to_string(),
+                Some(("O".repeat(game_res.ap as usize), Color::PURPLE)),
+                Some("O".repeat((game_res.max_ap - game_res.ap) as usize))
+            );
+            if let Ok(health) = player_query.get_single() {
+                spawn_text(
+                    parent,
+                    assets.as_ref(),
+                    "HP ".to_string(),
+                    Some(("O".repeat(health.value as usize), Color::MAROON)),
+                    Some("O".repeat((health.max - health.value) as usize))
+                );
+            };
             for idx in 1..game_res.tile_transforms.len() + 1 {
                 let kind = InputRes::get_transform_by_idx(idx);
                 if !game_res.tile_transforms[&kind] { continue }
@@ -92,21 +111,6 @@ pub fn update_sidebar(
                     kind
                 );
             }
-            spawn_text(
-                parent,
-                assets.as_ref(),
-                format!("AP {}", "O".repeat(game_res.ap as usize)),
-                "O".repeat((game_res.max_ap - game_res.ap) as usize)
-            );
-            if let Ok(health) = player_query.get_single() {
-                spawn_text(
-                    parent,
-                    assets.as_ref(),
-                    format!("HP {}", "O".repeat(health.value as usize)),
-                    "O".repeat((health.max - health.value) as usize)    
-                );
-            };
-            spawn_text(parent, assets.as_ref(), "[H] for help".to_string(), String::new());
         });
 }
 
@@ -124,7 +128,8 @@ fn spawn_text(
     parent: &mut ChildBuilder,
     assets: &super::UiAssets,
     msg: String,
-    dimmed_msg: String
+    color_msg: Option<(String, Color)>,
+    dimmed_msg: Option<String>
 ) {
     parent.spawn(NodeBundle {
         style: Style {
@@ -146,18 +151,34 @@ fn spawn_text(
                 ),
                 ..Default::default()
             });
-            node.spawn(TextBundle {
-                text: Text::from_section(
-                    dimmed_msg,
-                    TextStyle {
-                        color: Color::GRAY,
-                        font: assets.font.clone(),
-                        font_size: FONT_SIZE,
-                        ..Default::default()
-                    }
-                ),
-                ..Default::default()
-            });
+            if let Some(color_msg) = color_msg {
+                node.spawn(TextBundle {
+                    text: Text::from_section(
+                        color_msg.0,
+                        TextStyle {
+                            color: color_msg.1,
+                            font: assets.font.clone(),
+                            font_size: FONT_SIZE,
+                            ..Default::default()
+                        }
+                    ),
+                    ..Default::default()
+                });
+            }
+            if let Some(dimmed_msg) = dimmed_msg {
+                node.spawn(TextBundle {
+                    text: Text::from_section(
+                        dimmed_msg,
+                        TextStyle {
+                            color: Color::BLACK,
+                            font: assets.font.clone(),
+                            font_size: FONT_SIZE,
+                            ..Default::default()
+                        }
+                    ),
+                    ..Default::default()
+                });
+            }
         });
 }
 
@@ -175,7 +196,7 @@ fn spawn_tile_button(
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Row,
-                margin: UiRect{ bottom: Val::Px(20.), ..Default::default() },
+                margin: UiRect{ top: Val::Px(20.), ..Default::default() },
                 ..Default::default()
             },
             ..Default::default()
