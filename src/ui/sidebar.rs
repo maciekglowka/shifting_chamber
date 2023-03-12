@@ -62,21 +62,34 @@ pub fn update_sidebar(
 ) {
     if ev_ui.iter().len() == 0 { return };
     clear_sidebar(&mut commands, &sidebar_query);
-    commands.spawn((
-        Sidebar,
+    let container = commands.spawn((
+            Sidebar,
+            NodeBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    position: UiRect { right: Val::Px(0.), ..Default::default() },
+                    size: Size::new(Val::Px(SIDEBAR_WIDTH), Val::Percent(100.)),
+                    padding: UiRect{ left: Val::Px(4.), ..Default::default()},
+                    ..Default::default()
+                },
+                // background_color: Color::NONE.into(),
+                background_color: Color::Rgba { red: 0., green: 0., blue: 0., alpha: 0.3 }.into(),
+                ..Default::default()
+            }
+        ))
+        .id(); 
+    let content = commands.spawn((
         NodeBundle {
             style: Style {
-                position_type: PositionType::Absolute,
-                position: UiRect { right: Val::Px(0.), ..Default::default() },
-                size: Size::new(Val::Px(SIDEBAR_WIDTH), Val::Percent(100.)),
+                size: Size::all(Val::Percent(100.)),
                 flex_direction: FlexDirection::Column,
                 padding: UiRect{ top: Val::Px(80.), left: Val::Px(32.), ..Default::default()},
                 align_items: AlignItems::FlexStart,
                 justify_content: JustifyContent::FlexStart,
                 ..Default::default()
             },
-            // background_color: Color::NONE.into(),
-            background_color: Color::Rgba { red: 0.18, green: 0.3, blue: 0.42, alpha: 1. }.into(),
+            background_color: super::BG_COLOR.into(),
+            // background_color: Color::Rgba { red: 0.18, green: 0.3, blue: 0.42, alpha: 1. }.into(),
             ..Default::default()
         }  
         ))
@@ -88,7 +101,7 @@ pub fn update_sidebar(
                 parent,
                 assets.as_ref(),
                 "AP ".to_string(),
-                Some(("O".repeat(game_res.ap as usize), Color::PURPLE)),
+                Some(("O".repeat(game_res.ap as usize), Color::GOLD)),
                 Some("O".repeat((game_res.max_ap - game_res.ap) as usize))
             );
             if let Ok(health) = player_query.get_single() {
@@ -96,7 +109,7 @@ pub fn update_sidebar(
                     parent,
                     assets.as_ref(),
                     "HP ".to_string(),
-                    Some(("O".repeat(health.value as usize), Color::MAROON)),
+                    Some(("O".repeat(health.value as usize), Color::ORANGE_RED)),
                     Some("O".repeat((health.max - health.value) as usize))
                 );
             };
@@ -111,7 +124,9 @@ pub fn update_sidebar(
                     kind
                 );
             }
-        });
+        })
+        .id();
+    commands.entity(container).add_child(content);
 }
 
 fn clear_sidebar(
