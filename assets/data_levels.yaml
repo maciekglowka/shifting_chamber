@@ -1,6 +1,6 @@
 Chamber:
   initial_points: -1
-  required_pieces: ["Rock", "Rock", "Rock", "Rock", "Tower", "Volcano"]
+  required_pieces: ["Rock", "Rock", "Rock", "Rock", "Tower", "Volcano", "Dark"]
   # extra_items: [1, 3]
   extra_features: [2, 4]
 

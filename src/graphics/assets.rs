@@ -5,7 +5,7 @@ use super::PIECE_SPRITE_COLUMNS;
 const PIECE_SPRITE_FILES: [(&str, usize, usize); 2] = [
     // atlas, columns, rows
     ("fixtures", PIECE_SPRITE_COLUMNS, 4),
-    ("units", PIECE_SPRITE_COLUMNS, 4)
+    ("units", PIECE_SPRITE_COLUMNS, 6)
 ];
 
 #[derive(Resource)]

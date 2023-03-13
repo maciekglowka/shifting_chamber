@@ -8,7 +8,7 @@ use serde_yaml::Mapping;
 use std::cmp;
 
 use crate::actions::DamageKind;
-use crate::vectors::Vector2Int;
+use crate::vectors::{Vector2Int, ORTHO_DIRECTIONS};
 
 // marker / data components - added in game
 #[derive(Component)]
@@ -59,7 +59,13 @@ pub struct Range {
 #[derive(Component, Deserialize)]
 pub struct Walking {
     #[serde(skip)]
-    pub planned_move: Option<Vector2Int>
+    pub planned_move: Option<Vector2Int>,
+    #[serde(default="ortho_fields")]
+    pub fields: Vec<Vector2Int>
+}
+
+fn ortho_fields() -> Vec<Vector2Int> {
+    ORTHO_DIRECTIONS.into()
 }
 
 pub fn insert_from_list(ec: &mut EntityCommands, component_list: &Mapping) {

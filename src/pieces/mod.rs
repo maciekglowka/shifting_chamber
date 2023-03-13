@@ -27,7 +27,8 @@ impl Plugin for PiecesPlugin {
                 .in_schedule(OnEnter(GameState::TurnStart))
             )
             .add_systems(
-                (systems::walking::move_walking, systems::projectile::launch_projectiles)
+                (systems::projectile::launch_projectiles, systems::walking::move_walking)
+                .chain()
                 .in_schedule(OnEnter(GameState::NPCAction)))
             .add_systems(
                 (

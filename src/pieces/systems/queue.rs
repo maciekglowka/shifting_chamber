@@ -9,7 +9,7 @@ use super::super::PieceRes;
 pub fn plan_queue(
     mut piece_res: ResMut<PieceRes>,
     walking_query: Query<Entity, With<Walking>>,
-    range_query: Query<Entity, With<Range>>
+    range_query: Query<Entity, (With<Range>, Without<Walking>)>
 ) {
     let queue = walking_query.iter()
         .chain(range_query.iter())

@@ -81,8 +81,8 @@ pub fn plan_moves(
     for (mut walking, parent) in walking_query.iter_mut() {
         let mut possible = Vec::new();
         let Ok(tile) = tile_query.get(parent.get()) else { continue };
-        for dir in ORTHO_DIRECTIONS {
-            let v = tile.v + dir;
+        for dir in walking.fields.iter() { //ORTHO_DIRECTIONS {
+            let v = tile.v + *dir;
             if avoid.contains(&v) { continue };
             if !tile_res.tiles.contains_key(&v) { continue };
 
@@ -90,7 +90,7 @@ pub fn plan_moves(
                 Some(a) => *a,
                 _ => i32::MAX
             };
-            possible.push((rank, dir));
+            possible.push((rank, *dir));
 
         }
         possible.sort_by(|a, b| a.0.cmp(&b.0));
