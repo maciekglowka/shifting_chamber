@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct GameOverMenu;
+pub struct GameWinMenu;
 
 pub fn show_menu(
     mut commands: Commands,
     assets: Res<super::UiAssets>
 ) {
     commands.spawn((
-        GameOverMenu,
+        GameWinMenu,
         NodeBundle {
             style: Style {
                 position_type: PositionType::Absolute,
@@ -26,7 +26,7 @@ pub fn show_menu(
         .with_children(|parent| {
             parent.spawn(TextBundle {
                 text: Text::from_section(
-                    "GAME OVER",
+                    "DARK LORD IS DEFEATED!",
                     TextStyle {
                         color: Color::WHITE,
                         font: assets.font.clone(),
@@ -53,7 +53,7 @@ pub fn show_menu(
 
 pub fn clear_menu(
     mut commands: Commands,
-    query: Query<Entity, With<GameOverMenu>>
+    query: Query<Entity, With<GameWinMenu>>
 ) {
     for entity in query.iter() {
         commands.entity(entity)

@@ -15,7 +15,7 @@ pub fn generate_pieces(
     data_assets: Res<DataAssets>,
     mut game_res: ResMut<GameRes>
 ) {
-    let target_points = (game_res.level * MAP_POINTS_MUL) as i32;
+    let target_points = (game_res.level as f32 * MAP_POINTS_MUL) as i32;
     let level_type = get_level_type(&mut game_res, &data_assets);
     let player_v = get_player_v();
 
@@ -94,24 +94,6 @@ fn get_level_type(
     // target_points: i32
 ) -> String {
     data_assets.level_list[game_res.level as usize - 1].clone()
-    // let possible: Vec<_> = data_assets.levels.iter()
-    //     .filter(|(_, v)| v.initial_points <= target_points)
-    //     .map(|(k, _)| k)
-    //     .collect();
-
-    // let pool: Vec<_> = possible.iter()
-    //     .map(|n| {
-    //         let last_idx = game_res.level_history.iter()
-    //             .rposition(|l| l == *n)
-    //             .unwrap_or(0);
-    //         (*n, game_res.level_history.len() - last_idx + 1)
-    //     })
-    //     .collect();
-    
-    // let mut rng = thread_rng();
-    // let name = pool.choose_weighted(&mut rng, |n| n.1).unwrap().0;
-    // game_res.level_history.push(name.clone());
-    // name.to_owned()
 }
 
 fn get_name_pool(data: &HashMap<String, PieceData>, names: &Vec<String>, level: u32, weighted: bool) -> Vec<(String, i32)> {

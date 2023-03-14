@@ -7,6 +7,7 @@ use crate::states::GameState;
 
 mod bubble;
 mod game_over;
+mod game_win;
 mod overlays;
 mod sidebar;
 mod upgrade_menu;
@@ -36,7 +37,9 @@ impl Plugin for UIPlugin {
             .add_system(upgrade_menu::clear_menu.in_schedule(OnExit(GameState::Upgrade)))
             .add_system(upgrade_menu::menu_click.in_set(OnUpdate(GameState::Upgrade)))
             .add_system(game_over::show_menu.in_schedule(OnEnter(GameState::GameOver)))
-            .add_system(game_over::clear_menu.in_schedule(OnExit(GameState::GameOver)));
+            .add_system(game_over::clear_menu.in_schedule(OnExit(GameState::GameOver)))
+            .add_system(game_win::show_menu.in_schedule(OnEnter(GameState::GameWin)))
+            .add_system(game_win::clear_menu.in_schedule(OnExit(GameState::GameWin)));
     }  
 }
 

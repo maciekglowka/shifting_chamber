@@ -4,7 +4,7 @@ pub const SIDEBAR_WIDTH: f32 = 260.;
 
 pub const TILE_SIZE: f32 = 96.;
 pub const MAP_SIZE: i32 = 6;
-pub const MAP_POINTS_MUL: u32 = 1;
+pub const MAP_POINTS_MUL: f32 = 1.5;
 
 pub const UPGRADE_CHOICES: usize = 3;
 pub const UPGRADE_EVERY_LEVELS: u32 = 2;

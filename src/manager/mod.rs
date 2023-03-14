@@ -21,7 +21,8 @@ pub enum CommandType {
     PlayerWait,
     AnimationEnd,
     TurnEnd,
-    Upgrade(UpgradeKind)
+    Upgrade(UpgradeKind),
+    Restart
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -109,6 +110,10 @@ pub fn update_state(
     for ev in ev_command.iter() {
         if let CommandType::TurnEnd = ev.0 {
             next_state.set(GameState::TurnEnd);
+            break;
+        }
+        if let CommandType::Restart = ev.0 {
+            next_state.set(GameState::GameInit);
             break;
         }
         if let CommandType::AnimationEnd = ev.0 {

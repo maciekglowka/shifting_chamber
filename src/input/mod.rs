@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use std::collections::HashMap;
 
 use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
@@ -15,13 +14,24 @@ pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputRes>()
-            .add_system(reset_input.in_schedule(OnEnter(GameState::PlayerInput)))
-            .add_system(keys.in_set(OnUpdate(GameState::PlayerInput)));
+            .add_system(reset_input.in_schedule(OnEnter(GameState::GameInit)))
+            .add_system(keys.in_set(OnUpdate(GameState::PlayerInput)))
+            .add_system(keys_endgame.in_set(OnUpdate(GameState::GameOver)))
+            .add_system(keys_endgame.in_set(OnUpdate(GameState::GameWin)));
     }
 }
 
 fn reset_input(mut res: ResMut<InputRes>) {
-    // res.mode = InputMode::TileShift;
+    res.mode = TransformKind::default();
+}
+
+fn keys_endgame(
+    keys: ResMut<Input<KeyCode>>,
+    mut ev_command: EventWriter<CommandEvent>,
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        ev_command.send(CommandEvent(CommandType::Restart));
+    }
 }
 
 fn keys(
