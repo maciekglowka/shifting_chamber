@@ -4,6 +4,7 @@ use serde::Deserialize;
 use super::{DataAssets, YamlAsset};
 
 const LEVEL_FILE: &str = "data_levels.yaml";
+const LEVEL_LIST_FILE: &str = "data_level_list.yaml";
 
 #[derive(Deserialize)]
 pub struct LevelData {
@@ -26,6 +27,9 @@ pub fn parse_data(
             serde_yaml::from_value(v.clone()).expect("Wrong data item!")
         );
     }
+
+    let list_asset = yaml_assets.get(&assets.raw_level_list).expect("Wrong level list!");
+    assets.level_list = serde_yaml::from_str(&list_asset.value).expect("Wrong level list data!");
 }
 
 pub fn load_assets(
@@ -36,4 +40,8 @@ pub fn load_assets(
     let data: Handle<YamlAsset> = asset_server.load(LEVEL_FILE);
     asset_list.0.push(data.clone_untyped());
     assets.raw_levels = data;
+
+    let list_data: Handle<YamlAsset> = asset_server.load(LEVEL_LIST_FILE);
+    asset_list.0.push(list_data.clone_untyped());
+    assets.raw_level_list = list_data;
 }

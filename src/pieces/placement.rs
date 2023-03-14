@@ -16,7 +16,7 @@ pub fn generate_pieces(
     mut game_res: ResMut<GameRes>
 ) {
     let target_points = (game_res.level * MAP_POINTS_MUL) as i32;
-    let level_type = get_level_type(&mut game_res, &data_assets, target_points);
+    let level_type = get_level_type(&mut game_res, &data_assets);
     let player_v = get_player_v();
 
     let fixture_pool = get_name_pool(
@@ -91,26 +91,27 @@ fn spawn_level_pieces(
 fn get_level_type(
     game_res: &mut GameRes,
     data_assets: &DataAssets,
-    target_points: i32
+    // target_points: i32
 ) -> String {
-    let possible: Vec<_> = data_assets.levels.iter()
-        .filter(|(_, v)| v.initial_points <= target_points)
-        .map(|(k, _)| k)
-        .collect();
+    data_assets.level_list[game_res.level as usize - 1].clone()
+    // let possible: Vec<_> = data_assets.levels.iter()
+    //     .filter(|(_, v)| v.initial_points <= target_points)
+    //     .map(|(k, _)| k)
+    //     .collect();
 
-    let pool: Vec<_> = possible.iter()
-        .map(|n| {
-            let last_idx = game_res.level_history.iter()
-                .rposition(|l| l == *n)
-                .unwrap_or(0);
-            (*n, game_res.level_history.len() - last_idx + 1)
-        })
-        .collect();
+    // let pool: Vec<_> = possible.iter()
+    //     .map(|n| {
+    //         let last_idx = game_res.level_history.iter()
+    //             .rposition(|l| l == *n)
+    //             .unwrap_or(0);
+    //         (*n, game_res.level_history.len() - last_idx + 1)
+    //     })
+    //     .collect();
     
-    let mut rng = thread_rng();
-    let name = pool.choose_weighted(&mut rng, |n| n.1).unwrap().0;
-    game_res.level_history.push(name.clone());
-    name.to_owned()
+    // let mut rng = thread_rng();
+    // let name = pool.choose_weighted(&mut rng, |n| n.1).unwrap().0;
+    // game_res.level_history.push(name.clone());
+    // name.to_owned()
 }
 
 fn get_name_pool(data: &HashMap<String, PieceData>, names: &Vec<String>, level: u32, weighted: bool) -> Vec<(String, i32)> {

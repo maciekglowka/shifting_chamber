@@ -15,4 +15,5 @@ pub enum GameState {
     MapEnd,
     Upgrade,
     GameOver,
+    GameWin
 }

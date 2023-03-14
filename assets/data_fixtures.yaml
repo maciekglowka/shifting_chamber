@@ -28,6 +28,7 @@ Tower:
           y: 0
 
 Volcano:
+  min_level: 3
   points: 0
   sprite: 
     atlas: fixtures

@@ -38,7 +38,9 @@ pub struct DataAssets {
     pub unit_names: Vec<String>,
     pub fixture_names: Vec<String>,
     pub raw_levels: Handle<YamlAsset>,
-    pub levels: HashMap<String, LevelData>
+    pub levels: HashMap<String, LevelData>,
+    pub level_list: Vec<String>,
+    pub raw_level_list: Handle<YamlAsset>
 }
 
 #[derive(Debug, Deserialize, TypeUuid)]

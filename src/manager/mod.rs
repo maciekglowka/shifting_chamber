@@ -73,8 +73,13 @@ fn start_map(
 
 fn map_end(
     mut next_state: ResMut<NextState<GameState>>,
-    res: Res<GameRes>
+    res: Res<GameRes>,
+    data_assets: Res<crate::data::DataAssets>
 ) {
+    if data_assets.level_list.len() == res.level as usize {
+        next_state.set(GameState::GameWin);
+        return;
+    }
     if res.level % UPGRADE_EVERY_LEVELS == 0 {
         next_state.set(GameState::Upgrade);
     } else {
@@ -154,7 +159,6 @@ pub fn update_state(
 #[derive(Default, Resource)]
 pub struct GameRes {
     pub level: u32,
-    pub level_history: Vec<String>,
     pub ap: u32,
     pub max_ap: u32,
     pub ap_stacking: bool,
