@@ -47,17 +47,16 @@ Alchemist:
       max: 1
     Walking:
 
-Dark:
-  min_level: 10
+DarkLord:
   sprite:
     atlas: units
     index: 5
   components:
     Damage:
-      value: 2
+      value: 3
       kind: !Hit
     Health:
-      max: 3
+      max: 5
     Occupier:
     Range:
       fields:

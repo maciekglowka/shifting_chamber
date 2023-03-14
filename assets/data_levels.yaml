@@ -7,3 +7,8 @@ Volcanoes:
   initial_points: 0
   required_pieces: ["Rock", "Rock", "Rock", "Rock", "Volcano", "Volcano"]
   extra_features: [1, 3]
+
+DarkLord:
+  initial_points: 0
+  required_pieces: ["Rock", "Rock", "Rock", "Tower", "Volcano", "Volcano", "DarkLord"]
+  extra_features: [2, 4]
