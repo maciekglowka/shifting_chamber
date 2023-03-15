@@ -32,7 +32,7 @@ Viking:
     Walking:
 
 Alchemist:
-  min_level: 5
+  min_level: 6
   points: 3
   sprite: 
     atlas: units
@@ -45,6 +45,21 @@ Alchemist:
     Occupier:
     Health:
       max: 1
+    Walking:
+
+Hammer:
+  min_level: 4
+  points: 3
+  sprite: 
+    atlas: units
+    index: 4
+  components:
+    Damage:
+      value: 2
+      kind: !Hit
+    Occupier:
+    Health:
+      max: 3
     Walking:
 
 DarkLord:

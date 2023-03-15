@@ -8,6 +8,7 @@ use crate::states::GameState;
 mod bubble;
 mod game_over;
 mod game_win;
+mod help_menu;
 mod overlays;
 mod sidebar;
 mod upgrade_menu;
@@ -30,9 +31,10 @@ impl Plugin for UIPlugin {
             .add_system(sidebar::update_sidebar)
             .add_system(player_input.in_schedule(OnEnter(GameState::PlayerInput)))
             .add_systems(
-                (overlays::update_overlays, sidebar::tile_button_click)
+                (overlays::update_overlays, sidebar::tile_button_click, help_menu::toggle_menu)
                 .in_set(OnUpdate(GameState::PlayerInput))
             )
+            .add_system(help_menu::clear_menu.in_schedule(OnExit(GameState::PlayerInput)))
             .add_system(upgrade_menu::show_menu.in_schedule(OnEnter(GameState::Upgrade)))
             .add_system(upgrade_menu::clear_menu.in_schedule(OnExit(GameState::Upgrade)))
             .add_system(upgrade_menu::menu_click.in_set(OnUpdate(GameState::Upgrade)))

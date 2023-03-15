@@ -67,6 +67,10 @@ fn keys(
     if keys.just_pressed(KeyCode::Space) {
         ev_command.send(CommandEvent(CommandType::PlayerWait));
     }
+    if keys.just_pressed(KeyCode::H) {
+        res.show_help = !res.show_help;
+        ev_ui.send(ReloadUIEvent);
+    }
 }
 
 const DIR_KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
@@ -80,7 +84,8 @@ const DIGIT_KEYS: [(KeyCode, usize); 3] = [
 #[derive(Default, Resource)]
 pub struct InputRes {
     pub selected: Option<Vector2Int>,
-    pub mode: TransformKind
+    pub mode: TransformKind,
+    pub show_help: bool
 }
 impl InputRes {
     pub fn set_mode_by_kind(&mut self, kind: TransformKind, game_res: &GameRes) {
