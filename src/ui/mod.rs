@@ -9,6 +9,7 @@ mod bubble;
 mod game_over;
 mod game_win;
 mod help_menu;
+mod main_menu;
 mod overlays;
 mod sidebar;
 mod upgrade_menu;
@@ -41,7 +42,9 @@ impl Plugin for UIPlugin {
             .add_system(game_over::show_menu.in_schedule(OnEnter(GameState::GameOver)))
             .add_system(game_over::clear_menu.in_schedule(OnExit(GameState::GameOver)))
             .add_system(game_win::show_menu.in_schedule(OnEnter(GameState::GameWin)))
-            .add_system(game_win::clear_menu.in_schedule(OnExit(GameState::GameWin)));
+            .add_system(game_win::clear_menu.in_schedule(OnExit(GameState::GameWin)))
+            .add_system(main_menu::show_menu.in_schedule(OnEnter(GameState::MainMenu)))
+            .add_system(main_menu::clear_menu.in_schedule(OnExit(GameState::MainMenu)));
     }  
 }
 
@@ -109,13 +112,17 @@ pub fn load_assets(
         (TransformKind::TileRotate, rotate),
     ]);
 
+    let title = asset_server.load("ui/title.png");
+    asset_list.0.push(title.clone_untyped());
+
     commands.insert_resource(
         UiAssets { 
             font: font_handle,
             pico_font: pico_handle,
             overlay_texture: overlay_handle,
             button_texture: button_handle,
-            tile_buttons: tiles
+            tile_buttons: tiles,
+            title_screen: title
         }
     );
 }
@@ -126,6 +133,7 @@ pub struct UiAssets {
     pico_font: Handle<TextureAtlas>,
     overlay_texture: Handle<TextureAtlas>,
     button_texture: Handle<Image>,
-    tile_buttons: HashMap<TransformKind, Handle<Image>>
+    tile_buttons: HashMap<TransformKind, Handle<Image>>,
+    title_screen: Handle<Image>
 }
 

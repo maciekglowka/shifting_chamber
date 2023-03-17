@@ -6,6 +6,7 @@ use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 mod actions;
+mod audio;
 mod assets;
 mod camera;
 mod data;
@@ -44,6 +45,7 @@ fn main() {
         .insert_resource(Msaa::Off)
         .add_state::<states::GameState>()
         .add_plugin(actions::ActionPlugin)
+        .add_plugin(audio::AudioPlugin)
         .add_plugin(assets::AssetPlugin)
         .add_plugin(camera::CameraPlugin)
         .add_plugin(data::DataPlugin)

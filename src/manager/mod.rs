@@ -22,17 +22,27 @@ pub enum CommandType {
     AnimationEnd,
     TurnEnd,
     Upgrade(UpgradeKind),
-    Restart
+    Start,
+    Restart,
 }
 
 pub struct CommandEvent(pub CommandType);
 
+pub enum GameEventKind {
+    ProjectileLaunch,
+    TileTransformed,
+    UnitAttack,
+    WrongAction
+}
+
+pub struct GameEvent(pub GameEventKind);
 
 pub struct ManagerPlugin;
 
 impl Plugin for ManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CommandEvent>()
+            .add_event::<GameEvent>()
             .init_resource::<GameRes>()
             .add_system(start_game.in_set(OnUpdate(GameState::GameInit)))
             .add_system(start_map.in_set(OnUpdate(GameState::MapInit)))
@@ -112,8 +122,12 @@ pub fn update_state(
             next_state.set(GameState::TurnEnd);
             break;
         }
-        if let CommandType::Restart = ev.0 {
+        if let CommandType::Start = ev.0 {
             next_state.set(GameState::GameInit);
+            break;
+        }
+        if let CommandType::Restart = ev.0 {
+            next_state.set(GameState::MainMenu);
             break;
         }
         if let CommandType::AnimationEnd = ev.0 {

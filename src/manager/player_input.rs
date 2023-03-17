@@ -32,7 +32,8 @@ pub fn transform_tiles(
     player_query: Query<&Parent, With<Player>>,
     mut tile_query: Query<&mut tiles::Tile>,
     mut tile_res: ResMut<tiles::TileRes>,
-    mut next_state: ResMut<NextState<crate::states::GameState>>
+    mut next_state: ResMut<NextState<crate::states::GameState>>,
+    mut ev_game: EventWriter<super::GameEvent>
 ) {
     for ev in ev_command.iter() {
         if let CommandType::TransformTiles(transform) = ev.0 {
@@ -51,6 +52,9 @@ pub fn transform_tiles(
                     tile_res.as_mut()
                 );
                 next_state.set(GameState::TileShift);
+                ev_game.send(super::GameEvent(super::GameEventKind::TileTransformed));
+            } else {
+                ev_game.send(super::GameEvent(super::GameEventKind::WrongAction));
             }
         }
     }

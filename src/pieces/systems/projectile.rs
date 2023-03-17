@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::actions::{ActionEvent, ActionKind, DamageKind};
+use crate::manager::{GameEvent, GameEventKind};
 use crate::tiles::{Tile, TileRes};
 use crate::vectors::OMNI_DIRECTIONS;
 
@@ -86,6 +87,7 @@ pub fn hit_projectiles(
     tile_query: Query<&Children, With<Tile>>,
     tile_res: Res<TileRes>,
     mut ev_action: EventWriter<ActionEvent>,
+    mut ev_game: EventWriter<GameEvent>
 ) {
     for (entity, projectile, damage) in projectile_query.iter() {
         // despawn first - to be sure the projectile won't live to the next turn
@@ -98,6 +100,7 @@ pub fn hit_projectiles(
                 ev_action.send(ActionEvent(
                     ActionKind::Damage(health_entity, damage.kind, damage.value)
                 ));
+                ev_game.send(GameEvent(GameEventKind::ProjectileLaunch));
             }
         }
     }

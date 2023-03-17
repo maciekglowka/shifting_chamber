@@ -24,7 +24,7 @@ pub fn check_asset_loading(
         asset_list.0.iter().map(|a| a.id())
     ) {
         LoadState::Loaded => {
-            next_state.set(crate::states::GameState::GameInit);
+            next_state.set(crate::states::GameState::MainMenu);
         },
         LoadState::Failed => {
             error!("asset loading error");

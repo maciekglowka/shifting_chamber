@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub enum GameState {
     #[default]
     LoadAssets,
+    MainMenu,
     GameInit,
     MapInit,
     TurnStart,

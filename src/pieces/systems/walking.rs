@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::actions::{ActionEvent, ActionKind};
+use crate::manager::{GameEvent, GameEventKind};
 use crate::player::Player;
 use crate::tiles::{Tile, TileRes};
 use crate::vectors::{Vector2Int, ORTHO_DIRECTIONS};
@@ -151,7 +152,8 @@ pub fn walk_damage(
     damage_query: Query<(&Damage, &Parent)>,
     health_query: Query<(Entity, &Parent), With<Health>>,
     piece_res: Res<PieceRes>,
-    mut ev_action: EventWriter<ActionEvent>
+    mut ev_action: EventWriter<ActionEvent>,
+    mut ev_game: EventWriter<GameEvent>
 ) {
     let Some(entity) = piece_res.action_queue.get(0) else { return };
     let Ok((damage, parent)) = damage_query.get(*entity) else { return };
@@ -160,6 +162,7 @@ pub fn walk_damage(
         ev_action.send(ActionEvent(
             ActionKind::Damage(other, damage.kind, damage.value)
         ));
+        ev_game.send(GameEvent(GameEventKind::UnitAttack));
     }
 }
 

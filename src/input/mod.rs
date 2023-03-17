@@ -16,6 +16,7 @@ impl Plugin for InputPlugin {
         app.init_resource::<InputRes>()
             .add_system(reset_input.in_schedule(OnEnter(GameState::GameInit)))
             .add_system(keys.in_set(OnUpdate(GameState::PlayerInput)))
+            .add_system(keys_title.in_set(OnUpdate(GameState::MainMenu)))
             .add_system(keys_endgame.in_set(OnUpdate(GameState::GameOver)))
             .add_system(keys_endgame.in_set(OnUpdate(GameState::GameWin)));
     }
@@ -23,6 +24,15 @@ impl Plugin for InputPlugin {
 
 fn reset_input(mut res: ResMut<InputRes>) {
     res.mode = TransformKind::default();
+}
+
+fn keys_title(
+    keys: ResMut<Input<KeyCode>>,
+    mut ev_command: EventWriter<CommandEvent>,
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        ev_command.send(CommandEvent(CommandType::Start));
+    }
 }
 
 fn keys_endgame(
