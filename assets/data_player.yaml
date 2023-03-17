@@ -3,6 +3,7 @@ Player:
   sprite: 
     atlas: units
     index: 0
+    columns: !Frames 4
   components:
     Damage:
       value: 1

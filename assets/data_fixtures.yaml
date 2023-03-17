@@ -6,7 +6,7 @@ Rock:
   sprite: 
     atlas: fixtures
     index: 0
-    columns: !Variants 2
+    columns: !Variants 3
   components:
     Occupier:
 
