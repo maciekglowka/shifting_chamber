@@ -4,9 +4,10 @@ use crate::globals::{OVERLAY_Z, TILE_SIZE};
 use crate::graphics::{get_world_position, PieceRenderer};
 use crate::input::InputRes;
 use crate::pieces::{
-    components::{Health, Walking},
+    components::{Health, Range, Walking},
     PieceRes
 };
+use crate::vectors::Vector2Int;
 
 #[derive(Component)]
 pub struct Overlay;
@@ -16,6 +17,7 @@ pub fn update_overlays(
     overlay_query: Query<Entity, With<Overlay>>,
     renderer_query: Query<(Entity, &PieceRenderer)>,
     walking_query: Query<&Walking>,
+    range_query: Query<&Range>,
     health_query: Query<&Health>,
     piece_res: Res<PieceRes>,
     assets: Res<super::UiAssets>,
@@ -34,10 +36,12 @@ pub fn update_overlays(
 
         if let Ok(walking) = walking_query.get(renderer.target) {
             spawn_walk_overlay(&mut commands, walking, assets.as_ref(), entity);
-            if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
-                spawn_order_overlay(&mut commands, entity, assets.as_ref(), order + 1);
-                // symbols.push((order as u32 + 1, Color::WHITE));
-            }
+        }
+        if let Ok(range) = range_query.get(renderer.target) {
+            spawn_range_overlay(&mut commands, range, assets.as_ref(), entity);
+        }
+        if let Some(order) = piece_res.action_queue.iter().position(|a| *a == renderer.target) {
+            spawn_order_overlay(&mut commands, entity, assets.as_ref(), order + 1);
         }
 
     }
@@ -61,27 +65,48 @@ fn spawn_walk_overlay(
 )
 {
     if let Some(planned_move) = walking.planned_move {
-        let angle = Vec2::new(1., 0.)
-            .angle_between(Vec2::new(planned_move.x as f32, planned_move.y as f32));
-        let rotation = Quat::from_axis_angle(Vec3::new(0., 0., 1.), angle);
-        let marker = commands.spawn((
-                Overlay,
-                SpriteSheetBundle {
-                    sprite: TextureAtlasSprite {
-                        index: 0,
-                        custom_size: Some(Vec2::splat(TILE_SIZE)),
-                        ..Default::default()
-                    },
-                    texture_atlas: assets.overlay_texture.clone(),
-                    transform: Transform::from_rotation(rotation)
-                        .with_translation(
-                            Vec3::new(0.5 * TILE_SIZE * planned_move.x as f32, 0.5 * TILE_SIZE * planned_move.y as f32, OVERLAY_Z)
-                        ),
-                    ..Default::default()
-                }
-            )).id();
-        commands.entity(parent).add_child(marker);
+        spawn_dir_overlay(commands, 0, planned_move, assets, parent);
     }
+}
+
+fn spawn_range_overlay(
+    commands: &mut Commands,
+    range: &Range,
+    assets: &super::UiAssets,
+    parent: Entity
+) {
+    for dir in range.fields.iter() {
+        spawn_dir_overlay(commands, 1, *dir, assets, parent);
+    }
+}
+
+fn spawn_dir_overlay(
+    commands: &mut Commands,
+    sprite_idx: usize,
+    dir: Vector2Int,
+    assets: &super::UiAssets,
+    parent: Entity
+) {
+    let angle = Vec2::new(1., 0.)
+        .angle_between(Vec2::new(dir.x as f32, dir.y as f32));
+    let rotation = Quat::from_axis_angle(Vec3::new(0., 0., 1.), angle);
+    let marker = commands.spawn((
+            Overlay,
+            SpriteSheetBundle {
+                sprite: TextureAtlasSprite {
+                    index: sprite_idx,
+                    custom_size: Some(Vec2::splat(TILE_SIZE)),
+                    ..Default::default()
+                },
+                texture_atlas: assets.overlay_texture.clone(),
+                transform: Transform::from_rotation(rotation)
+                    .with_translation(
+                        Vec3::new(0.5 * TILE_SIZE * dir.x as f32, 0.5 * TILE_SIZE * dir.y as f32, OVERLAY_Z)
+                    ),
+                ..Default::default()
+            }
+        )).id();
+    commands.entity(parent).add_child(marker);
 }
 
 fn spawn_order_overlay(
@@ -166,7 +191,6 @@ fn get_icon_bundle(
         texture_atlas: atlas.clone(),
         transform: Transform::from_translation(
             offset
-            // Vec3::new(offset.x, offset.y, OVERLAY_Z + 1.)
         ),
         ..Default::default()
     }
