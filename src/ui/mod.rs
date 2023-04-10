@@ -32,7 +32,7 @@ impl Plugin for UIPlugin {
             .add_system(sidebar::update_sidebar)
             .add_system(player_input.in_schedule(OnEnter(GameState::PlayerInput)))
             .add_systems(
-                (overlays::update_overlays, sidebar::tile_button_click, help_menu::toggle_menu)
+                (overlays::update_overlays, sidebar::tile_button_click, help_menu::toggle_menu, sidebar::pause_button_click)
                 .in_set(OnUpdate(GameState::PlayerInput))
             )
             .add_system(help_menu::clear_menu.in_schedule(OnExit(GameState::PlayerInput)))
@@ -115,6 +115,9 @@ pub fn load_assets(
     let title = asset_server.load("ui/title.png");
     asset_list.0.push(title.clone_untyped());
 
+    let pause_handle = asset_server.load("ui/pause_button.png");
+    asset_list.0.push(pause_handle.clone_untyped());
+
     commands.insert_resource(
         UiAssets { 
             font: font_handle,
@@ -122,7 +125,8 @@ pub fn load_assets(
             overlay_texture: overlay_handle,
             button_texture: button_handle,
             tile_buttons: tiles,
-            title_screen: title
+            title_screen: title,
+            pause_button: pause_handle
         }
     );
 }
@@ -134,6 +138,7 @@ pub struct UiAssets {
     overlay_texture: Handle<TextureAtlas>,
     button_texture: Handle<Image>,
     tile_buttons: HashMap<TransformKind, Handle<Image>>,
+    pause_button: Handle<Image>,
     title_screen: Handle<Image>
 }
 

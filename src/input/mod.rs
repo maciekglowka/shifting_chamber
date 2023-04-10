@@ -1,13 +1,18 @@
-use bevy::prelude::*;
+use bevy::{
+    input::touch::TouchPhase,
+    prelude::*,
+};
 
 use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
 use crate::manager::{CommandEvent, CommandType, GameRes};
 use crate::ui::ReloadUIEvent;
-use crate::vectors::Vector2Int;
+use crate::vectors::{ORTHO_DIRECTIONS, Vector2Int};
 use crate::tiles::transform::TileTransform;
 
 mod utils;
+
+const SWIPE_THRESH: f32 = 50.;
 
 pub struct InputPlugin;
 
@@ -16,6 +21,7 @@ impl Plugin for InputPlugin {
         app.init_resource::<InputRes>()
             .add_system(reset_input.in_schedule(OnEnter(GameState::GameInit)))
             .add_system(keys.in_set(OnUpdate(GameState::PlayerInput)))
+            .add_system(touches.in_set(OnUpdate(GameState::PlayerInput)))
             .add_system(keys_title.in_set(OnUpdate(GameState::MainMenu)))
             .add_system(keys_endgame.in_set(OnUpdate(GameState::GameOver)))
             .add_system(keys_endgame.in_set(OnUpdate(GameState::GameWin)));
@@ -28,19 +34,89 @@ fn reset_input(mut res: ResMut<InputRes>) {
 
 fn keys_title(
     keys: ResMut<Input<KeyCode>>,
-    mut ev_command: EventWriter<CommandEvent>,
+    mut touch_ev: EventReader<TouchInput>,
+    mut ev_command: EventWriter<CommandEvent>
 ) {
     if keys.just_pressed(KeyCode::Space) {
         ev_command.send(CommandEvent(CommandType::Start));
+    }
+    for ev in touch_ev.iter() {
+        match ev.phase {
+            TouchPhase::Ended => {
+                ev_command.send(CommandEvent(CommandType::Start));
+            }
+            _ => {}
+        }
     }
 }
 
 fn keys_endgame(
     keys: ResMut<Input<KeyCode>>,
-    mut ev_command: EventWriter<CommandEvent>,
+    mut touch_ev: EventReader<TouchInput>,
+    mut ev_command: EventWriter<CommandEvent>
 ) {
     if keys.just_pressed(KeyCode::Space) {
         ev_command.send(CommandEvent(CommandType::Restart));
+    }
+    for ev in touch_ev.iter() {
+        match ev.phase {
+            TouchPhase::Ended => {
+                ev_command.send(CommandEvent(CommandType::Restart));
+            }
+            _ => {}
+        }
+    }
+}
+
+fn send_dir_action(
+    dir: Vector2Int,
+    ev_command: &mut EventWriter<CommandEvent>,
+    res: &InputRes,
+) {
+    if !ORTHO_DIRECTIONS.contains(&dir) { return }
+    let command = match res.mode {
+        TransformKind::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
+        TransformKind::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
+        TransformKind::TileRotate => {
+            let clockwise = match dir {
+                Vector2Int::RIGHT => true,
+                Vector2Int::LEFT => false,
+                _ => return
+            };
+            CommandType::TransformTiles(TileTransform::Rotate(clockwise))
+        }
+    };
+    ev_command.send(CommandEvent(command));
+}
+
+fn touches(
+    mut touch_ev: EventReader<TouchInput>,
+    mut res: ResMut<InputRes>,
+    mut ev_command: EventWriter<CommandEvent>
+) {
+    for ev in touch_ev.iter() {
+        match ev.phase {
+            TouchPhase::Started => {
+                res.swipe_start = Some(ev.position)
+            },
+            TouchPhase::Ended => {
+                if let Some(start) = res.swipe_start {
+                    let dx = match ev.position.x - start.x {
+                        a if a > SWIPE_THRESH => 1,
+                        a if a < -SWIPE_THRESH => -1,
+                        _ => 0
+                    };
+                    let dy = match ev.position.y - start.y {
+                        a if a > SWIPE_THRESH => -1,
+                        a if a < -SWIPE_THRESH => 1,
+                        _ => 0
+                    };
+                    send_dir_action(Vector2Int::new(dx, dy), &mut ev_command, res.as_ref());
+                }
+                res.swipe_start = None;
+            }
+            _ => {}
+        }
     }
 }
 
@@ -53,19 +129,20 @@ fn keys(
 ) {
     for (key, dir) in DIR_KEY_MAPPING {
         if !keys.just_pressed(key) { continue; }
-        let command = match res.mode {
-            TransformKind::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
-            TransformKind::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
-            TransformKind::TileRotate => {
-                let clockwise = match key {
-                    KeyCode::D => true,
-                    KeyCode::A => false,
-                    _ => continue
-                };
-                CommandType::TransformTiles(TileTransform::Rotate(clockwise))
-            }
-        };
-        ev_command.send(CommandEvent(command));
+        send_dir_action(dir, &mut ev_command, res.as_ref());
+        // let command = match res.mode {
+        //     TransformKind::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
+        //     TransformKind::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
+        //     TransformKind::TileRotate => {
+        //         let clockwise = match key {
+        //             KeyCode::D => true,
+        //             KeyCode::A => false,
+        //             _ => continue
+        //         };
+        //         CommandType::TransformTiles(TileTransform::Rotate(clockwise))
+        //     }
+        // };
+        // ev_command.send(CommandEvent(command));
         // only one command can be sent
         break;
     }
@@ -95,7 +172,8 @@ const DIGIT_KEYS: [(KeyCode, usize); 3] = [
 pub struct InputRes {
     pub selected: Option<Vector2Int>,
     pub mode: TransformKind,
-    pub show_help: bool
+    pub show_help: bool,
+    pub swipe_start: Option<Vec2>
 }
 impl InputRes {
     pub fn set_mode_by_kind(&mut self, kind: TransformKind, game_res: &GameRes) {

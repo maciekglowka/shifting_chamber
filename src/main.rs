@@ -34,6 +34,7 @@ fn main() {
                             globals::WINDOW_WIDTH,
                             globals::WINDOW_HEIGHT
                         ).into(),
+                        fit_canvas_to_parent: true,
                         ..Default::default()
                     }),
                     ..Default::default()
@@ -43,6 +44,7 @@ fn main() {
             )
         )
         .insert_resource(Msaa::Off)
+        .insert_resource(ClearColor(ui::BG_COLOR))
         .add_state::<states::GameState>()
         .add_plugin(actions::ActionPlugin)
         .add_plugin(audio::AudioPlugin)

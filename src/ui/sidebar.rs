@@ -2,7 +2,9 @@ use bevy::prelude::*;
 
 use crate::globals::{FONT_SIZE, SIDEBAR_WIDTH};
 use crate::input::InputRes;
-use crate::manager::GameRes;
+use crate::manager::{
+    CommandEvent, CommandType, GameRes
+};
 use crate::player::{
     Player,
     upgrades::TransformKind
@@ -11,7 +13,8 @@ use crate::pieces::components::{
     Health
 };
 
-const TILE_BUTTION_DIM: f32 = 64.;
+const TILE_BUTTON_DIM: f32 = 64.;
+const PAUSE_BUTTON_DIM: f32 = 204.;
 
 #[derive(Component)]
 pub struct Sidebar;
@@ -21,6 +24,11 @@ pub struct Sidebar;
 pub struct TileButton{
     pub pressed: bool,
     pub kind: TransformKind
+}
+
+#[derive(Component)]
+pub struct PauseButton {
+    pub pressed: bool
 }
 
 pub fn tile_button_click(
@@ -33,19 +41,41 @@ pub fn tile_button_click(
         match *interaction {
             Interaction::Clicked => {
                 button.pressed = true;
-                style.size = Size::all(Val::Px(TILE_BUTTION_DIM - 4.));
+                style.size = Size::all(Val::Px(TILE_BUTTON_DIM - 4.));
             },
-            Interaction::Hovered => {
+            Interaction::Hovered | Interaction::None => {
                 if button.pressed {
                     input_res.set_mode_by_kind(button.kind, game_res.as_ref());
                     ev_ui.send(super::ReloadUIEvent);
                 }
                 button.pressed = false;
-                style.size = Size::all(Val::Px(TILE_BUTTION_DIM));
+                style.size = Size::all(Val::Px(TILE_BUTTON_DIM));
             },
-            Interaction::None => {
+            // Interaction::None => {
+            //     button.pressed = false;
+            //     style.size = Size::all(Val::Px(TILE_BUTTON_DIM));
+            // },
+        }
+    }
+}
+
+pub fn pause_button_click(
+    mut ev_command: EventWriter<CommandEvent>,
+    mut interactions: Query<(&Interaction, &mut PauseButton, &mut Style), Changed<Interaction>>,
+) {
+    // this should be refactor into some common behaviour with tile buttons
+    for (interaction, mut button, mut style) in interactions.iter_mut() {
+        match *interaction {
+            Interaction::Clicked => {
+                button.pressed = true;
+                style.size = Size::new(Val::Px(PAUSE_BUTTON_DIM -4.), Val::Px(TILE_BUTTON_DIM - 4.));
+            },
+            Interaction::Hovered | Interaction::None => {
+                if button.pressed {
+                    ev_command.send(CommandEvent(CommandType::PlayerWait));
+                }
                 button.pressed = false;
-                style.size = Size::all(Val::Px(TILE_BUTTION_DIM));
+                style.size = Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM - 4.));
             },
         }
     }
@@ -83,7 +113,7 @@ pub fn update_sidebar(
             style: Style {
                 size: Size::all(Val::Percent(100.)),
                 flex_direction: FlexDirection::Column,
-                padding: UiRect{ top: Val::Px(80.), left: Val::Px(32.), ..Default::default()},
+                padding: UiRect{ top: Val::Px(20.), left: Val::Px(24.), ..Default::default()},
                 align_items: AlignItems::FlexStart,
                 justify_content: JustifyContent::FlexStart,
                 ..Default::default()
@@ -113,17 +143,18 @@ pub fn update_sidebar(
                     Some("O".repeat((health.max - health.value) as usize))
                 );
             };
-            for idx in 1..game_res.tile_transforms.len() + 1 {
-                let kind = InputRes::get_transform_by_idx(idx);
-                if !game_res.tile_transforms[&kind] { continue }
-                spawn_tile_button(
-                    parent,
-                    assets.as_ref(),
-                    input_res.mode == kind,
-                    idx,
-                    kind
-                );
-            }
+            // for idx in 1..game_res.tile_transforms.len() + 1 {
+            //     let kind = InputRes::get_transform_by_idx(idx);
+            //     if !game_res.tile_transforms[&kind] { continue }
+            //     spawn_tile_button(
+            //         parent,
+            //         assets.as_ref(),
+            //         input_res.mode == kind,
+            //         idx,
+            //         kind
+            //     );
+            // }
+            spawn_controls(parent, input_res.as_ref(), game_res.as_ref(), assets.as_ref());
         })
         .id();
     commands.entity(container).add_child(content);
@@ -137,6 +168,53 @@ fn clear_sidebar(
         commands.entity(entity)
             .despawn_recursive();
     }
+}
+
+fn spawn_controls(
+    parent: &mut ChildBuilder,
+    input_res: &InputRes,
+    game_res: &GameRes,
+    assets: &super::UiAssets,
+) {
+    parent.spawn(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Percent(100.), Val::Px(192.)),
+                flex_direction: FlexDirection::Row,
+                flex_wrap: FlexWrap::Wrap,
+                // padding: UiRect{ top: Val::Px(20.), left: Val::Px(32.), ..Default::default()},
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::FlexStart,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .with_children(|parent| {
+                // pause button
+                parent.spawn((
+                    PauseButton { pressed: false },
+                    ButtonBundle {
+                        style: Style {
+                            size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
+                            margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(24.), ..Default::default() },
+                            ..Default::default()
+                        },
+                        image: assets.pause_button.clone().into(),
+                        ..Default::default()
+                    }));
+
+                // tile buttons
+                for idx in 1..game_res.tile_transforms.len() + 1 {
+                    let kind = InputRes::get_transform_by_idx(idx);
+                    if !game_res.tile_transforms[&kind] { continue }
+                    spawn_tile_button(
+                        parent,
+                        assets,
+                        input_res.mode == kind,
+                        idx,
+                        kind
+                    );
+                }
+            });
 }
 
 fn spawn_text(
@@ -207,10 +285,10 @@ fn spawn_tile_button(
     parent.spawn(
         NodeBundle {
             style: Style {
-                size: Size { height: Val::Px(TILE_BUTTION_DIM), ..Default::default() },
+                size: Size::new(Val::Px(TILE_BUTTON_DIM + 4.), Val::Px(TILE_BUTTON_DIM)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                flex_direction: FlexDirection::Row,
+                flex_direction: FlexDirection::Column,
                 margin: UiRect{ top: Val::Px(20.), ..Default::default() },
                 ..Default::default()
             },
@@ -222,8 +300,8 @@ fn spawn_tile_button(
                 TileButton{ pressed: false, kind },
                 ButtonBundle {
                     style: Style {
-                        size: Size::all(Val::Px(TILE_BUTTION_DIM)),
-                        margin: UiRect::right(Val::Px(8.)),
+                        size: Size::all(Val::Px(TILE_BUTTON_DIM)),
+                        margin: UiRect::bottom(Val::Px(4.)),
                         ..Default::default()
                     },
                     image: assets.tile_buttons[&kind].clone().into(),

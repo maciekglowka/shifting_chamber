@@ -56,10 +56,18 @@ impl Plugin for ManagerPlugin {
     }
 }
 
+fn start_tutorial(
+    mut next_state: ResMut<NextState<GameState>>,
+    mut res: ResMut<GameRes>
+) {
+    res.is_tutorial = true;
+}
+
 fn start_game(
     mut next_state: ResMut<NextState<GameState>>,
     mut res: ResMut<GameRes>
 ) {
+    res.is_tutorial = false;
     res.level = 0;
     res.max_ap = 1;
     res.tile_transforms = HashMap::from_iter(
@@ -97,17 +105,6 @@ fn map_end(
         next_state.set(GameState::MapInit);
     }
 }
-
-// pub fn turn_end(
-//     mut ev_command: EventReader<CommandEvent>,
-//     mut next_state: ResMut<NextState<GameState>>
-// ) {
-//     for ev in ev_command.iter() {
-//         if let CommandType::TurnEnd = ev.0 {
-//             next_state.set(GameState::TurnEnd);
-//         }
-//     }
-// }
 
 pub fn update_state(
     mut ev_command: EventReader<CommandEvent>,
@@ -183,5 +180,6 @@ pub struct GameRes {
     pub ap_stacking: bool,
     pub possible_upgrades: HashSet<UpgradeKind>,
     // actions with 'true' value are enabled for the player
-    pub tile_transforms: HashMap<TransformKind, bool>
+    pub tile_transforms: HashMap<TransformKind, bool>,
+    pub is_tutorial: bool
 }

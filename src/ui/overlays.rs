@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use crate::globals::{OVERLAY_Z, TILE_SIZE};
-use crate::graphics::{get_world_position, PieceRenderer};
-use crate::input::InputRes;
+use crate::graphics::PieceRenderer;
 use crate::pieces::{
     components::{Health, Range, Walking},
     PieceRes

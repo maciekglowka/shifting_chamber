@@ -24,7 +24,7 @@ pub fn menu_click(
                 button.0 = true;
                 style.size = Size { width: Val::Px(BUTTON_WIDTH - 8.), height: Val::Px(BUTTON_HEIGHT - 8.)};
             },
-            Interaction::Hovered => {
+            Interaction::Hovered | Interaction::None => {
                 if button.0 {
                     ev_command.send(
                         CommandEvent(CommandType::Upgrade(button.1.clone()))
@@ -32,10 +32,10 @@ pub fn menu_click(
                 }
                 button.0 = false;
             },
-            Interaction::None => {
-                button.0 = false;
-                style.size = Size { width: Val::Px(BUTTON_WIDTH), height: Val::Px(BUTTON_HEIGHT)};
-            },
+            // Interaction::None => {
+            //     button.0 = false;
+            //     style.size = Size { width: Val::Px(BUTTON_WIDTH), height: Val::Px(BUTTON_HEIGHT)};
+            // },
         }
     }
 }
