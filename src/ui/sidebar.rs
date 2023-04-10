@@ -75,7 +75,7 @@ pub fn pause_button_click(
                     ev_command.send(CommandEvent(CommandType::PlayerWait));
                 }
                 button.pressed = false;
-                style.size = Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM - 4.));
+                style.size = Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM));
             },
         }
     }
@@ -191,16 +191,29 @@ fn spawn_controls(
         .with_children(|parent| {
                 // pause button
                 parent.spawn((
-                    PauseButton { pressed: false },
-                    ButtonBundle {
-                        style: Style {
-                            size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
-                            margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(24.), ..Default::default() },
+                        NodeBundle {
+                            style: Style {
+                                size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
+                                margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(24.), ..Default::default() },
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                ..Default::default()
+                            },
                             ..Default::default()
-                        },
-                        image: assets.pause_button.clone().into(),
-                        ..Default::default()
-                    }));
+                        }
+                    )).with_children(|parent| {
+                        parent.spawn((
+                            PauseButton { pressed: false },
+                            ButtonBundle {
+                                style: Style {
+                                    size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
+                                    // margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(24.), ..Default::default() },
+                                    ..Default::default()
+                                },
+                                image: assets.pause_button.clone().into(),
+                                ..Default::default()
+                            }));
+                    });
 
                 // tile buttons
                 for idx in 1..game_res.tile_transforms.len() + 1 {
@@ -285,7 +298,7 @@ fn spawn_tile_button(
     parent.spawn(
         NodeBundle {
             style: Style {
-                size: Size::new(Val::Px(TILE_BUTTON_DIM + 4.), Val::Px(TILE_BUTTON_DIM)),
+                size: Size::new(Val::Px(TILE_BUTTON_DIM + 5.), Val::Px(TILE_BUTTON_DIM)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
@@ -301,7 +314,7 @@ fn spawn_tile_button(
                 ButtonBundle {
                     style: Style {
                         size: Size::all(Val::Px(TILE_BUTTON_DIM)),
-                        margin: UiRect::bottom(Val::Px(4.)),
+                        margin: UiRect::bottom(Val::Px(8.)),
                         ..Default::default()
                     },
                     image: assets.tile_buttons[&kind].clone().into(),
