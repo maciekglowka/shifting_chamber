@@ -115,8 +115,8 @@ pub fn load_assets(
     let title = asset_server.load("ui/title.png");
     asset_list.0.push(title.clone_untyped());
 
-    let pause_handle = asset_server.load("ui/pause_button.png");
-    asset_list.0.push(pause_handle.clone_untyped());
+    let wide_handle = asset_server.load("ui/wide_button.png");
+    asset_list.0.push(wide_handle.clone_untyped());
 
     commands.insert_resource(
         UiAssets { 
@@ -126,7 +126,7 @@ pub fn load_assets(
             button_texture: button_handle,
             tile_buttons: tiles,
             title_screen: title,
-            pause_button: pause_handle
+            wide_button: wide_handle
         }
     );
 }
@@ -138,7 +138,7 @@ pub struct UiAssets {
     overlay_texture: Handle<TextureAtlas>,
     button_texture: Handle<Image>,
     tile_buttons: HashMap<TransformKind, Handle<Image>>,
-    pause_button: Handle<Image>,
+    wide_button: Handle<Image>,
     title_screen: Handle<Image>
 }
 

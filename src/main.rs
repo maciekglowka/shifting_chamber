@@ -30,10 +30,6 @@ fn main() {
             DefaultPlugins.set(
                 WindowPlugin {
                     primary_window: Some(Window {
-                        // resolution: (
-                        //     globals::WINDOW_WIDTH,
-                        //     globals::WINDOW_HEIGHT
-                        // ).into(),
                         fit_canvas_to_parent: true,
                         ..Default::default()
                     }),

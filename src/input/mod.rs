@@ -1,5 +1,8 @@
 use bevy::{
-    input::touch::TouchPhase,
+    input::{
+        keyboard::KeyboardInput,
+        touch::TouchPhase
+    },
     prelude::*,
 };
 
@@ -32,39 +35,40 @@ fn reset_input(mut res: ResMut<InputRes>) {
     res.mode = TransformKind::default();
 }
 
+fn any_input(
+    key_ev: &mut EventReader<KeyboardInput>,
+    touch_ev: &mut EventReader<TouchInput>,
+) -> bool {
+    for ev in key_ev.iter() {
+        if let bevy::input::ButtonState::Released = ev.state {
+            return true
+        }
+    }
+    for ev in touch_ev.iter() {
+        if let TouchPhase::Ended = ev.phase {
+            return true
+        }
+    }
+    false
+}
+
 fn keys_title(
-    keys: ResMut<Input<KeyCode>>,
+    mut key_ev: EventReader<KeyboardInput>,
     mut touch_ev: EventReader<TouchInput>,
     mut ev_command: EventWriter<CommandEvent>
 ) {
-    if keys.just_pressed(KeyCode::Space) {
+    if any_input(&mut key_ev, &mut touch_ev) {
         ev_command.send(CommandEvent(CommandType::Start));
-    }
-    for ev in touch_ev.iter() {
-        match ev.phase {
-            TouchPhase::Ended => {
-                ev_command.send(CommandEvent(CommandType::Start));
-            }
-            _ => {}
-        }
     }
 }
 
 fn keys_endgame(
-    keys: ResMut<Input<KeyCode>>,
+    mut key_ev: EventReader<KeyboardInput>,
     mut touch_ev: EventReader<TouchInput>,
     mut ev_command: EventWriter<CommandEvent>
 ) {
-    if keys.just_pressed(KeyCode::Space) {
+    if any_input(&mut key_ev, &mut touch_ev) {
         ev_command.send(CommandEvent(CommandType::Restart));
-    }
-    for ev in touch_ev.iter() {
-        match ev.phase {
-            TouchPhase::Ended => {
-                ev_command.send(CommandEvent(CommandType::Restart));
-            }
-            _ => {}
-        }
     }
 }
 
@@ -130,19 +134,6 @@ fn keys(
     for (key, dir) in DIR_KEY_MAPPING {
         if !keys.just_pressed(key) { continue; }
         send_dir_action(dir, &mut ev_command, res.as_ref());
-        // let command = match res.mode {
-        //     TransformKind::TileShift => CommandType::TransformTiles(TileTransform::Shift(dir)),
-        //     TransformKind::TileSwitch => CommandType::TransformTiles(TileTransform::Switch(dir)),
-        //     TransformKind::TileRotate => {
-        //         let clockwise = match key {
-        //             KeyCode::D => true,
-        //             KeyCode::A => false,
-        //             _ => continue
-        //         };
-        //         CommandType::TransformTiles(TileTransform::Rotate(clockwise))
-        //     }
-        // };
-        // ev_command.send(CommandEvent(command));
         // only one command can be sent
         break;
     }

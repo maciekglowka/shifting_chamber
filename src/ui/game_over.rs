@@ -38,7 +38,7 @@ pub fn show_menu(
             });
             parent.spawn(TextBundle {
                 text: Text::from_section(
-                    "(press Space Bar to continue)",
+                    "(press key or tap to continue)",
                     TextStyle {
                         color: Color::WHITE,
                         font: assets.font.clone(),

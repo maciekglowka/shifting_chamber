@@ -125,7 +125,7 @@ pub fn update_sidebar(
         ))
         .with_children(|parent| {
             spawn_text(parent, assets.as_ref(), "Level ".to_string(), Some((format!("{}", game_res.level), Color::ORANGE_RED)), None);
-            spawn_text(parent, assets.as_ref(), "[H] for help".to_string(), None, None);
+            // spawn_text(parent, assets.as_ref(), "[H] for help".to_string(), None, None);
             spawn_text(parent, assets.as_ref(), String::new(), None, None);
             spawn_text(
                 parent,
@@ -143,17 +143,6 @@ pub fn update_sidebar(
                     Some("O".repeat((health.max - health.value) as usize))
                 );
             };
-            // for idx in 1..game_res.tile_transforms.len() + 1 {
-            //     let kind = InputRes::get_transform_by_idx(idx);
-            //     if !game_res.tile_transforms[&kind] { continue }
-            //     spawn_tile_button(
-            //         parent,
-            //         assets.as_ref(),
-            //         input_res.mode == kind,
-            //         idx,
-            //         kind
-            //     );
-            // }
             spawn_controls(parent, input_res.as_ref(), game_res.as_ref(), assets.as_ref());
         })
         .id();
@@ -189,32 +178,6 @@ fn spawn_controls(
             ..Default::default()
         })
         .with_children(|parent| {
-                // pause button
-                parent.spawn((
-                        NodeBundle {
-                            style: Style {
-                                size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
-                                margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(24.), ..Default::default() },
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                ..Default::default()
-                            },
-                            ..Default::default()
-                        }
-                    )).with_children(|parent| {
-                        parent.spawn((
-                            PauseButton { pressed: false },
-                            ButtonBundle {
-                                style: Style {
-                                    size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
-                                    // margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(24.), ..Default::default() },
-                                    ..Default::default()
-                                },
-                                image: assets.pause_button.clone().into(),
-                                ..Default::default()
-                            }));
-                    });
-
                 // tile buttons
                 for idx in 1..game_res.tile_transforms.len() + 1 {
                     let kind = InputRes::get_transform_by_idx(idx);
@@ -227,6 +190,46 @@ fn spawn_controls(
                         kind
                     );
                 }
+                // pause button
+                parent.spawn((
+                        NodeBundle {
+                            style: Style {
+                                size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
+                                margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(40.), ..Default::default() },
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        }
+                    )).with_children(|parent| {
+                        parent.spawn((
+                            PauseButton { pressed: false },
+                            ButtonBundle {
+                                style: Style {
+                                    size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    ..Default::default()
+                                },
+                                image: assets.wide_button.clone().into(),
+                                ..Default::default()
+                            }))
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle {
+                                        text: Text::from_section(
+                                            "Wait",
+                                            TextStyle {
+                                                color: Color::WHITE,
+                                                font: assets.font.clone(),
+                                                font_size: FONT_SIZE,
+                                                ..Default::default()
+                                            }
+                                        ),
+                                        ..Default::default()
+                                    });
+                            });
+                    });
             });
 }
 
@@ -298,11 +301,11 @@ fn spawn_tile_button(
     parent.spawn(
         NodeBundle {
             style: Style {
-                size: Size::new(Val::Px(TILE_BUTTON_DIM + 5.), Val::Px(TILE_BUTTON_DIM)),
+                size: Size::new(Val::Px(TILE_BUTTON_DIM + 6.), Val::Px(TILE_BUTTON_DIM)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
-                margin: UiRect{ top: Val::Px(20.), ..Default::default() },
+                margin: UiRect{ top: Val::Px(40.), ..Default::default() },
                 ..Default::default()
             },
             ..Default::default()
