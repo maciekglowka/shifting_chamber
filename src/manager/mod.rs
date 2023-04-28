@@ -51,7 +51,7 @@ impl Plugin for ManagerPlugin {
                 (player_input::transform_tiles, player_input::wait)
                 .in_set(OnUpdate(GameState::PlayerInput)))
             .add_system(player_input::upgrade.in_set(OnUpdate(GameState::Upgrade)))
-            .add_system(update_state);
+            .add_system(update_state.in_base_set(CoreSet::Last));
 
     }
 }
