@@ -10,6 +10,7 @@ mod game_over;
 mod game_win;
 mod help_menu;
 mod main_menu;
+mod marker;
 mod overlays;
 mod sidebar;
 mod upgrade_menu;
@@ -41,10 +42,14 @@ impl Plugin for UIPlugin {
             .add_system(upgrade_menu::menu_click.in_set(OnUpdate(GameState::Upgrade)))
             .add_system(game_over::show_menu.in_schedule(OnEnter(GameState::GameOver)))
             .add_system(game_over::clear_menu.in_schedule(OnExit(GameState::GameOver)))
+            .add_system(game_over::menu_click.in_set(OnUpdate(GameState::GameOver)))
             .add_system(game_win::show_menu.in_schedule(OnEnter(GameState::GameWin)))
             .add_system(game_win::clear_menu.in_schedule(OnExit(GameState::GameWin)))
             .add_system(main_menu::show_menu.in_schedule(OnEnter(GameState::MainMenu)))
-            .add_system(main_menu::clear_menu.in_schedule(OnExit(GameState::MainMenu)));
+            .add_system(main_menu::clear_menu.in_schedule(OnExit(GameState::MainMenu)))
+            .add_system(marker::spawn_marker.in_schedule(OnExit(GameState::MapInit)))
+            .add_system(marker::update_marker.in_set(OnUpdate(GameState::PlayerInput)))
+            .add_system(marker::remove_marker.in_schedule(OnExit(GameState::PlayerInput)));
     }  
 }
 

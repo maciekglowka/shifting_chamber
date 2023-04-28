@@ -121,10 +121,11 @@ pub fn update_sidebar(
             background_color: super::BG_COLOR.into(),
             // background_color: Color::Rgba { red: 0.18, green: 0.3, blue: 0.42, alpha: 1. }.into(),
             ..Default::default()
-        }  
+        }
         ))
         .with_children(|parent| {
             spawn_text(parent, assets.as_ref(), "Level ".to_string(), Some((format!("{}", game_res.level), Color::ORANGE_RED)), None);
+            spawn_text(parent, assets.as_ref(), "Score ".to_string(), Some((format!("{}", game_res.score), Color::ORANGE_RED)), None);
             // spawn_text(parent, assets.as_ref(), "[H] for help".to_string(), None, None);
             spawn_text(parent, assets.as_ref(), String::new(), None, None);
             spawn_text(

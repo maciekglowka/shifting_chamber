@@ -26,7 +26,6 @@ impl Plugin for InputPlugin {
             .add_system(keys.in_set(OnUpdate(GameState::PlayerInput)))
             .add_system(touches.in_set(OnUpdate(GameState::PlayerInput)))
             .add_system(keys_title.in_set(OnUpdate(GameState::MainMenu)))
-            .add_system(keys_endgame.in_set(OnUpdate(GameState::GameOver)))
             .add_system(keys_endgame.in_set(OnUpdate(GameState::GameWin)));
     }
 }
@@ -68,7 +67,7 @@ fn keys_endgame(
     mut ev_command: EventWriter<CommandEvent>
 ) {
     if any_input(&mut key_ev, &mut touch_ev) {
-        ev_command.send(CommandEvent(CommandType::Restart));
+        ev_command.send(CommandEvent(CommandType::RestartGame));
     }
 }
 
@@ -151,9 +150,11 @@ fn keys(
     }
 }
 
-const DIR_KEY_MAPPING: [(KeyCode, Vector2Int); 4] = [
+const DIR_KEY_MAPPING: [(KeyCode, Vector2Int); 8] = [
     (KeyCode::W, Vector2Int::UP), (KeyCode::S, Vector2Int::DOWN),
     (KeyCode::A, Vector2Int::LEFT), (KeyCode::D, Vector2Int::RIGHT),
+    (KeyCode::Left, Vector2Int::LEFT), (KeyCode::Right, Vector2Int::RIGHT),
+    (KeyCode::Up, Vector2Int::UP), (KeyCode::Down, Vector2Int::DOWN),
 ];
 const DIGIT_KEYS: [(KeyCode, usize); 3] = [
     (KeyCode::Key1, 1), (KeyCode::Key2, 2), (KeyCode::Key3, 3)

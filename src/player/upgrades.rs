@@ -5,7 +5,8 @@ pub enum UpgradeKind {
     TileTransform(TransformKind),
     HealPlayer,
     IncreaseAP,
-    IncreaseHP
+    IncreaseHP,
+    Skip
 }
 impl UpgradeKind {
     pub fn is_single(&self) -> bool {
@@ -19,7 +20,8 @@ impl UpgradeKind {
             Self::HealPlayer => "Heal 3HP",
             Self::IncreaseAP => "Increase Max AP +1",
             Self::IncreaseHP => "Increase Max HP +1",
-            Self::TileTransform(a) => a.to_str()
+            Self::TileTransform(a) => a.to_str(),
+            Self::Skip => "Skip"
         }
     }
 }

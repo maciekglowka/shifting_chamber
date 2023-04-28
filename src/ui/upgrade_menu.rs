@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::globals::{FONT_SIZE, UPGRADE_CHOICES};
+use crate::globals::{FONT_SIZE, UPGRADE_CHOICES, UPGRADE_PENALTY};
 use crate::manager::{CommandEvent, CommandType};
 use crate::player::upgrades::UpgradeKind;
 
@@ -31,11 +31,7 @@ pub fn menu_click(
                     );
                 }
                 button.0 = false;
-            },
-            // Interaction::None => {
-            //     button.0 = false;
-            //     style.size = Size { width: Val::Px(BUTTON_WIDTH), height: Val::Px(BUTTON_HEIGHT)};
-            // },
+            }
         }
     }
 }
@@ -75,7 +71,7 @@ pub fn show_menu(
                 .with_children(|parent| {
                     parent.spawn(TextBundle {
                         text: Text::from_section(
-                            "Choose your upgrade:",
+                            format!("Choose your upgrade (-{} score):", UPGRADE_PENALTY),
                             TextStyle {
                                 color: Color::WHITE,
                                 font: assets.font.clone(),
@@ -93,6 +89,7 @@ pub fn show_menu(
                     for choice in game_res.possible_upgrades.iter().choose_multiple(&mut rng, UPGRADE_CHOICES) {
                         add_button(parent, assets.as_ref(), choice.to_str(), *choice);
                     }
+                    add_button(parent, assets.as_ref(), UpgradeKind::Skip.to_str(), UpgradeKind::Skip);
                 });
         });
 }

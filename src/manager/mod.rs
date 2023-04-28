@@ -4,7 +4,11 @@ use std::{
     collections::{HashMap, HashSet}
 };
 
-use crate::globals::UPGRADE_EVERY_LEVELS;
+use crate::globals::{
+    UPGRADE_EVERY_LEVELS,
+    LEVEL_BONUS,
+    RESTART_PENALTY
+};
 use crate::pieces::components::Walking;
 use crate::player::{
     Player,
@@ -23,7 +27,8 @@ pub enum CommandType {
     TurnEnd,
     Upgrade(UpgradeKind),
     Start,
-    Restart,
+    RestartGame,
+    RestartLevel
 }
 
 pub struct CommandEvent(pub CommandType);
@@ -56,19 +61,12 @@ impl Plugin for ManagerPlugin {
     }
 }
 
-fn start_tutorial(
-    mut next_state: ResMut<NextState<GameState>>,
-    mut res: ResMut<GameRes>
-) {
-    res.is_tutorial = true;
-}
-
 fn start_game(
     mut next_state: ResMut<NextState<GameState>>,
     mut res: ResMut<GameRes>
 ) {
-    res.is_tutorial = false;
-    res.level = 0;
+    res.score = 0;
+    res.level = 1;
     res.max_ap = 1;
     res.tile_transforms = HashMap::from_iter(
         get_all_transforms().iter().map(|a| (*a, false))
@@ -85,21 +83,22 @@ fn start_map(
     mut next_state: ResMut<NextState<GameState>>,
     mut res: ResMut<GameRes>
 ) {
-    res.level += 1;
     res.ap = 0;
     next_state.set(GameState::TurnStart);
 }
 
 fn map_end(
     mut next_state: ResMut<NextState<GameState>>,
-    res: Res<GameRes>,
+    mut res: ResMut<GameRes>,
     data_assets: Res<crate::data::DataAssets>
 ) {
+    res.level += 1;
+    res.score += LEVEL_BONUS;
     if data_assets.level_list.len() == res.level as usize {
         next_state.set(GameState::GameWin);
         return;
     }
-    if res.level % UPGRADE_EVERY_LEVELS == 0 {
+    if res.level % UPGRADE_EVERY_LEVELS == 1 {
         next_state.set(GameState::Upgrade);
     } else {
         next_state.set(GameState::MapInit);
@@ -123,7 +122,12 @@ pub fn update_state(
             next_state.set(GameState::GameInit);
             break;
         }
-        if let CommandType::Restart = ev.0 {
+        if let CommandType::RestartLevel = ev.0 {
+            res.score -= RESTART_PENALTY;
+            next_state.set(GameState::MapInit);
+            break;
+        }
+        if let CommandType::RestartGame = ev.0 {
             next_state.set(GameState::MainMenu);
             break;
         }
@@ -179,7 +183,7 @@ pub struct GameRes {
     pub max_ap: u32,
     pub ap_stacking: bool,
     pub possible_upgrades: HashSet<UpgradeKind>,
+    pub score: u32,
     // actions with 'true' value are enabled for the player
-    pub tile_transforms: HashMap<TransformKind, bool>,
-    pub is_tutorial: bool
+    pub tile_transforms: HashMap<TransformKind, bool>
 }

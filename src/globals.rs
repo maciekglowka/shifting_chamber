@@ -21,3 +21,8 @@ pub const FONT_SIZE: f32 = 16.;
 pub const MAX_ANIMATION_DIST: f32 = 1.;
 
 pub const BUBBLE_LIFE: f32 = 2.;
+
+// SCORE
+pub const LEVEL_BONUS: u32 = 5;
+pub const RESTART_PENALTY: u32 = 5;
+pub const UPGRADE_PENALTY: u32 = 1;

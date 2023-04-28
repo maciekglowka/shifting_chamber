@@ -1,11 +1,14 @@
 use bevy::prelude::*;
 
+use crate::manager::GameRes;
+
 #[derive(Component)]
 pub struct GameWinMenu;
 
 pub fn show_menu(
     mut commands: Commands,
-    assets: Res<super::UiAssets>
+    assets: Res<super::UiAssets>,
+    game_res: Res<GameRes>
 ) {
     commands.spawn((
         GameWinMenu,
@@ -31,6 +34,18 @@ pub fn show_menu(
                         color: Color::WHITE,
                         font: assets.font.clone(),
                         font_size: 32.,
+                        ..Default::default()
+                    }
+                ),
+                ..Default::default()
+            });
+            parent.spawn(TextBundle {
+                text: Text::from_section(
+                    &format!("Final Score: {}", game_res.score),
+                    TextStyle {
+                        color: Color::WHITE,
+                        font: assets.font.clone(),
+                        font_size: 16.,
                         ..Default::default()
                     }
                 ),

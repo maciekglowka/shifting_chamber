@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use std::cmp;
 
 use crate::actions::{ActionEvent, ActionKind};
+use crate::globals::UPGRADE_PENALTY;
 use crate::pieces::components;
 use crate::player::{
     Player,
@@ -70,12 +71,15 @@ pub fn upgrade(
     for ev in ev_command.iter() {
         if let CommandType::Upgrade(kind) = ev.0 {
             let Ok(player) = player_query.get_single() else { return };
-            info!("Upgrading {:?}", kind);
+            if kind != UpgradeKind::Skip {
+                res.score -= UPGRADE_PENALTY;
+            }
             match kind {
                 UpgradeKind::HealPlayer => ev_action.send(ActionEvent(ActionKind::Heal(player, 3))),
                 UpgradeKind::IncreaseAP => res.max_ap += 1,
                 UpgradeKind::IncreaseHP => ev_action.send(ActionEvent(ActionKind::IncreaseHP(player, 1))),
-                UpgradeKind::TileTransform(t) => { res.tile_transforms.insert(t, true); }
+                UpgradeKind::TileTransform(t) => { res.tile_transforms.insert(t, true); },
+                UpgradeKind::Skip => ()
             };
             if kind.is_single() {
                 res.possible_upgrades.remove(&kind);
