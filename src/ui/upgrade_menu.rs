@@ -71,7 +71,7 @@ pub fn show_menu(
                 .with_children(|parent| {
                     parent.spawn(TextBundle {
                         text: Text::from_section(
-                            format!("Choose your upgrade (-{} score):", UPGRADE_PENALTY),
+                            format!("Choose your upgrade (cost: {} score):", UPGRADE_PENALTY),
                             TextStyle {
                                 color: Color::WHITE,
                                 font: assets.font.clone(),
@@ -126,16 +126,20 @@ fn add_button(
             node.spawn((
                 UpgradeButton(false, action),
                 ButtonBundle {
-                style: Style {
-                    size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect::all(Val::Px(10.)),
+                    style: Style {
+                        size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        margin: UiRect::all(Val::Px(10.)),
+                        ..Default::default()
+                    },
+                    image: match action {
+                        UpgradeKind::Skip => assets.button_skip_texture.clone().into(),
+                        _ => assets.button_texture.clone().into()
+                    },
                     ..Default::default()
-                },
-                image: assets.button_texture.clone().into(),
-                ..Default::default()
-            }))
+                }
+            ))
             .with_children(|button| {
                 button.spawn(TextBundle {
                     text: Text::from_section(

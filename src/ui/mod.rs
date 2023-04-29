@@ -105,6 +105,9 @@ pub fn load_assets(
     let button_handle = asset_server.load("ui/button.png");
     asset_list.0.push(button_handle.clone_untyped());
 
+    let button_skip_handle = asset_server.load("ui/button_skip.png");
+    asset_list.0.push(button_skip_handle.clone_untyped());
+
     let shift = asset_server.load("ui/shift.png");
     asset_list.0.push(shift.clone_untyped());
     let switch = asset_server.load("ui/switch.png");
@@ -129,6 +132,7 @@ pub fn load_assets(
             pico_font: pico_handle,
             overlay_texture: overlay_handle,
             button_texture: button_handle,
+            button_skip_texture: button_skip_handle,
             tile_buttons: tiles,
             title_screen: title,
             wide_button: wide_handle
@@ -142,6 +146,7 @@ pub struct UiAssets {
     pico_font: Handle<TextureAtlas>,
     overlay_texture: Handle<TextureAtlas>,
     button_texture: Handle<Image>,
+    button_skip_texture: Handle<Image>,
     tile_buttons: HashMap<TransformKind, Handle<Image>>,
     wide_button: Handle<Image>,
     title_screen: Handle<Image>
