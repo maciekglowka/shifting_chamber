@@ -20,12 +20,23 @@ impl Plugin for PlayerPlugin {
                 (spawn_player, pin_player)
                 .in_schedule(OnExit(GameState::MapInit))
             )
-            .add_system(unpin_player.in_schedule(OnEnter(GameState::MapEnd)));
+            .add_system(unpin_player.in_schedule(OnEnter(GameState::MapEnd)))
+            .add_system(unpin_player.in_schedule(OnEnter(GameState::GameOver)))
+            .add_system(despawn_player.in_schedule(OnEnter(GameState::MainMenu)));
     }
 }
 
 #[derive(Component)]
 pub struct Player;
+
+fn despawn_player(
+    mut commands: Commands,
+    player_query: Query<Entity, With<Player>>
+) {
+    for entity in player_query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
 
 fn spawn_player(
     mut commands: Commands,

@@ -9,7 +9,7 @@ use crate::globals::{
     LEVEL_BONUS,
     RESTART_PENALTY
 };
-use crate::pieces::components::Walking;
+use crate::pieces::components::{Health, Walking};
 use crate::player::{
     Player,
     upgrades::{UpgradeKind, TransformKind, get_all_transforms}
@@ -81,9 +81,13 @@ fn start_game(
 
 fn start_map(
     mut next_state: ResMut<NextState<GameState>>,
-    mut res: ResMut<GameRes>
+    mut res: ResMut<GameRes>,
+    health_query: Query<&Health, With<Player>>
 ) {
     res.ap = 0;
+    if let Ok(health) = health_query.get_single() {
+        res.level_starting_hp = health.value;
+    }
     next_state.set(GameState::TurnStart);
 }
 
@@ -109,9 +113,10 @@ pub fn update_state(
     mut ev_command: EventReader<CommandEvent>,
     game_state: Res<State<GameState>>,
     mut next_state: ResMut<NextState<GameState>>,
-    player_query: Query<&Player>,
+    // player_query: Query<&Player>,
     npc_query: Query<&Walking>,
-    mut res: ResMut<GameRes>
+    mut res: ResMut<GameRes>,
+    mut health_query: Query<&mut Health, With<Player>>
 ) {
     for ev in ev_command.iter() {
         if let CommandType::TurnEnd = ev.0 {
@@ -124,6 +129,10 @@ pub fn update_state(
         }
         if let CommandType::RestartLevel = ev.0 {
             res.score -= RESTART_PENALTY;
+            if let Ok(mut health) = health_query.get_single_mut() {
+                // restart players HP to level's initial
+                health.value = res.level_starting_hp;
+            }
             next_state.set(GameState::MapInit);
             break;
         }
@@ -157,15 +166,16 @@ pub fn update_state(
                     next_state.set(GameState::NPCAction);
                 },
                 GameState::TurnEnd => {
-                    match player_query.get_single() {
-                        Ok(_) => {
+                    let Ok(player_health) = health_query.get_single() else { break };
+                    match player_health.value {
+                        a if a == 0 => { next_state.set(GameState::GameOver) },
+                        _ => {
                             if npc_query.iter().len() == 0 {
                                 next_state.set(GameState::MapEnd);
                             } else {
                                 next_state.set(GameState::TurnStart);
                             }          
                         },
-                        _ => { next_state.set(GameState::GameOver) },
                     }
                 },
                 _ => ()
@@ -184,6 +194,7 @@ pub struct GameRes {
     pub ap_stacking: bool,
     pub possible_upgrades: HashSet<UpgradeKind>,
     pub score: u32,
+    pub level_starting_hp: u32,
     // actions with 'true' value are enabled for the player
     pub tile_transforms: HashMap<TransformKind, bool>
 }

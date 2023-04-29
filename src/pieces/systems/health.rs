@@ -4,6 +4,7 @@ use crate::tiles::Tile;
 
 use super::super::{PieceEvent, PieceEventKind};
 use super::super::components::Health;
+use crate::player::Player;
 
 pub fn init_health(
     mut query: Query<&mut Health, Added<Health>>
@@ -15,7 +16,7 @@ pub fn init_health(
 
 pub fn kill_units(
     mut commands: Commands,
-    health_query: Query<(Entity, &Health, Option<&Parent>)>,
+    health_query: Query<(Entity, &Health, Option<&Parent>), Without<Player>>,
     tile_query: Query<&Tile>,
     mut ev_piece: EventWriter<PieceEvent>
 ) {

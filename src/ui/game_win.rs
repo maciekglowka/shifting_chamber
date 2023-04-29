@@ -29,7 +29,7 @@ pub fn show_menu(
         .with_children(|parent| {
             parent.spawn(TextBundle {
                 text: Text::from_section(
-                    "DARK LORD IS DEFEATED!",
+                    "THE DARK LORD IS DEFEATED!",
                     TextStyle {
                         color: Color::WHITE,
                         font: assets.font.clone(),
