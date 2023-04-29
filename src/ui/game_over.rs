@@ -88,7 +88,7 @@ pub fn show_menu(
                 add_button(
                     parent,
                     assets.as_ref(),
-                    &format!("Restart Level: -{} score", RESTART_PENALTY),
+                    &format!("Restart Level (cost: {}score)", RESTART_PENALTY),
                     CommandType::RestartLevel
                 );
             }

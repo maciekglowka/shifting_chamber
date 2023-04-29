@@ -96,12 +96,12 @@ fn map_end(
     mut res: ResMut<GameRes>,
     data_assets: Res<crate::data::DataAssets>
 ) {
-    res.level += 1;
-    res.score += LEVEL_BONUS;
     if data_assets.level_list.len() == res.level as usize {
         next_state.set(GameState::GameWin);
         return;
     }
+    res.level += 1;
+    res.score += LEVEL_BONUS;
     if res.level % UPGRADE_EVERY_LEVELS == 1 {
         next_state.set(GameState::Upgrade);
     } else {

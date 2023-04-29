@@ -49,6 +49,10 @@ pub fn show_menu(
                         ..Default::default()
                     }
                 ),
+                style: Style {
+                    margin: UiRect::new(Val::Px(0.), Val::Px(0.), Val::Px(10.), Val::Px(10.)),
+                    ..Default::default()
+                },
                 ..Default::default()
             });
             parent.spawn(TextBundle {

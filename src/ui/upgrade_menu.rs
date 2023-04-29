@@ -71,7 +71,7 @@ pub fn show_menu(
                 .with_children(|parent| {
                     parent.spawn(TextBundle {
                         text: Text::from_section(
-                            format!("Choose your upgrade (cost: {} score):", UPGRADE_PENALTY),
+                            format!("Choose your upgrade (cost: {}score):", UPGRADE_PENALTY),
                             TextStyle {
                                 color: Color::WHITE,
                                 font: assets.font.clone(),
