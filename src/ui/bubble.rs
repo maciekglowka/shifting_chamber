@@ -12,6 +12,7 @@ pub struct Bubble {
     pub age: f32
 }
 
+#[derive(Event)]
 pub struct BubbleEvent(pub Vector2Int, pub String);
 
 pub fn update_bubbles(

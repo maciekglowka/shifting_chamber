@@ -18,42 +18,46 @@ mod upgrade_menu;
 pub use bubble::BubbleEvent;
 
 pub const BG_COLOR: Color = Color::rgb(0.15, 0.25, 0.35);
+
+#[derive(Event)]
 pub struct ReloadUIEvent;
 
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(load_assets)
+        app.add_systems(Startup, load_assets)
             .add_event::<ReloadUIEvent>()
             .add_event::<bubble::BubbleEvent>()
-            .add_system(bubble::spawn_bubbles)
-            .add_system(bubble::update_bubbles)
-            .add_system(added_piece)
-            .add_system(sidebar::update_sidebar)
-            .add_system(player_input.in_schedule(OnEnter(GameState::PlayerInput)))
             .add_systems(
-                (overlays::update_overlays, sidebar::tile_button_click, help_menu::toggle_menu, sidebar::pause_button_click)
-                .in_set(OnUpdate(GameState::PlayerInput))
+                Update,
+                (bubble::spawn_bubbles, bubble::update_bubbles, added_piece, sidebar::update_sidebar)
             )
-            .add_system(help_menu::clear_menu.in_schedule(OnExit(GameState::PlayerInput)))
-            .add_system(upgrade_menu::show_menu.in_schedule(OnEnter(GameState::Upgrade)))
-            .add_system(upgrade_menu::clear_menu.in_schedule(OnExit(GameState::Upgrade)))
-            .add_system(upgrade_menu::menu_click.in_set(OnUpdate(GameState::Upgrade)))
-            .add_system(game_over::show_menu.in_schedule(OnEnter(GameState::GameOver)))
-            .add_system(game_over::clear_menu.in_schedule(OnExit(GameState::GameOver)))
-            .add_system(game_over::menu_click.in_set(OnUpdate(GameState::GameOver)))
-            .add_system(game_win::show_menu.in_schedule(OnEnter(GameState::GameWin)))
-            .add_system(game_win::clear_menu.in_schedule(OnExit(GameState::GameWin)))
-            .add_system(main_menu::show_menu.in_schedule(OnEnter(GameState::MainMenu)))
-            .add_system(main_menu::clear_menu.in_schedule(OnExit(GameState::MainMenu)))
-            .add_system(marker::spawn_marker.in_schedule(OnExit(GameState::MapInit)))
-            .add_system(marker::update_marker.in_set(OnUpdate(GameState::PlayerInput)))
-            .add_system(marker::remove_marker.in_schedule(OnExit(GameState::PlayerInput)));
+            .add_systems(OnEnter(GameState::PlayerInput), force_reload)
+            .add_systems(OnEnter(GameState::GameOver), force_reload)
+            .add_systems(
+                Update,
+                (overlays::update_overlays, sidebar::tile_button_click, help_menu::toggle_menu, sidebar::pause_button_click)
+                    .run_if(in_state(GameState::PlayerInput))
+            )
+            .add_systems(OnExit(GameState::PlayerInput), help_menu::clear_menu)
+            .add_systems(OnEnter(GameState::Upgrade), upgrade_menu::show_menu)
+            .add_systems(OnExit(GameState::Upgrade), upgrade_menu::clear_menu)
+            .add_systems(Update, upgrade_menu::menu_click.run_if(in_state(GameState::Upgrade)))
+            .add_systems(OnEnter(GameState::GameOver), game_over::show_menu)
+            .add_systems(OnExit(GameState::GameOver), game_over::clear_menu)
+            .add_systems(Update, game_over::menu_click.run_if(in_state(GameState::GameOver)))
+            .add_systems(OnEnter(GameState::GameWin), game_win::show_menu)
+            .add_systems(OnExit(GameState::GameWin), game_win::clear_menu)
+            .add_systems(OnEnter(GameState::MainMenu), main_menu::show_menu)
+            .add_systems(OnExit(GameState::MainMenu), main_menu::clear_menu)
+            .add_systems(OnExit(GameState::MapInit), marker::spawn_marker)
+            .add_systems(Update, marker::update_marker.run_if(in_state(GameState::PlayerInput)))
+            .add_systems(OnExit(GameState::PlayerInput), marker::remove_marker);
     }  
 }
 
-fn player_input(
+fn force_reload(
     mut ev_ui: EventWriter<ReloadUIEvent>
 ) {
     ev_ui.send(ReloadUIEvent);

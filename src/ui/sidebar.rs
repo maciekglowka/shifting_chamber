@@ -39,9 +39,10 @@ pub fn tile_button_click(
 ) {
     for (interaction, mut button, mut style) in interactions.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 button.pressed = true;
-                style.size = Size::all(Val::Px(TILE_BUTTON_DIM - 4.));
+                style.width = Val::Px(TILE_BUTTON_DIM - 4.);
+                style.height = Val::Px(TILE_BUTTON_DIM - 4.);
             },
             Interaction::Hovered | Interaction::None => {
                 if button.pressed {
@@ -49,7 +50,8 @@ pub fn tile_button_click(
                     ev_ui.send(super::ReloadUIEvent);
                 }
                 button.pressed = false;
-                style.size = Size::all(Val::Px(TILE_BUTTON_DIM));
+                style.width = Val::Px(TILE_BUTTON_DIM);
+                style.height = Val::Px(TILE_BUTTON_DIM);
             },
             // Interaction::None => {
             //     button.pressed = false;
@@ -66,16 +68,18 @@ pub fn pause_button_click(
     // this should be refactor into some common behaviour with tile buttons
     for (interaction, mut button, mut style) in interactions.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 button.pressed = true;
-                style.size = Size::new(Val::Px(PAUSE_BUTTON_DIM -4.), Val::Px(TILE_BUTTON_DIM - 4.));
+                style.width = Val::Px(PAUSE_BUTTON_DIM -4.);
+                style.height = Val::Px(TILE_BUTTON_DIM - 4.);
             },
             Interaction::Hovered | Interaction::None => {
                 if button.pressed {
                     ev_command.send(CommandEvent(CommandType::PlayerWait));
                 }
                 button.pressed = false;
-                style.size = Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM));
+                style.width = Val::Px(PAUSE_BUTTON_DIM);
+                style.height = Val::Px(TILE_BUTTON_DIM);
             },
         }
     }
@@ -97,8 +101,9 @@ pub fn update_sidebar(
             NodeBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
-                    position: UiRect { right: Val::Px(0.), ..Default::default() },
-                    size: Size::new(Val::Px(SIDEBAR_WIDTH), Val::Percent(100.)),
+                    right: Val::Px(0.),
+                    width: Val::Px(SIDEBAR_WIDTH),
+                    height: Val::Percent(100.),
                     padding: UiRect{ left: Val::Px(4.), ..Default::default()},
                     ..Default::default()
                 },
@@ -111,7 +116,8 @@ pub fn update_sidebar(
     let content = commands.spawn((
         NodeBundle {
             style: Style {
-                size: Size::all(Val::Percent(100.)),
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
                 flex_direction: FlexDirection::Column,
                 padding: UiRect{ top: Val::Px(20.), left: Val::Px(24.), ..Default::default()},
                 align_items: AlignItems::FlexStart,
@@ -168,7 +174,8 @@ fn spawn_controls(
 ) {
     parent.spawn(NodeBundle {
             style: Style {
-                size: Size::new(Val::Percent(100.), Val::Px(192.)),
+                width: Val::Percent(100.),
+                height: Val::Px(192.),
                 flex_direction: FlexDirection::Row,
                 flex_wrap: FlexWrap::Wrap,
                 // padding: UiRect{ top: Val::Px(20.), left: Val::Px(32.), ..Default::default()},
@@ -195,7 +202,8 @@ fn spawn_controls(
                 parent.spawn((
                         NodeBundle {
                             style: Style {
-                                size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
+                                width: Val::Px(PAUSE_BUTTON_DIM),
+                                height: Val::Px(TILE_BUTTON_DIM),
                                 margin: UiRect{ bottom: Val::Px(8.), top: Val::Px(40.), ..Default::default() },
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
@@ -208,7 +216,8 @@ fn spawn_controls(
                             PauseButton { pressed: false },
                             ButtonBundle {
                                 style: Style {
-                                    size: Size::new(Val::Px(PAUSE_BUTTON_DIM), Val::Px(TILE_BUTTON_DIM)),
+                                    width: Val::Px(PAUSE_BUTTON_DIM),
+                                    height: Val::Px(TILE_BUTTON_DIM),
                                     align_items: AlignItems::Center,
                                     justify_content: JustifyContent::Center,
                                     ..Default::default()
@@ -302,7 +311,8 @@ fn spawn_tile_button(
     parent.spawn(
         NodeBundle {
             style: Style {
-                size: Size::new(Val::Px(TILE_BUTTON_DIM + 6.), Val::Px(TILE_BUTTON_DIM)),
+                width: Val::Px(TILE_BUTTON_DIM + 6.),
+                height: Val::Px(TILE_BUTTON_DIM),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
@@ -317,7 +327,8 @@ fn spawn_tile_button(
                 TileButton{ pressed: false, kind },
                 ButtonBundle {
                     style: Style {
-                        size: Size::all(Val::Px(TILE_BUTTON_DIM)),
+                        width: Val::Px(TILE_BUTTON_DIM),
+                        height: Val::Px(TILE_BUTTON_DIM),
                         margin: UiRect::bottom(Val::Px(8.)),
                         ..Default::default()
                     },

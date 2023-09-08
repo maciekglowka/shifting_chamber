@@ -8,7 +8,7 @@ pub struct AssetPlugin;
 impl Plugin for AssetPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AssetList>()
-            .add_system(check_asset_loading.in_set(OnUpdate(GameState::LoadAssets)));
+            .add_systems(Update, check_asset_loading.run_if(in_state(GameState::LoadAssets)));
     }
 }
 

@@ -11,7 +11,7 @@ pub struct TilePlugin;
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<TileRes>()
-            .add_system(spawn_map.in_schedule(OnEnter(GameState::MapInit)));
+            .add_systems(OnEnter(GameState::MapInit), spawn_map);
     }
 }
 

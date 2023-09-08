@@ -14,8 +14,8 @@ pub fn show_menu(
         NodeBundle {
             style: Style {
                 position_type: PositionType::Absolute,
-                position: UiRect { ..Default::default() },
-                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,

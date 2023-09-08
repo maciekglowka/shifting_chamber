@@ -6,23 +6,31 @@ pub struct AudioPlugin;
 
 impl Plugin for AudioPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(load_assets)
-            .add_system(play_sfx);
+        app.add_systems(Startup, load_assets)
+            .add_systems(Update, play_sfx);
     }
 }
 
 fn play_sfx(
+    mut commands: Commands,
     assets: Res<AudioAssets>,
-    audio: Res<Audio>,
     mut ev_game: EventReader<GameEvent>
 ) {
     for ev in ev_game.iter() {
         match ev.0 {
-            GameEventKind::ProjectileLaunch => { audio.play(assets.throw_sound.clone()); }
-            GameEventKind::UnitAttack => { audio.play(assets.hit_sound.clone()); },
-            GameEventKind::TileTransformed => { audio.play(assets.tile_sound.clone()); }
-            GameEventKind::WrongAction => { audio.play(assets.wrong_sound.clone()); }
-        } 
+            GameEventKind::ProjectileLaunch => commands.spawn(AudioBundle {
+                source: assets.throw_sound.clone(), ..Default::default()
+            }),
+            GameEventKind::UnitAttack => commands.spawn(AudioBundle {
+                source: assets.hit_sound.clone(), ..Default::default()
+            }),
+            GameEventKind::TileTransformed => commands.spawn(AudioBundle {
+                source: assets.tile_sound.clone(), ..Default::default()
+            }),
+            GameEventKind::WrongAction => commands.spawn(AudioBundle {
+                source: assets.wrong_sound.clone(), ..Default::default()
+            })
+        };
     }
 }
 

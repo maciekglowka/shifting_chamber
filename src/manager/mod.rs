@@ -31,6 +31,7 @@ pub enum CommandType {
     RestartLevel
 }
 
+#[derive(Event)]
 pub struct CommandEvent(pub CommandType);
 
 pub enum GameEventKind {
@@ -40,6 +41,7 @@ pub enum GameEventKind {
     WrongAction
 }
 
+#[derive(Event)]
 pub struct GameEvent(pub GameEventKind);
 
 pub struct ManagerPlugin;
@@ -49,14 +51,14 @@ impl Plugin for ManagerPlugin {
         app.add_event::<CommandEvent>()
             .add_event::<GameEvent>()
             .init_resource::<GameRes>()
-            .add_system(start_game.in_set(OnUpdate(GameState::GameInit)))
-            .add_system(start_map.in_set(OnUpdate(GameState::MapInit)))
-            .add_system(map_end.in_set(OnUpdate(GameState::MapEnd)))
+            .add_systems(Update, start_game.run_if(in_state(GameState::GameInit)))
+            .add_systems(Update, start_map.run_if(in_state(GameState::MapInit)))
+            .add_systems(Update, map_end.run_if(in_state(GameState::MapEnd)))
             .add_systems(
-                (player_input::transform_tiles, player_input::wait)
-                .in_set(OnUpdate(GameState::PlayerInput)))
-            .add_system(player_input::upgrade.in_set(OnUpdate(GameState::Upgrade)))
-            .add_system(update_state.in_base_set(CoreSet::Last));
+                Update,
+                (player_input::transform_tiles, player_input::wait).run_if(in_state(GameState::PlayerInput)))
+            .add_systems(Update, player_input::upgrade.run_if(in_state(GameState::Upgrade)))
+            .add_systems(Last, update_state);
 
     }
 }
@@ -113,7 +115,6 @@ pub fn update_state(
     mut ev_command: EventReader<CommandEvent>,
     game_state: Res<State<GameState>>,
     mut next_state: ResMut<NextState<GameState>>,
-    // player_query: Query<&Player>,
     npc_query: Query<&Walking>,
     mut res: ResMut<GameRes>,
     mut health_query: Query<&mut Health, With<Player>>
@@ -141,7 +142,7 @@ pub fn update_state(
             break;
         }
         if let CommandType::AnimationEnd = ev.0 {
-            match game_state.0 {
+            match game_state.get() {
                 GameState::TurnStart => {
                     if res.ap_stacking {
                         res.ap = cmp::min(res.max_ap, res.ap + 1);

@@ -10,6 +10,7 @@ pub mod components;
 mod placement;
 mod systems;
 
+#[derive(Event)]
 pub struct PieceEvent(pub PieceEventKind);
 pub enum PieceEventKind {
     Kill(Entity, Vector2Int)
@@ -21,31 +22,33 @@ impl Plugin for PiecesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PieceRes>()
             .add_event::<PieceEvent>()
-            .add_system(placement::generate_pieces.in_schedule(OnExit(GameState::MapInit)))
+            .add_systems(OnExit(GameState::MapInit), placement::generate_pieces)
             .add_systems(
+                OnEnter(GameState::TurnStart),
                 (systems::walking::plan_moves, systems::queue::plan_queue)
-                .in_schedule(OnEnter(GameState::TurnStart))
             )
             .add_systems(
+                OnEnter(GameState::NPCAction),
                 (systems::projectile::launch_projectiles, systems::walking::move_walking)
-                .chain()
-                .in_schedule(OnEnter(GameState::NPCAction)))
+                    .chain()
+            )
             .add_systems(
+                OnEnter(GameState::NPCResult),
                 (
                     systems::walking::walk_damage,
                     systems::walking::walk_back,
                     systems::projectile::hit_projectiles
                 )
-                .in_schedule(OnEnter(GameState::NPCResult))
             )
-            .add_system(systems::queue::update_queue.in_schedule(OnExit(GameState::NPCResult)))
+            .add_systems(OnExit(GameState::NPCResult), systems::queue::update_queue)
             .add_systems(
+                Update,
                 (systems::health::init_health, systems::health::kill_units)
-                .chain()
+                    .chain()
             )
-            .add_system(
+            .add_systems(
+                PostUpdate,
                 systems::projectile::explode_projectiles
-                .in_base_set(CoreSet::PostUpdate)
             );
     }
 }

@@ -26,24 +26,28 @@ pub enum FXType {
     Explosion
 }
 
+#[derive(Event)]
 pub struct FXEvent(pub Vec3, pub FXType);
 
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(assets::load_assets)
+        app.add_systems(Startup, assets::load_assets)
             .add_event::<FXEvent>()
             .init_resource::<animate::AnimationRes>()
             .insert_resource(frames::SpriteTimer::new())
             .insert_resource(frames::FXTimer::new())
             .configure_set(
+                Update,
                 AnimationSet::Update.after(AnimationSet::Spawn)
             )
             .configure_set(
+                Update,
                 AnimationSet::Last.after(AnimationSet::Update)
             )
             .add_systems(
+                Update,
                 (
                     spawn::spawn_piece_renderer,
                     spawn::spawn_tile_renderer,
@@ -52,42 +56,52 @@ impl Plugin for GraphicsPlugin {
                 ).in_set(AnimationSet::Spawn)
             )
             .add_systems(
+                Update,
                 (frames::animate_frames, frames::animate_fx_frames)
             )
-            .add_system(animate::update_state
-                .in_set(OnUpdate(GameState::TurnStart))
-            )
-            .add_system(animate::update_state
-                .in_set(OnUpdate(GameState::TileShift))
-                .in_set(AnimationSet::Last)
-            )
-            .add_system(animate::update_state
-                .in_set(OnUpdate(GameState::NPCAction))
-                .in_set(AnimationSet::Last)
-            )
-            .add_system(animate::update_state
-                .in_set(OnUpdate(GameState::NPCResult))
-                .in_set(AnimationSet::Last)
+            .add_systems(
+                Update,
+                animate::update_state
+                    .run_if(in_state(GameState::TurnStart))
             )
             .add_systems(
-                (
-                    spawn::despawn_piece_renderer,
-                    spawn::despawn_tile_renderer,
-                ).in_base_set(CoreSet::PostUpdate)
+                Update,
+                animate::update_state
+                    .run_if(in_state(GameState::TileShift))
+                    .in_set(AnimationSet::Last)
             )
             .add_systems(
+                Update,
+                animate::update_state
+                    .run_if(in_state(GameState::NPCAction))
+                    .in_set(AnimationSet::Last)
+            )
+            .add_systems(
+                Update,
+                animate::update_state
+                    .run_if(in_state(GameState::NPCResult))
+                    .in_set(AnimationSet::Last)
+            )
+            .add_systems(
+                PostUpdate,
+                (spawn::despawn_piece_renderer, spawn::despawn_tile_renderer)
+            )
+            .add_systems(
+                Update,
                 (animate::update_tiles, animate::update_pieces)
-                .in_set(OnUpdate(GameState::TileShift))
-                .in_set(AnimationSet::Update)
+                    .run_if(in_state(GameState::TileShift))
+                    .in_set(AnimationSet::Update)
             )
             .add_systems(
+                Update,
                 (animate::update_pieces, animate::update_projectiles)
-                .in_set(OnUpdate(GameState::NPCAction))
-                .in_set(AnimationSet::Update)
+                    .run_if(in_state(GameState::NPCAction))
+                    .in_set(AnimationSet::Update)
             )
-            .add_system(
-                animate::update_pieces.in_set(OnUpdate(GameState::NPCResult))
-                .in_set(AnimationSet::Update)
+            .add_systems(
+                Update,
+                animate::update_pieces.run_if(in_state(GameState::NPCResult))
+                    .in_set(AnimationSet::Update)
             );
     }
 }

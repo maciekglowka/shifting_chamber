@@ -22,11 +22,11 @@ pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputRes>()
-            .add_system(reset_input.in_schedule(OnEnter(GameState::GameInit)))
-            .add_system(keys.in_set(OnUpdate(GameState::PlayerInput)))
-            .add_system(touches.in_set(OnUpdate(GameState::PlayerInput)))
-            .add_system(keys_title.in_set(OnUpdate(GameState::MainMenu)))
-            .add_system(keys_endgame.in_set(OnUpdate(GameState::GameWin)));
+            .add_systems(OnEnter(GameState::GameInit), reset_input)
+            .add_systems(Update, keys.run_if(in_state(GameState::PlayerInput)))
+            .add_systems(Update, touches.run_if(in_state(GameState::PlayerInput)))
+            .add_systems(Update, keys_title.run_if(in_state(GameState::MainMenu)))
+            .add_systems(Update, keys_endgame.run_if(in_state(GameState::GameWin)));
     }
 }
 

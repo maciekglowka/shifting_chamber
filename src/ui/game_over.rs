@@ -18,9 +18,10 @@ pub fn menu_click(
 ) {
     for (interaction, mut button, mut style) in interactions.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 button.0 = true;
-                style.size = Size { width: Val::Px(BUTTON_WIDTH - 8.), height: Val::Px(BUTTON_HEIGHT - 8.)};
+                style.width = Val::Px(BUTTON_WIDTH - 8.);
+                style.height = Val::Px(BUTTON_HEIGHT - 8.);
             },
             Interaction::Hovered | Interaction::None => {
                 if button.0 {
@@ -44,8 +45,8 @@ pub fn show_menu(
         NodeBundle {
             style: Style {
                 position_type: PositionType::Absolute,
-                position: UiRect { ..Default::default() },
-                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
@@ -88,7 +89,7 @@ pub fn show_menu(
                 add_button(
                     parent,
                     assets.as_ref(),
-                    &format!("Restart Level (cost: {}score)", RESTART_PENALTY),
+                    &format!("Restart Level (cost: {} score)", RESTART_PENALTY),
                     CommandType::RestartLevel
                 );
             }
@@ -115,7 +116,8 @@ fn add_button(
     parent.spawn(
         NodeBundle {
             style: Style {
-                size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
+                width: Val::Px(BUTTON_WIDTH),
+                height: Val::Px(BUTTON_HEIGHT),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 margin: UiRect::all(Val::Px(10.)),
@@ -129,7 +131,8 @@ fn add_button(
                 GameOverButton(false, action),
                 ButtonBundle {
                 style: Style {
-                    size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
+                    width: Val::Px(BUTTON_WIDTH),
+                    height: Val::Px(BUTTON_HEIGHT),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     margin: UiRect::all(Val::Px(10.)),

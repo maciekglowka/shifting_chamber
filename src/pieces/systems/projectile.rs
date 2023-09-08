@@ -73,9 +73,11 @@ pub fn explode_projectiles(
             // add dummy entity to the second spot of the queue
             // to make room explosion projectiles
             // current first will be popped on the beggining of next NPCAction phase
-            let first = piece_res.action_queue.pop_front().unwrap();
+            let first = piece_res.action_queue.pop_front();
             piece_res.action_queue.push_front(entity);
-            piece_res.action_queue.push_front(first);
+            if let Some(first) = first {
+                piece_res.action_queue.push_front(first);
+            };
         }
     }
 }

@@ -20,9 +20,10 @@ pub fn menu_click(
 ) {
     for (interaction, mut button, mut style) in interactions.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 button.0 = true;
-                style.size = Size { width: Val::Px(BUTTON_WIDTH - 8.), height: Val::Px(BUTTON_HEIGHT - 8.)};
+                style.width = Val::Px(BUTTON_WIDTH - 8.);
+                style.height = Val::Px(BUTTON_HEIGHT - 8.);
             },
             Interaction::Hovered | Interaction::None => {
                 if button.0 {
@@ -47,7 +48,8 @@ pub fn show_menu(
                 style: Style {
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                     ..Default::default()
                 },
                 ..Default::default()
@@ -61,7 +63,8 @@ pub fn show_menu(
                             justify_content: JustifyContent::Center,
                             // padding: UiRect::all(Val::Px(20.)),
                             flex_direction: FlexDirection::Column,
-                            size: Size { width: Val::Percent(100.), height: Val::Percent(100.) },
+                            width: Val::Percent(100.),
+                            height: Val::Percent(100.),
                             ..Default::default()
                         },
                         background_color: super::BG_COLOR.into(),
@@ -71,7 +74,7 @@ pub fn show_menu(
                 .with_children(|parent| {
                     parent.spawn(TextBundle {
                         text: Text::from_section(
-                            format!("Choose your upgrade (cost: {}score):", UPGRADE_PENALTY),
+                            format!("Choose your upgrade (cost: {} score):", UPGRADE_PENALTY),
                             TextStyle {
                                 color: Color::WHITE,
                                 font: assets.font.clone(),
@@ -113,7 +116,8 @@ fn add_button(
     parent.spawn(
         NodeBundle {
             style: Style {
-                size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
+                width: Val::Px(BUTTON_WIDTH),
+                height: Val::Px(BUTTON_HEIGHT),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 margin: UiRect::all(Val::Px(10.)),
@@ -127,7 +131,8 @@ fn add_button(
                 UpgradeButton(false, action),
                 ButtonBundle {
                     style: Style {
-                        size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
+                        width: Val::Px(BUTTON_WIDTH),
+                        height: Val::Px(BUTTON_HEIGHT),
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
                         margin: UiRect::all(Val::Px(10.)),

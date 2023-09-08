@@ -1,4 +1,4 @@
-cargo build --release
+cargo build --target wasm32-unknown-unknown --release
 rm ./wasm-out -rf
 wasm-bindgen --out-dir ./wasm-out/ --target web ./target/wasm32-unknown-unknown/release/shifting_chamber.wasm
 cp ./assets ./wasm-out -r

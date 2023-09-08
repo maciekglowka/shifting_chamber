@@ -7,6 +7,7 @@ use crate::vectors::Vector2Int;
 mod pieces;
 mod units;
 
+#[derive(Event)]
 pub struct ActionEvent(pub ActionKind);
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
@@ -21,12 +22,15 @@ pub struct ActionPlugin;
 impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ActionEvent>()
-            .add_systems((
-                units::receive_damage,
-                units::heal,
-                units::increase_hp,
-                pieces::spawn_piece,
-            ));
+            .add_systems(
+                Update,
+                (
+                    units::receive_damage,
+                    units::heal,
+                    units::increase_hp,
+                    pieces::spawn_piece,
+                )
+            );
     }
 }
 

@@ -17,12 +17,12 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
+                OnExit(GameState::MapInit),
                 (spawn_player, pin_player)
-                .in_schedule(OnExit(GameState::MapInit))
             )
-            .add_system(unpin_player.in_schedule(OnEnter(GameState::MapEnd)))
-            .add_system(unpin_player.in_schedule(OnEnter(GameState::GameOver)))
-            .add_system(despawn_player.in_schedule(OnEnter(GameState::MainMenu)));
+            .add_systems(OnEnter(GameState::MapEnd), unpin_player)
+            .add_systems(OnEnter(GameState::GameOver), unpin_player)
+            .add_systems(OnEnter(GameState::MainMenu), despawn_player);
     }
 }
 

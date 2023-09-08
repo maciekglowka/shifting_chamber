@@ -1,7 +1,7 @@
 use bevy::{
     asset::{AssetLoader, LoadContext, LoadedAsset},
     prelude::*,
-    reflect::TypeUuid,
+    reflect::{TypeUuid, TypePath},
     utils::BoxedFuture
 };
 use serde::Deserialize;
@@ -22,11 +22,11 @@ impl Plugin for DataPlugin {
         app.init_resource::<DataAssets>()
             .add_asset::<YamlAsset>()
             .init_asset_loader::<YamlAssetLoader>()
-            .add_startup_system(pieces::load_assets)
-            .add_startup_system(levels::load_assets)
+            .add_systems(Startup, pieces::load_assets)
+            .add_systems(Startup, levels::load_assets)
             .add_systems(
+                OnExit(GameState::LoadAssets),
                 (pieces::parse_data, levels::parse_data)
-                .in_schedule(OnExit(GameState::LoadAssets))
             );
     }
 }
@@ -43,7 +43,7 @@ pub struct DataAssets {
     pub raw_level_list: Handle<YamlAsset>
 }
 
-#[derive(Debug, Deserialize, TypeUuid)]
+#[derive(Debug, Deserialize, TypeUuid, TypePath)]
 #[uuid = "d1228bd6-057b-4b93-844b-b43f26063235"]
 pub struct YamlAsset {
     pub value: String
