@@ -9,7 +9,7 @@ use bevy::{
 use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
 use crate::manager::{CommandEvent, CommandType, GameRes};
-use crate::ui::ReloadUIEvent;
+use crate::ui::{ReloadUIEvent, no_modal};
 use crate::vectors::{ORTHO_DIRECTIONS, Vector2Int};
 use crate::tiles::transform::TileTransform;
 
@@ -23,10 +23,10 @@ impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputRes>()
             .add_systems(OnEnter(GameState::GameInit), reset_input)
-            .add_systems(Update, keys.run_if(in_state(GameState::PlayerInput)))
-            .add_systems(Update, touches.run_if(in_state(GameState::PlayerInput)))
+            .add_systems(Update, keys.run_if(in_state(GameState::PlayerInput)).run_if(no_modal))
+            .add_systems(Update, touches.run_if(in_state(GameState::PlayerInput)).run_if(no_modal));
             // .add_systems(Update, keys_title.run_if(in_state(GameState::MainMenu)))
-            .add_systems(Update, keys_endgame.run_if(in_state(GameState::GameWin)));
+            // .add_systems(Update, keys_endgame.run_if(in_state(GameState::GameWin)));
     }
 }
 
@@ -61,15 +61,15 @@ fn any_input(
 //     }
 // }
 
-fn keys_endgame(
-    mut key_ev: EventReader<KeyboardInput>,
-    mut touch_ev: EventReader<TouchInput>,
-    mut ev_command: EventWriter<CommandEvent>
-) {
-    if any_input(&mut key_ev, &mut touch_ev) {
-        ev_command.send(CommandEvent(CommandType::RestartGame));
-    }
-}
+// fn keys_endgame(
+//     mut key_ev: EventReader<KeyboardInput>,
+//     mut touch_ev: EventReader<TouchInput>,
+//     mut ev_command: EventWriter<CommandEvent>
+// ) {
+//     if any_input(&mut key_ev, &mut touch_ev) {
+//         ev_command.send(CommandEvent(CommandType::RestartGame));
+//     }
+// }
 
 fn send_dir_action(
     dir: Vector2Int,

@@ -44,7 +44,7 @@ pub fn spawn_modal(
         .with_children(|parent| {
             parent.spawn(TextBundle {
                 style: Style {
-                    width: Val::Percent(80.),
+                    margin: UiRect::bottom(Val::Px(32.)),
                     ..Default::default()
                 },
                 text: Text {

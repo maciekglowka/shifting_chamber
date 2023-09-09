@@ -54,11 +54,16 @@ impl Plugin for UIPlugin {
             .add_systems(OnEnter(GameState::GameWin), game_win::show_menu)
             .add_systems(OnExit(GameState::GameWin), game_win::clear_menu)
             .add_systems(OnEnter(GameState::MainMenu), main_menu::show_menu)
-            // .add_systems(OnExit(GameState::MainMenu), main_menu::clear_menu)
             .add_systems(OnExit(GameState::MapInit), marker::spawn_marker)
             .add_systems(Update, marker::update_marker.run_if(in_state(GameState::PlayerInput)))
             .add_systems(OnExit(GameState::PlayerInput), marker::remove_marker);
     }  
+}
+
+pub fn no_modal(
+    query: Query<&modal::Modal>
+) -> bool {
+    query.iter().len() == 0
 }
 
 fn force_reload(
