@@ -124,10 +124,10 @@ pub fn update_state(
             next_state.set(GameState::TurnEnd);
             break;
         }
-        if let CommandType::Start = ev.0 {
-            next_state.set(GameState::GameInit);
-            break;
-        }
+        // if let CommandType::Start = ev.0 {
+        //     next_state.set(GameState::GameInit);
+        //     break;
+        // }
         if let CommandType::RestartLevel = ev.0 {
             res.score -= RESTART_PENALTY;
             if let Ok(mut health) = health_query.get_single_mut() {

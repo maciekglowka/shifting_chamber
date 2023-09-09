@@ -30,6 +30,7 @@ impl Plugin for UIPlugin {
         app.add_systems(Startup, load_assets)
             .add_event::<ReloadUIEvent>()
             .add_event::<bubble::BubbleEvent>()
+            .add_event::<modal::CloseModalEvent>()
             .add_systems(
                 Update,
                 (bubble::spawn_bubbles, bubble::update_bubbles, added_piece, sidebar::update_sidebar)
@@ -41,6 +42,8 @@ impl Plugin for UIPlugin {
                 (overlays::update_overlays, sidebar::tile_button_click, help_menu::toggle_menu, sidebar::pause_button_click)
                     .run_if(in_state(GameState::PlayerInput))
             )
+            .add_systems(Update,modal::button_click)
+            .add_systems(Update,modal::clear_modal.run_if(on_event::<modal::CloseModalEvent>()))
             .add_systems(OnExit(GameState::PlayerInput), help_menu::clear_menu)
             .add_systems(OnEnter(GameState::Upgrade), upgrade_menu::show_menu)
             .add_systems(OnExit(GameState::Upgrade), upgrade_menu::clear_menu)
@@ -51,7 +54,7 @@ impl Plugin for UIPlugin {
             .add_systems(OnEnter(GameState::GameWin), game_win::show_menu)
             .add_systems(OnExit(GameState::GameWin), game_win::clear_menu)
             .add_systems(OnEnter(GameState::MainMenu), main_menu::show_menu)
-            .add_systems(OnExit(GameState::MainMenu), main_menu::clear_menu)
+            // .add_systems(OnExit(GameState::MainMenu), main_menu::clear_menu)
             .add_systems(OnExit(GameState::MapInit), marker::spawn_marker)
             .add_systems(Update, marker::update_marker.run_if(in_state(GameState::PlayerInput)))
             .add_systems(OnExit(GameState::PlayerInput), marker::remove_marker);
@@ -79,7 +82,7 @@ pub fn load_assets(
     mut asset_list: ResMut<crate::assets::AssetList>,
     mut texture_atlasses: ResMut<Assets<TextureAtlas>> 
 ) {
-    let font_handle = asset_server.load("ui/PICO-8 mono.ttf");
+    let font_handle = asset_server.load("ui/04B_03.ttf");
     asset_list.0.push(font_handle.clone_untyped());
 
     let overlay_img = asset_server.load("ui/icons.png");

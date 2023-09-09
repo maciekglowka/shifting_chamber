@@ -3,6 +3,7 @@ use serde::Deserialize;
 use std::collections::VecDeque;
 
 use crate::pieces::components::Health;
+use crate::states::GameState;
 use crate::tiles::Tile;
 use crate::ui::BubbleEvent;
 
@@ -10,14 +11,6 @@ mod units;
 
 #[derive(Event)]
 pub struct ActionEvent(pub Box<dyn Action>);
-// // pub struct ActionEvent(pub ActionKind);
-
-// #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
-// pub enum ActionKind {
-//     Damage(Entity, DamageKind, u32),
-//     Heal(Entity, u32),
-//     IncreaseHP(Entity, u32)
-// }
 
 pub struct ActionPlugin;
 
@@ -25,14 +18,6 @@ impl Plugin for ActionPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ActionEvent>()
             .add_systems(Update, handle_event.run_if(on_event::<ActionEvent>()));
-            // .add_systems(
-            //     Update,
-            //     (
-            //         units::receive_damage,
-            //         units::heal,
-            //         units::increase_hp,
-            //     )
-            // );
     }
 }
 
@@ -56,6 +41,17 @@ pub enum DamageKind {
 
 pub trait Action: Send + Sync {
     fn execute(&self, world: &mut World);
+}
+
+pub struct StartGameAction {
+    pub level: i32
+}
+impl Action for StartGameAction {
+    fn execute(&self, world: &mut World) {
+        if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
+            state.set(GameState::GameInit);
+        }
+    }
 }
 
 pub struct DamageAction {

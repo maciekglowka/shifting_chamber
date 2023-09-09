@@ -25,7 +25,7 @@ impl Plugin for InputPlugin {
             .add_systems(OnEnter(GameState::GameInit), reset_input)
             .add_systems(Update, keys.run_if(in_state(GameState::PlayerInput)))
             .add_systems(Update, touches.run_if(in_state(GameState::PlayerInput)))
-            .add_systems(Update, keys_title.run_if(in_state(GameState::MainMenu)))
+            // .add_systems(Update, keys_title.run_if(in_state(GameState::MainMenu)))
             .add_systems(Update, keys_endgame.run_if(in_state(GameState::GameWin)));
     }
 }
@@ -51,15 +51,15 @@ fn any_input(
     false
 }
 
-fn keys_title(
-    mut key_ev: EventReader<KeyboardInput>,
-    mut touch_ev: EventReader<TouchInput>,
-    mut ev_command: EventWriter<CommandEvent>
-) {
-    if any_input(&mut key_ev, &mut touch_ev) {
-        ev_command.send(CommandEvent(CommandType::Start));
-    }
-}
+// fn keys_title(
+//     mut key_ev: EventReader<KeyboardInput>,
+//     mut touch_ev: EventReader<TouchInput>,
+//     mut ev_command: EventWriter<CommandEvent>
+// ) {
+//     if any_input(&mut key_ev, &mut touch_ev) {
+//         ev_command.send(CommandEvent(CommandType::Start));
+//     }
+// }
 
 fn keys_endgame(
     mut key_ev: EventReader<KeyboardInput>,
