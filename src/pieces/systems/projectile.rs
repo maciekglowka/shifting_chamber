@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::actions::{ActionEvent, ActionKind, DamageKind};
+use crate::actions::{ActionEvent, DamageAction, DamageKind};
 use crate::manager::{GameEvent, GameEventKind};
 use crate::tiles::{Tile, TileRes};
 use crate::vectors::OMNI_DIRECTIONS;
@@ -100,7 +100,8 @@ pub fn hit_projectiles(
         for child in tile_children {
             if let Ok(health_entity) = health_query.get(*child) {
                 ev_action.send(ActionEvent(
-                    ActionKind::Damage(health_entity, damage.kind, damage.value)
+                    Box::new(DamageAction{ entity: health_entity, kind: damage.kind, value: damage.value})
+                    // ActionKind::Damage(health_entity, damage.kind, damage.value)
                 ));
                 ev_game.send(GameEvent(GameEventKind::ProjectileLaunch));
             }

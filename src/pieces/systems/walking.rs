@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::actions::{ActionEvent, ActionKind};
+use crate::actions::{ActionEvent, DamageAction};
 use crate::manager::{GameEvent, GameEventKind};
 use crate::player::Player;
 use crate::tiles::{Tile, TileRes};
@@ -160,7 +160,8 @@ pub fn walk_damage(
     for (other, other_parent) in health_query.iter() {
         if parent.get() != other_parent.get() || other == *entity { continue };
         ev_action.send(ActionEvent(
-            ActionKind::Damage(other, damage.kind, damage.value)
+            Box::new(DamageAction { entity: other, kind: damage.kind, value: damage.value })
+            // ActionKind::Damage(other, damage.kind, damage.value)
         ));
         ev_game.send(GameEvent(GameEventKind::UnitAttack));
     }

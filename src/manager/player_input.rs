@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::cmp;
 
-use crate::actions::{ActionEvent, ActionKind};
+use crate::actions::{ActionEvent, HealAction, IncreaseHPAction};
 use crate::globals::UPGRADE_PENALTY;
 use crate::pieces::components;
 use crate::player::{
@@ -75,9 +75,15 @@ pub fn upgrade(
                 res.score -= UPGRADE_PENALTY;
             }
             match kind {
-                UpgradeKind::HealPlayer => ev_action.send(ActionEvent(ActionKind::Heal(player, 3))),
+                // UpgradeKind::HealPlayer => ev_action.send(ActionEvent(ActionKind::Heal(player, 3))),
+                UpgradeKind::HealPlayer => ev_action.send(
+                    ActionEvent(Box::new(HealAction{ entity: player, value: 3 }))
+                ),
                 UpgradeKind::IncreaseAP => res.max_ap += 1,
-                UpgradeKind::IncreaseHP => ev_action.send(ActionEvent(ActionKind::IncreaseHP(player, 1))),
+                // UpgradeKind::IncreaseHP => ev_action.send(ActionEvent(ActionKind::IncreaseHP(player, 1))),
+                UpgradeKind::IncreaseHP => ev_action.send(
+                    ActionEvent(Box::new(IncreaseHPAction{ entity: player, value: 1 }))
+                ),
                 UpgradeKind::TileTransform(t) => { res.tile_transforms.insert(t, true); },
                 UpgradeKind::Skip => ()
             };

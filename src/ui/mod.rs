@@ -11,6 +11,7 @@ mod game_win;
 mod help_menu;
 mod main_menu;
 mod marker;
+mod modal;
 mod overlays;
 mod sidebar;
 mod upgrade_menu;

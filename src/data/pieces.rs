@@ -21,7 +21,7 @@ pub struct SpriteData {
 
 #[derive(Deserialize)]
 pub struct PieceData {
-    pub min_level: Option<u32>,
+    pub min_level: Option<i32>,
     pub points: Option<i32>,
     pub sprite: SpriteData,
     pub components: serde_yaml::Mapping

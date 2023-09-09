@@ -104,7 +104,7 @@ fn map_end(
     }
     res.level += 1;
     res.score += LEVEL_BONUS;
-    if res.level % UPGRADE_EVERY_LEVELS == 1 {
+    if res.level % UPGRADE_EVERY_LEVELS as i32 == 1 {
         next_state.set(GameState::Upgrade);
     } else {
         next_state.set(GameState::MapInit);
@@ -189,7 +189,7 @@ pub fn update_state(
 
 #[derive(Default, Resource)]
 pub struct GameRes {
-    pub level: u32,
+    pub level: i32,
     pub ap: u32,
     pub max_ap: u32,
     pub ap_stacking: bool,

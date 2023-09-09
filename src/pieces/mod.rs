@@ -58,17 +58,6 @@ pub struct PieceRes {
     pub action_queue: VecDeque<Entity>
 }
 
-// pub fn spawn_piece_at_entity(
-//     commands: &mut Commands,
-//     name: String,
-//     parent_entity: Entity,
-//     data_assets: &DataAssets
-// ) {
-//     let entity = get_new_piece(commands, name, data_assets);
-//     commands.entity(parent_entity)
-//         .push_children(&[entity]);
-// }
-
 pub fn spawn_piece_at_v(
     commands: &mut Commands,
     name: String,

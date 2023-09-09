@@ -3,7 +3,7 @@ use rand::prelude::*;
 use std::collections::HashMap;
 
 use crate::data::{DataAssets, PieceData};
-use crate::globals::{MAP_SIZE, MAP_POINTS_MUL};
+use crate::globals::{MAP_SIZE, MAP_POINTS_MUL, TUTORIAL_LEVELS};
 use crate::player::get_player_v;
 use crate::manager::GameRes;
 use crate::tiles::TileRes;
@@ -91,12 +91,11 @@ fn spawn_level_pieces(
 fn get_level_type(
     game_res: &mut GameRes,
     data_assets: &DataAssets,
-    // target_points: i32
 ) -> String {
-    data_assets.level_list[game_res.level as usize - 1].clone()
+    data_assets.level_list[(game_res.level + TUTORIAL_LEVELS) as usize - 1].clone()
 }
 
-fn get_name_pool(data: &HashMap<String, PieceData>, names: &Vec<String>, level: u32, weighted: bool) -> Vec<(String, i32)> {
+fn get_name_pool(data: &HashMap<String, PieceData>, names: &Vec<String>, level: i32, weighted: bool) -> Vec<(String, i32)> {
     names.iter()
         .filter(|n| data[*n].points.is_some() && data[*n].min_level.unwrap_or(0) <= level)
         .map(|n| {

@@ -8,6 +8,7 @@ pub const MAP_POINTS_MUL: f32 = 1.5;
 
 pub const UPGRADE_CHOICES: usize = 3;
 pub const UPGRADE_EVERY_LEVELS: u32 = 2;
+pub const TUTORIAL_LEVELS: i32 = 0;
 
 pub const TILE_Z: f32 = 20.;
 pub const Y_PERSPECTIVE: f32 = 0.75;
