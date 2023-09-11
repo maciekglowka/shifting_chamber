@@ -15,7 +15,7 @@ pub fn show_menu(
         vec![
             (
                 "Start Game".to_string(),
-                Box::new(StartGameAction { level: 0 })
+                Box::new(StartGameAction { level: 1 })
             ),
             (
                 "Tutorial".to_string(),

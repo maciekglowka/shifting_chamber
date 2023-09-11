@@ -26,9 +26,9 @@ pub enum CommandType {
     AnimationEnd,
     TurnEnd,
     Upgrade(UpgradeKind),
-    Start,
-    RestartGame,
-    RestartLevel
+    // Start,
+    // RestartGame,
+    // RestartLevel
 }
 
 #[derive(Event)]
@@ -51,7 +51,7 @@ impl Plugin for ManagerPlugin {
         app.add_event::<CommandEvent>()
             .add_event::<GameEvent>()
             .init_resource::<GameRes>()
-            .add_systems(Update, start_game.run_if(in_state(GameState::GameInit)))
+            // .add_systems(Update, start_game.run_if(in_state(GameState::GameInit)))
             .add_systems(Update, start_map.run_if(in_state(GameState::MapInit)))
             .add_systems(Update, map_end.run_if(in_state(GameState::MapEnd)))
             .add_systems(
@@ -63,23 +63,21 @@ impl Plugin for ManagerPlugin {
     }
 }
 
-fn start_game(
-    mut next_state: ResMut<NextState<GameState>>,
-    mut res: ResMut<GameRes>
-) {
-    res.score = 0;
-    res.level = 1;
-    res.max_ap = 1;
-    res.tile_transforms = HashMap::from_iter(
-        get_all_transforms().iter().map(|a| (*a, false))
-    );
-    // at the beggining only the default action is enabled
-    res.tile_transforms.insert(TransformKind::default(), true);
-    // tests only
-    // res.tile_transforms.insert(TransformKind::TileSwitch, true);
-    res.possible_upgrades = crate::player::upgrades::get_initial_upgrades();
-    next_state.set(GameState::MapInit);
-}
+// fn start_game(
+//     mut next_state: ResMut<NextState<GameState>>,
+//     mut res: ResMut<GameRes>
+// ) {
+//     res.score = 0;
+//     res.level = 1;
+//     res.max_ap = 1;
+//     res.tile_transforms = HashMap::from_iter(
+//         get_all_transforms().iter().map(|a| (*a, false))
+//     );
+//     // at the beggining only the default action is enabled
+//     res.tile_transforms.insert(TransformKind::default(), true);
+//     res.possible_upgrades = crate::player::upgrades::get_initial_upgrades();
+//     next_state.set(GameState::MapInit);
+// }
 
 fn start_map(
     mut next_state: ResMut<NextState<GameState>>,
@@ -128,19 +126,19 @@ pub fn update_state(
         //     next_state.set(GameState::GameInit);
         //     break;
         // }
-        if let CommandType::RestartLevel = ev.0 {
-            res.score -= RESTART_PENALTY;
-            if let Ok(mut health) = health_query.get_single_mut() {
-                // restart players HP to level's initial
-                health.value = res.level_starting_hp;
-            }
-            next_state.set(GameState::MapInit);
-            break;
-        }
-        if let CommandType::RestartGame = ev.0 {
-            next_state.set(GameState::MainMenu);
-            break;
-        }
+        // if let CommandType::RestartLevel = ev.0 {
+        //     res.score -= RESTART_PENALTY;
+        //     if let Ok(mut health) = health_query.get_single_mut() {
+        //         // restart players HP to level's initial
+        //         health.value = res.level_starting_hp;
+        //     }
+        //     next_state.set(GameState::MapInit);
+        //     break;
+        // }
+        // if let CommandType::RestartGame = ev.0 {
+        //     next_state.set(GameState::MainMenu);
+        //     break;
+        // }
         if let CommandType::AnimationEnd = ev.0 {
             match game_state.get() {
                 GameState::TurnStart => {

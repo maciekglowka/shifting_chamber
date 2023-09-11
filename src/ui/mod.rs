@@ -40,7 +40,7 @@ impl Plugin for UIPlugin {
             .add_systems(
                 Update,
                 (overlays::update_overlays, sidebar::tile_button_click, help_menu::toggle_menu, sidebar::pause_button_click)
-                    .run_if(in_state(GameState::PlayerInput))
+                    .run_if(in_state(GameState::PlayerInput)).run_if(no_modal)
             )
             .add_systems(Update,modal::button_click)
             .add_systems(Update,modal::clear_modal.run_if(on_event::<modal::CloseModalEvent>()))
@@ -49,8 +49,6 @@ impl Plugin for UIPlugin {
             .add_systems(OnExit(GameState::Upgrade), upgrade_menu::clear_menu)
             .add_systems(Update, upgrade_menu::menu_click.run_if(in_state(GameState::Upgrade)))
             .add_systems(OnEnter(GameState::GameOver), game_over::show_menu)
-            .add_systems(OnExit(GameState::GameOver), game_over::clear_menu)
-            .add_systems(Update, game_over::menu_click.run_if(in_state(GameState::GameOver)))
             .add_systems(OnEnter(GameState::GameWin), game_win::show_menu)
             .add_systems(OnExit(GameState::GameWin), game_win::clear_menu)
             .add_systems(OnEnter(GameState::MainMenu), main_menu::show_menu)

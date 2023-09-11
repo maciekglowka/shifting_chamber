@@ -22,7 +22,7 @@ pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputRes>()
-            .add_systems(OnEnter(GameState::GameInit), reset_input)
+            .add_systems(OnEnter(GameState::MapInit), reset_input)
             .add_systems(Update, keys.run_if(in_state(GameState::PlayerInput)).run_if(no_modal))
             .add_systems(Update, touches.run_if(in_state(GameState::PlayerInput)).run_if(no_modal));
             // .add_systems(Update, keys_title.run_if(in_state(GameState::MainMenu)))
