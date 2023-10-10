@@ -22,7 +22,7 @@ pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputRes>()
-            .add_systems(OnEnter(GameState::MapInit), reset_input)
+            // .add_systems(OnEnter(GameState::MapInit), reset_input)
             .add_systems(Update, keys.run_if(in_state(GameState::PlayerInput)).run_if(no_modal))
             .add_systems(Update, touches.run_if(in_state(GameState::PlayerInput)).run_if(no_modal));
             // .add_systems(Update, keys_title.run_if(in_state(GameState::MainMenu)))
@@ -30,26 +30,26 @@ impl Plugin for InputPlugin {
     }
 }
 
-fn reset_input(mut res: ResMut<InputRes>) {
-    res.mode = TransformKind::default();
-}
+// fn reset_input(mut res: ResMut<InputRes>) {
+//     res.mode = TransformKind::default();
+// }
 
-fn any_input(
-    key_ev: &mut EventReader<KeyboardInput>,
-    touch_ev: &mut EventReader<TouchInput>,
-) -> bool {
-    for ev in key_ev.iter() {
-        if let bevy::input::ButtonState::Released = ev.state {
-            return true
-        }
-    }
-    for ev in touch_ev.iter() {
-        if let TouchPhase::Ended = ev.phase {
-            return true
-        }
-    }
-    false
-}
+// fn any_input(
+//     key_ev: &mut EventReader<KeyboardInput>,
+//     touch_ev: &mut EventReader<TouchInput>,
+// ) -> bool {
+//     for ev in key_ev.iter() {
+//         if let bevy::input::ButtonState::Released = ev.state {
+//             return true
+//         }
+//     }
+//     for ev in touch_ev.iter() {
+//         if let TouchPhase::Ended = ev.phase {
+//             return true
+//         }
+//     }
+//     false
+// }
 
 // fn keys_title(
 //     mut key_ev: EventReader<KeyboardInput>,

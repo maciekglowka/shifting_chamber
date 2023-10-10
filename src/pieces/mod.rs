@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 
 use crate::data::DataAssets;
 use crate::states::GameState;
-use crate::tiles::TileRes;
+use crate::tiles::{MapSpawnedEvent, TileRes};
 use crate::vectors::Vector2Int;
 
 pub mod components;
@@ -22,7 +22,7 @@ impl Plugin for PiecesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PieceRes>()
             .add_event::<PieceEvent>()
-            .add_systems(OnExit(GameState::MapInit), placement::generate_pieces)
+            .add_systems(Update, placement::generate_pieces.run_if(on_event::<MapSpawnedEvent>()))
             .add_systems(
                 OnEnter(GameState::TurnStart),
                 (systems::walking::plan_moves, systems::queue::plan_queue)

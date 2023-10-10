@@ -4,6 +4,7 @@ use std::{
     collections::{HashMap, HashSet}
 };
 
+use crate::actions::{ActionEvent, StartMapAction};
 use crate::globals::{
     UPGRADE_EVERY_LEVELS,
     LEVEL_BONUS,
@@ -52,7 +53,7 @@ impl Plugin for ManagerPlugin {
             .add_event::<GameEvent>()
             .init_resource::<GameRes>()
             // .add_systems(Update, start_game.run_if(in_state(GameState::GameInit)))
-            .add_systems(Update, start_map.run_if(in_state(GameState::MapInit)))
+            // .add_systems(Update, start_map.run_if(in_state(GameState::MapInit)))
             .add_systems(Update, map_end.run_if(in_state(GameState::MapEnd)))
             .add_systems(
                 Update,
@@ -79,22 +80,24 @@ impl Plugin for ManagerPlugin {
 //     next_state.set(GameState::MapInit);
 // }
 
-fn start_map(
-    mut next_state: ResMut<NextState<GameState>>,
-    mut res: ResMut<GameRes>,
-    health_query: Query<&Health, With<Player>>
-) {
-    res.ap = 0;
-    if let Ok(health) = health_query.get_single() {
-        res.level_starting_hp = health.value;
-    }
-    next_state.set(GameState::TurnStart);
-}
+// fn start_map(
+//     mut next_state: ResMut<NextState<GameState>>,
+//     mut res: ResMut<GameRes>,
+//     health_query: Query<&Health, With<Player>>
+// ) {
+//     res.ap = 0;
+//     if let Ok(health) = health_query.get_single() {
+//         res.level_starting_hp = health.value;
+//     }
+//     next_state.set(GameState::TurnStart);
+// }
 
 fn map_end(
     mut next_state: ResMut<NextState<GameState>>,
     mut res: ResMut<GameRes>,
-    data_assets: Res<crate::data::DataAssets>
+    data_assets: Res<crate::data::DataAssets>,
+    mut ev_action: EventWriter<ActionEvent>
+
 ) {
     if data_assets.level_list.len() == res.level as usize {
         next_state.set(GameState::GameWin);
@@ -105,7 +108,10 @@ fn map_end(
     if res.level % UPGRADE_EVERY_LEVELS as i32 == 1 {
         next_state.set(GameState::Upgrade);
     } else {
-        next_state.set(GameState::MapInit);
+        // next_state.set(GameState::MapInit);
+        ev_action.send(
+            ActionEvent(Box::new(StartMapAction))
+        );
     }
 }
 

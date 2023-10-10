@@ -9,9 +9,8 @@ use crate::player::{
     upgrades::{UpgradeKind, TransformKind, get_all_transforms}
 };
 use crate::states::GameState;
-use crate::tiles::transform::TileTransform;
 
-use super::Action;
+use super::{Action, ActionEvent};
 
 
 pub struct StartGameAction {
@@ -31,9 +30,10 @@ impl Action for StartGameAction {
             res.possible_upgrades = crate::player::upgrades::get_initial_upgrades();
         }
 
-        if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
-            state.set(GameState::MapInit);
-        }
+        // if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
+        //     state.set(GameState::MapInit);
+        // }
+        world.send_event(ActionEvent(Box::new(StartMapAction)));
     }
 }
 
@@ -51,9 +51,10 @@ impl Action for RestartLevelAction {
             // restart players HP to level's initial
             health.value = starting_hp;
         }
-        if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
-            state.set(GameState::MapInit);
-        }
+        // if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
+        //     state.set(GameState::MapInit);
+        // }
+        world.send_event(ActionEvent(Box::new(StartMapAction)));
     }
 }
 
@@ -62,6 +63,37 @@ impl Action for RestartGameAction {
     fn execute(&self, world: &mut World) {
         if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
             state.set(GameState::MainMenu);
+        }
+    }
+}
+
+pub struct StartMapAction;
+impl Action for StartMapAction {
+    fn execute(&self, world: &mut World) {
+        // set starting HP and AP
+        let mut health_query = world.query_filtered::<&Health, With<Player>>();
+        let starting_hp = if let Ok(health) = health_query.get_single(world) {
+            Some(health.value)
+        } else {
+            // no player yet
+            None
+        };
+        if let Some(mut res) = world.get_resource_mut::<GameRes>() {
+            res.ap = 0;
+            if let Some(hp) = starting_hp {
+                res.level_starting_hp = hp;
+            }
+        }
+        // reset inputs
+        if let Some(mut res) = world.get_resource_mut::<crate::input::InputRes>() {
+            res.mode = TransformKind::default();
+        }
+
+        // spawn map
+        crate::tiles::spawn_map(world);
+        // set next state
+        if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
+            state.set(GameState::TurnStart);
         }
     }
 }

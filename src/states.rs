@@ -5,8 +5,8 @@ pub enum GameState {
     #[default]
     LoadAssets,
     MainMenu,
-    GameInit,
-    MapInit,
+    // GameInit,
+    // MapInit,
     TurnStart,
     PlayerInput,
     TileShift,

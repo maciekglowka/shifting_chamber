@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::cmp;
 
-use crate::actions::{ActionEvent, HealAction, IncreaseHPAction};
+use crate::actions::{ActionEvent, HealAction, IncreaseHPAction, StartMapAction};
 use crate::globals::UPGRADE_PENALTY;
 use crate::pieces::components;
 use crate::player::{
@@ -90,7 +90,9 @@ pub fn upgrade(
             if kind.is_single() {
                 res.possible_upgrades.remove(&kind);
             }
-            next_state.set(GameState::MapInit);
+            ev_action.send(
+                ActionEvent(Box::new(StartMapAction))
+            );
         }
     }
 }

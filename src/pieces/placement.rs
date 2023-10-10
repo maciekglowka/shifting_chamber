@@ -13,10 +13,10 @@ pub fn generate_pieces(
     mut commands: Commands,
     tile_res: Res<TileRes>,
     data_assets: Res<DataAssets>,
-    mut game_res: ResMut<GameRes>
+    game_res: Res<GameRes>,
 ) {
     let target_points = (game_res.level as f32 * MAP_POINTS_MUL) as i32;
-    let level_type = get_level_type(&mut game_res, &data_assets);
+    let level_type = get_level_type(&game_res, &data_assets);
     let player_v = get_player_v();
 
     let fixture_pool = get_name_pool(
@@ -49,7 +49,7 @@ pub fn generate_pieces(
         points += data_assets.pieces[name].points.unwrap_or(0);
         pieces.push(name.to_string());
     }
-
+    
     spawn_level_pieces(
         &mut commands,
         pieces,
@@ -89,7 +89,7 @@ fn spawn_level_pieces(
 }
 
 fn get_level_type(
-    game_res: &mut GameRes,
+    game_res: &GameRes,
     data_assets: &DataAssets,
 ) -> String {
     data_assets.level_list[(game_res.level + TUTORIAL_LEVELS) as usize - 1].clone()

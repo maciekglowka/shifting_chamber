@@ -17,8 +17,9 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-                OnExit(GameState::MapInit),
+                Update,
                 (spawn_player, pin_player)
+                .run_if(on_event::<tiles::MapSpawnedEvent>())
             )
             .add_systems(OnEnter(GameState::MapEnd), unpin_player)
             .add_systems(OnEnter(GameState::GameOver), unpin_player)
