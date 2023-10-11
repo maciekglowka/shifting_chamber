@@ -1,14 +1,11 @@
 use bevy::prelude::*;
-use std::{
-    cmp,
-    collections::{HashMap, HashSet}
-};
+use std::collections::{HashMap, HashSet};
 
-use crate::actions::{ActionEvent, StartMapAction};
+use crate::actions::{ActionEvent, StartMapAction, StartTurnAction};
 use crate::globals::{
     UPGRADE_EVERY_LEVELS,
     LEVEL_BONUS,
-    RESTART_PENALTY
+    // RESTART_PENALTY
 };
 use crate::pieces::components::{Health, Walking};
 use crate::player::{
@@ -45,12 +42,20 @@ pub enum GameEventKind {
 #[derive(Event)]
 pub struct GameEvent(pub GameEventKind);
 
+#[derive(Event)]
+pub struct MapSpawnedEvent;
+
 pub struct ManagerPlugin;
+
+#[derive(Event)]
+pub struct TurnStartEvent;
 
 impl Plugin for ManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CommandEvent>()
             .add_event::<GameEvent>()
+            .add_event::<MapSpawnedEvent>()
+            .add_event::<TurnStartEvent>()
             .init_resource::<GameRes>()
             // .add_systems(Update, start_game.run_if(in_state(GameState::GameInit)))
             // .add_systems(Update, start_map.run_if(in_state(GameState::MapInit)))
@@ -121,7 +126,8 @@ pub fn update_state(
     mut next_state: ResMut<NextState<GameState>>,
     npc_query: Query<&Walking>,
     mut res: ResMut<GameRes>,
-    mut health_query: Query<&mut Health, With<Player>>
+    health_query: Query<&Health, With<Player>>,
+    mut ev_action: EventWriter<ActionEvent>
 ) {
     for ev in ev_command.iter() {
         if let CommandType::TurnEnd = ev.0 {
@@ -147,15 +153,15 @@ pub fn update_state(
         // }
         if let CommandType::AnimationEnd = ev.0 {
             match game_state.get() {
-                GameState::TurnStart => {
-                    if res.ap_stacking {
-                        res.ap = cmp::min(res.max_ap, res.ap + 1);
-                    } else {
-                        res.ap = 1;
-                    }
-                    res.ap_stacking = true;
-                    next_state.set(GameState::PlayerInput);
-                },
+                // GameState::TurnStart => {
+                //     if res.ap_stacking {
+                //         res.ap = cmp::min(res.max_ap, res.ap + 1);
+                //     } else {
+                //         res.ap = 1;
+                //     }
+                //     res.ap_stacking = true;
+                //     next_state.set(GameState::PlayerInput);
+                // },
                 GameState::TileShift => {
                     res.ap = res.ap.saturating_sub(1);
                     res.ap_stacking = false;
@@ -178,7 +184,9 @@ pub fn update_state(
                             if npc_query.iter().len() == 0 {
                                 next_state.set(GameState::MapEnd);
                             } else {
-                                next_state.set(GameState::TurnStart);
+                                ev_action.send(
+                                    ActionEvent(Box::new(StartTurnAction))
+                                );
                             }          
                         },
                     }

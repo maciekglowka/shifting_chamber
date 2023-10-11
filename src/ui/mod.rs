@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use crate::graphics::PieceRenderer;
 use crate::player::upgrades::TransformKind;
 use crate::states::GameState;
-use crate::tiles::MapSpawnedEvent;
 
 mod bubble;
 mod game_over;
@@ -53,7 +52,7 @@ impl Plugin for UIPlugin {
             .add_systems(OnEnter(GameState::GameWin), game_win::show_menu)
             .add_systems(OnExit(GameState::GameWin), game_win::clear_menu)
             .add_systems(OnEnter(GameState::MainMenu), main_menu::show_menu)
-            .add_systems(Update, marker::spawn_marker.run_if(on_event::<MapSpawnedEvent>()))
+            .add_systems(Update, marker::spawn_marker.run_if(on_event::<crate::manager::MapSpawnedEvent>()))
             // .add_systems(OnExit(GameState::MapInit), marker::spawn_marker)
             .add_systems(Update, marker::update_marker.run_if(in_state(GameState::PlayerInput)))
             .add_systems(OnExit(GameState::PlayerInput), marker::remove_marker);

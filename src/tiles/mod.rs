@@ -3,19 +3,16 @@ use bevy::hierarchy::despawn_with_children_recursive;
 use std::collections::HashMap;
 
 use crate::globals::MAP_SIZE;
+use crate::manager::MapSpawnedEvent;
 use crate::states::GameState;
 use crate::vectors::Vector2Int;
 
 pub mod transform;
 pub struct TilePlugin;
 
-#[derive(Event)]
-pub struct MapSpawnedEvent;
-
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<TileRes>()
-            .add_event::<MapSpawnedEvent>();
+        app.init_resource::<TileRes>();
     }
 }
 

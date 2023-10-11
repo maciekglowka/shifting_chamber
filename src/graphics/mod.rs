@@ -59,11 +59,11 @@ impl Plugin for GraphicsPlugin {
                 Update,
                 (frames::animate_frames, frames::animate_fx_frames)
             )
-            .add_systems(
-                Update,
-                animate::update_state
-                    .run_if(in_state(GameState::TurnStart))
-            )
+            // .add_systems(
+            //     Update,
+            //     animate::update_state
+            //         .run_if(in_state(GameState::TurnStart))
+            // )
             .add_systems(
                 Update,
                 animate::update_state

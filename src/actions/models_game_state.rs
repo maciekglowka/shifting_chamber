@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use std::collections::HashMap;
 
 use crate::globals::RESTART_PENALTY;
-use crate::manager::GameRes;
+use crate::manager::{GameRes, TurnStartEvent};
 use crate::pieces::components::Health;
 use crate::player::{
     Player,
@@ -91,9 +91,27 @@ impl Action for StartMapAction {
 
         // spawn map
         crate::tiles::spawn_map(world);
+
+        world.send_event(ActionEvent(Box::new(StartTurnAction)));
+    }
+}
+
+pub struct StartTurnAction;
+impl Action for StartTurnAction {
+    fn execute(&self, world: &mut World) {
+        if let Some(mut res) = world.get_resource_mut::<GameRes>() {
+            if res.ap_stacking {
+                res.ap = std::cmp::min(res.max_ap, res.ap + 1);
+            } else {
+                res.ap = 1;
+            }
+            res.ap_stacking = true;
+        }
+
         // set next state
         if let Some(mut state) = world.get_resource_mut::<NextState<GameState>>() {
-            state.set(GameState::TurnStart);
+            state.set(GameState::PlayerInput);
         }
+        world.send_event(TurnStartEvent);
     }
 }

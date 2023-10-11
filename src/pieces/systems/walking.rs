@@ -72,8 +72,8 @@ pub fn plan_moves(
     tile_res: Res<TileRes>,
 ) {
     let mut avoid = get_obstacles(&obstacle_query, &tile_query);
-    
-    let Ok((player_entity, player_parent)) = player_query.get_single() else { return };
+    println!("Plan moves");
+    let Ok((_, player_parent)) = player_query.get_single() else { return };
     let player_v = match tile_query.get(player_parent.get()) {
         Ok(t) => t.v,
         _ => return

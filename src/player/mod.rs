@@ -19,7 +19,7 @@ impl Plugin for PlayerPlugin {
         app.add_systems(
                 Update,
                 (spawn_player, pin_player)
-                .run_if(on_event::<tiles::MapSpawnedEvent>())
+                .run_if(on_event::<crate::manager::MapSpawnedEvent>())
             )
             .add_systems(OnEnter(GameState::MapEnd), unpin_player)
             .add_systems(OnEnter(GameState::GameOver), unpin_player)
